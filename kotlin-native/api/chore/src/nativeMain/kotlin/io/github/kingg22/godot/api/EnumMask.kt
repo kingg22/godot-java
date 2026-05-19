@@ -91,7 +91,8 @@ public inline infix fun <T> T.or(mask: EnumMask<T>): EnumMask<T> where T : Godot
     EnumMask(this.value or mask.flags)
 
 /** Converts [Array] of [enums][GodotEnum] to an [EnumMask] of the same type */
-public inline fun <T> Array<T>.toEnumMask(): EnumMask<T> where T : GodotEnum, T : Enum<T> = EnumMask.of(this.toList())
+public inline fun <T> Array<out T>.toEnumMask(): EnumMask<T> where T : GodotEnum, T : Enum<T> =
+    EnumMask.of(this.toList())
 
 /** Converts [Iterable] of [enums][GodotEnum] to an [EnumMask] of the same type */
 public inline fun <T> Iterable<T>.toEnumMask(): EnumMask<T> where T : GodotEnum, T : Enum<T> = EnumMask.of(this)
