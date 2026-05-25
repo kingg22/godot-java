@@ -30,7 +30,7 @@ import kotlinx.cinterop.value
 
     @Export var speed: Float = 1.0f
 
-    @Export var spriteName: String = "SpriteBench"
+    @Export val spriteName: String = "SpriteBench"
 
     private val hintStr = "hint".toStringName()
     private val punchStr = "punch".toStringName()
