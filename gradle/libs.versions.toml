@@ -43,7 +43,7 @@ kotlinpoet = "2.3.0"
 
 # https://github.com/google/ksp/releases
 ksp-api = "2.3.2"
-ksp-plugin = "2.3.7"
+ksp-plugin = "2.3.8"
 
 # https://github.com/uber/NullAway/releases
 nullaway = "0.13.4"
