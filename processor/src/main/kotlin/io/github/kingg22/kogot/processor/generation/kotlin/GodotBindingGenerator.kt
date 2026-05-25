@@ -153,7 +153,7 @@ class GodotBindingGenerator : Generator {
             val isMutable = prop.isMutable
             val propGetterName = "_godot_get_${prop.name}"
             val propSetterName = if (isMutable) "_godot_set_${prop.name}" else null
-            val setterName = if (isMutable) SETTER_PREFIX + prop.name else null
+            val setterName = if (isMutable) SETTER_PREFIX + prop.name else ""
             val getterName = GETTER_PREFIX + prop.name
 
             // Generate getter trampoline
@@ -178,7 +178,7 @@ class GodotBindingGenerator : Generator {
                     "%M(%S, %S, %T.%L, %N)",
                     REGISTER_METHOD_SETTER,
                     classInfo.shortName,
-                    setterName!!,
+                    setterName,
                     VARIANT_TYPE_CLASS_NAME,
                     variantType,
                     propSetterName,
