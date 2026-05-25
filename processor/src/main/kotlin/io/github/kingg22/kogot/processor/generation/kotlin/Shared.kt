@@ -1,7 +1,9 @@
 package io.github.kingg22.kogot.processor.generation.kotlin
 
 import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
 
 fun FileSpec.Builder.applyCommonConfig(): FileSpec.Builder = apply {
     indent("    ")
@@ -33,3 +35,8 @@ fun FileSpec.Builder.optInForeignNative() = apply {
             .build(),
     )
 }
+
+@IgnorableReturnValue
+fun FunSpec.Builder.addStatement(format: String, vararg args: Any?): FunSpec.Builder = addCode(
+    CodeBlock.builder().addStatement(format, *args).build(),
+)
