@@ -2,6 +2,7 @@
 
 import io.github.kingg22.godot.api.GodotEnum
 import io.github.kingg22.godot.api.GodotError
+import io.github.kingg22.godot.api.annotations.Export
 import io.github.kingg22.godot.api.annotations.Godot
 import io.github.kingg22.godot.api.annotations.RegisterSignal
 import io.github.kingg22.godot.api.builtin.Callable
@@ -24,6 +25,12 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
 
 @Godot class SpriteBench(nativePtr: COpaquePointer) : Node2D(nativePtr) {
+
+    @Export var health: Int = 100
+
+    @Export var speed: Float = 1.0f
+
+    @Export var spriteName: String = "SpriteBench"
 
     private val hintStr = "hint".toStringName()
     private val punchStr = "punch".toStringName()
