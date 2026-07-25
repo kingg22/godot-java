@@ -12,7 +12,7 @@ apache-commons-compress = "1.28.0"
 dokka = "2.2.0"
 
 # https://github.com/google/error-prone/releases
-errorprone-core = "2.49.0"
+errorprone-core = "2.50.0"
 
 # https://github.com/tbroyer/gradle-errorprone-plugin/releases
 errorprone-gradle = "5.1.0"
