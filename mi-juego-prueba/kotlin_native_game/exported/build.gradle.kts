@@ -27,6 +27,7 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     linuxX64 { applyBinariesExport() }
+    macosArm64 { applyBinariesExport() }
     // mingwX64 { applyBinariesExport() }
 }
 

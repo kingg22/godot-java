@@ -11,6 +11,7 @@ plugins {
 
 kotlin {
     explicitApi()
+
     compilerOptions {
         optIn.addAll(
             "kotlinx.cinterop.ExperimentalForeignApi",
@@ -27,7 +28,8 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     linuxX64()
-    // mingwX64()
+    macosArm64()
+    mingwX64()
 }
 
 godotCodegen {

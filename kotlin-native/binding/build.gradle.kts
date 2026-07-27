@@ -24,7 +24,7 @@ kotlin {
 
     applyDefaultHierarchyTemplate()
 
-    // linux
     linuxX64()
-    // mingwX64()
+    macosArm64()
+    mingwX64()
 }

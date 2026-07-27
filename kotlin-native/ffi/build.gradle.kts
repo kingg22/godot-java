@@ -18,9 +18,9 @@ kotlin {
 
     applyDefaultHierarchyTemplate()
 
-    // linux
     linuxX64 { configureGodotInterop() }
-    // mingwX64 { configureGodotInterop() }
+    macosArm64 { configureGodotInterop() }
+    mingwX64 { configureGodotInterop() }
 }
 
 fun KotlinNativeTarget.configureGodotInterop() {

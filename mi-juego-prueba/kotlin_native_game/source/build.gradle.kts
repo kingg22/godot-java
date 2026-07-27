@@ -7,6 +7,10 @@ plugins {
 }
 
 kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xexpect-actual-classes")
+    }
+
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     dependencies {
         api(projects.kotlinNative.api)
@@ -16,11 +20,14 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     linuxX64()
-    // mingwX64()
+    macosArm64()
+    mingwX64()
 }
 
 dependencies {
     add("kspCommonMainMetadata", projects.processor)
     add("kspLinuxX64", projects.processor)
+    add("kspMacosArm64", projects.processor)
+    add("kspMingwX64", projects.processor)
     // put KSP on nativeMain source set when have more than one target
 }
