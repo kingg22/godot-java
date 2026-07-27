@@ -51,7 +51,7 @@ nullaway = "0.13.4"
 # https://github.com/tbroyer/gradle-nullaway-plugin/releases
 nullaway-gradle = "3.0.0"
 
-slf4j = "2.0.17"
+slf4j = "2.0.18"
 
 # https://github.com/diffplug/spotless/blob/main/plugin-gradle/CHANGES.md
 # https://github.com/diffplug/spotless/releases
