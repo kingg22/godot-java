@@ -51,7 +51,7 @@ public fun registerProperty(
                 }
 
                 memScoped {
-                    ClassDBBinding.instance.registerExtensionClassPropertyRaw(
+                    ClassDBBinding.registerExtensionClassPropertyRaw(
                         BindingProcAddressHolder.library,
                         classNameStr.rawPtr,
                         propertyInfo.ptr,

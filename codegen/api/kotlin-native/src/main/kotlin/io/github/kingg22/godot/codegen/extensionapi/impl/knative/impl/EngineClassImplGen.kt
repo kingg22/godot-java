@@ -52,7 +52,7 @@ import io.github.kingg22.godot.codegen.types.COPAQUE_POINTER
  * Singletons are the one case where we *do* call a GDExtension function at construction time,
  * but that function is `global_get_singleton` — it retrieves an **already-existing** Godot
  * singleton, it does not create anything new. The companion `instance` lazy delegates to
- * `GlobalBinding.instance.getSingletonRaw` using the high-level `StringName(...).use { }` API.
+ * `GlobalBinding.getSingletonRaw` using the high-level `StringName(...).use { }` API.
  *
  * ## RefCounted
  *
@@ -133,7 +133,7 @@ class EngineClassImplGen {
     /**
      * Singletons use a private constructor and expose a single lazy `instance`.
      *
-     * The pointer is obtained via `GlobalBinding.instance.getSingletonRaw` — this retrieves an
+     * The pointer is obtained via `GlobalBinding.getSingletonRaw` — this retrieves an
      * **already-existing** Godot singleton object, it does not create anything new.
      *
      * Generated output for e.g. `Engine`:
@@ -144,7 +144,7 @@ class EngineClassImplGen {
      * // inside companion object (filled via companionBuilder):
      * val instance: Engine by lazy(PUBLICATION) {
      *     StringName("Engine").use { sn ->
-     *         Engine(GlobalBinding.instance.getSingletonRaw(sn.rawPtr)
+     *         Engine(GlobalBinding.getSingletonRaw(sn.rawPtr)
      *             ?: error("Singleton 'Engine' not found in Godot"))
      *     }
      * }
@@ -186,7 +186,7 @@ class EngineClassImplGen {
             .delegate(
                 buildLazyBlock {
                     beginControlFlow("%T(%S).use { sn ->", stringNameClass, cls.name)
-                    addStatement("val nativePtr = %T.instance.getSingletonRaw(sn.rawPtr)", globalBinding)
+                    addStatement("val nativePtr = %T.getSingletonRaw(sn.rawPtr)", globalBinding)
                     withIndent {
                         addStatement("?: error(%S)", "Singleton '${cls.name}' not found in Godot")
                     }

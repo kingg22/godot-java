@@ -28,8 +28,8 @@ import io.github.kingg22.godot.codegen.utils.warning
  * ## Calling convention
  *
  * Engine methods use `GDExtensionMethodBindPtr` retrieved via
- * `ClassDBBinding.instance.getMethodBindRaw(className, methodName, hash)`.
- * Invocation: `ObjectBinding.instance.methodBindPtrcallRaw(bind, p_object, p_args, r_ret)`.
+ * `ClassDBBinding.getMethodBindRaw(className, methodName, hash)`.
+ * Invocation: `ObjectBinding.methodBindPtrcallRaw(bind, p_object, p_args, r_ret)`.
  *
  * ## Type resolution
  *
@@ -96,7 +96,7 @@ class EngineMethodImplGen(private val typeResolver: TypeResolver) {
             beginControlFlow("%T(%S).use { cn ->", stringNameClass, className)
                 .beginControlFlow("%T(%S).use { mn ->", stringNameClass, method.name)
                 .addStatement(
-                    "%T.instance.getMethodBindRaw(cn.rawPtr, mn.rawPtr, %LL)",
+                    "%T.getMethodBindRaw(cn.rawPtr, mn.rawPtr, %LL)",
                     classDBBinding,
                     method.hash,
                 )
@@ -199,7 +199,7 @@ class EngineMethodImplGen(private val typeResolver: TypeResolver) {
                 }
             }
 
-            addStatement("%T.instance.methodBindPtrcallRaw(", objectBinding)
+            addStatement("%T.methodBindPtrcallRaw(", objectBinding)
             withIndent {
                 addStatement("%N,", propName)
                 addStatement("%L,", pObject)
@@ -286,7 +286,7 @@ class EngineMethodImplGen(private val typeResolver: TypeResolver) {
             val fixedArgPtrs = method.arguments.map { arg -> argVariantPointerExpression(arg) }
 
             // methodBindCall invocation
-            addStatement("val error = %T.instance.methodBindCall(", objectBinding)
+            addStatement("val error = %T.methodBindCall(", objectBinding)
             withIndent {
                 addStatement("%N,", propName)
                 addStatement("rawPtr,")

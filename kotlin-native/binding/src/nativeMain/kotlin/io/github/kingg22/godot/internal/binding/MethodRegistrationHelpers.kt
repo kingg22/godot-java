@@ -130,7 +130,7 @@ public fun registerMethod(
                     default_arguments = null
                 }
 
-                ClassDBBinding.instance.registerExtensionClassMethodRaw(
+                ClassDBBinding.registerExtensionClassMethodRaw(
                     BindingProcAddressHolder.library,
                     classNameStr.rawPtr,
                     methodInfo.ptr,

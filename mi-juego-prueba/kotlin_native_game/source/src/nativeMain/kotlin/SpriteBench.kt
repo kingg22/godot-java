@@ -104,7 +104,7 @@ fun Signal.emitFix(vararg args: Variant): GodotError = memScoped {
 
 private val methodSignalEmit_3286317445_Fn: GDExtensionPtrBuiltInMethod by lazy(PUBLICATION) {
     StringName("emit").use { name ->
-        VariantBinding.instance.getPtrBuiltinMethodRaw(GDEXTENSION_VARIANT_TYPE_SIGNAL, name.rawPtr, 3_286_317_445L)
+        VariantBinding.getPtrBuiltinMethodRaw(GDEXTENSION_VARIANT_TYPE_SIGNAL, name.rawPtr, 3_286_317_445L)
             ?: error("Missing builtin method 'Signal.emit' hash: 3286317445")
     }
 }

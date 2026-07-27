@@ -110,13 +110,13 @@ public object CallableBinding {
         }
 
         fillCallError(GDEXTENSION_CALL_OK, 0, 0)
-        VariantBinding.instance.newCopyRaw(rReturn, resultVariant.rawPtr)
+        VariantBinding.newCopyRaw(rReturn, resultVariant.rawPtr)
     }
 
     // Call the low-level Godot function to create custom callable and fill the callable object
     public fun createCustom2(callableCustomInfo2: CValue<GDExtensionCallableCustomInfo2>, callablePtr: COpaquePointer) {
         memScoped {
-            CallableBinding.instance.customCreate2Raw(
+            CallableBinding.customCreate2Raw(
                 callablePtr,
                 callableCustomInfo2.ptr,
             )

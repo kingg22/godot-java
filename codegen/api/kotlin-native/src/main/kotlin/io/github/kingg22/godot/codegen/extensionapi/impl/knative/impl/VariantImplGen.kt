@@ -102,7 +102,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                     CodeBlock
                         .builder()
                         .beginControlFlow("if (!%N)", closedProp)
-                        .addStatement("%T.instance.destroyRaw(rawPtr)", variantBinding)
+                        .addStatement("%T.destroyRaw(rawPtr)", variantBinding)
                         .addStatement("%T.free(%N.rawValue)", cinteropNativeHeap, "storage")
                         .addStatement("%N = true", closedProp)
                         .endControlFlow()
@@ -122,7 +122,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                         .build(),
                 )
                 .callThisConstructor()
-                .addStatement("%T.instance.newCopyRaw(rawPtr, from)", variantBinding)
+                .addStatement("%T.newCopyRaw(rawPtr, from)", variantBinding)
                 .build(),
         )
     }
@@ -286,7 +286,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
             .addCode(
                 CodeBlock
                     .builder()
-                    .addStatement("val raw = %T.instance.getTypeRaw(rawPtr)", variantBinding)
+                    .addStatement("val raw = %T.getTypeRaw(rawPtr)", variantBinding)
                     .addStatement(
                         "return %T.entries.firstOrNull { it.value.toUInt() == raw.value } ?: %T.NIL",
                         variantTypeClass,
@@ -321,7 +321,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                     CodeBlock
                         .builder()
                         .addStatement("val result = %T()", variantClassName)
-                        .addStatement("val status = %T.instance", variantBinding)
+                        .addStatement("val status = %T", variantBinding)
                         .indent()
                         .addStatement(
                             ".evaluate(op.%M(), rawPtr, rhs.rawPtr, result.rawPtr)",
@@ -352,7 +352,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                     CodeBlock
                         .builder()
                         .addStatement(
-                            "return %T.instance",
+                            "return %T",
                             variantBinding,
                         )
                         .withIndent {
@@ -376,7 +376,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                         .builder()
                         .addStatement("val result = %T()", variantClassName)
                         .addStatement(
-                            "val status = %T.instance.get(rawPtr, key.rawPtr, result.rawPtr)",
+                            "val status = %T.get(rawPtr, key.rawPtr, result.rawPtr)",
                             variantBinding,
                         )
                         .beginControlFlow("return if (status.isOk)")
@@ -401,7 +401,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .addCode(
                     CodeBlock
                         .builder()
-                        .addStatement("return %T.instance", variantBinding)
+                        .addStatement("return %T", variantBinding)
                         .withIndent {
                             addStatement(".setNamed(rawPtr, name.rawPtr, value.rawPtr)")
                             addStatement(".isOk")
@@ -422,7 +422,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                         .builder()
                         .addStatement("val result = %T()", variantClassName)
                         .addStatement(
-                            "val status = %T.instance.getNamed(rawPtr, name.rawPtr, result.rawPtr)",
+                            "val status = %T.getNamed(rawPtr, name.rawPtr, result.rawPtr)",
                             variantBinding,
                         )
                         .beginControlFlow("return if (status.isOk)")
@@ -447,7 +447,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .addCode(
                     CodeBlock
                         .builder()
-                        .addStatement("return %T.instance", variantBinding)
+                        .addStatement("return %T", variantBinding)
                         .withIndent {
                             addStatement(".setKeyed(rawPtr, key.rawPtr, value.rawPtr)")
                             addStatement(".isOk")
@@ -468,7 +468,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                         .builder()
                         .addStatement("val result = %T()", variantClassName)
                         .addStatement(
-                            "val status = %T.instance.getKeyed(rawPtr, key.rawPtr, result.rawPtr)",
+                            "val status = %T.getKeyed(rawPtr, key.rawPtr, result.rawPtr)",
                             variantBinding,
                         )
                         .beginControlFlow("return if (status.isOk)")
@@ -493,7 +493,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .addCode(
                     CodeBlock
                         .builder()
-                        .addStatement("return %T.instance", variantBinding)
+                        .addStatement("return %T", variantBinding)
                         .withIndent {
                             addStatement(".setIndexed(rawPtr, index, value.rawPtr)")
                             addStatement(".isOk")
@@ -515,7 +515,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                         .builder()
                         .addStatement("val result = %T()", variantClassName)
                         .addStatement(
-                            "val status = %T.instance.getIndexed(rawPtr, index, result.rawPtr)",
+                            "val status = %T.getIndexed(rawPtr, index, result.rawPtr)",
                             variantBinding,
                         )
                         .beginControlFlow("return if (status.isOk)")
@@ -535,7 +535,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .builder("hasMethod")
                 .returns(BOOLEAN)
                 .addParameter("method", stringNameClass)
-                .addStatement("return %T.instance.hasMethod(rawPtr, method.rawPtr)", variantBinding)
+                .addStatement("return %T.hasMethod(rawPtr, method.rawPtr)", variantBinding)
                 .build(),
         )
 
@@ -546,7 +546,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .returns(BOOLEAN)
                 .addParameter("key", variantClassName)
                 .addKdoc("Returns true if this variant has the given key and the check itself is valid.")
-                .addCode("return %T.instance.hasKey(rawPtr, key.rawPtr).isOk", variantBinding)
+                .addCode("return %T.hasKey(rawPtr, key.rawPtr).isOk", variantBinding)
                 .build(),
         )
 
@@ -567,7 +567,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                         .builder()
                         .addStatement("val iter = %T()", variantClassName)
                         .addStatement(
-                            "val result = %T.instance.iterInit(rawPtr, iter.rawPtr)",
+                            "val result = %T.iterInit(rawPtr, iter.rawPtr)",
                             variantBinding,
                         )
                         .beginControlFlow("return if (result.isOk)")
@@ -588,7 +588,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .returns(BOOLEAN)
                 .addParameter("iter", variantClassName)
                 .addKdoc("Advances the iterator. Returns true if there is a next element.")
-                .addCode("return %T.instance.iterNext(rawPtr, iter.rawPtr).isOk", variantBinding)
+                .addCode("return %T.iterNext(rawPtr, iter.rawPtr).isOk", variantBinding)
                 .build(),
         )
 
@@ -604,7 +604,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                         .builder()
                         .addStatement("val result = %T()", variantClassName)
                         .addStatement(
-                            "val status = %T.instance.iterGet(rawPtr, iter.rawPtr, result.rawPtr)",
+                            "val status = %T.iterGet(rawPtr, iter.rawPtr, result.rawPtr)",
                             variantBinding,
                         )
                         .beginControlFlow("return if (status.valid == true)")
@@ -629,7 +629,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                     CodeBlock
                         .builder()
                         .addStatement("val result = %T()", variantClassName)
-                        .addStatement("val errorInfo = %T.instance.call(", variantBinding)
+                        .addStatement("val errorInfo = %T.call(", variantBinding)
                         .indent()
                         .addStatement("rawPtr,")
                         .addStatement("method.rawPtr,")
@@ -656,7 +656,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                     CodeBlock
                         .builder()
                         .addStatement("val result = %T()", variantClassName)
-                        .addStatement("val errorInfo = %T.instance.callStatic(", variantBinding)
+                        .addStatement("val errorInfo = %T.callStatic(", variantBinding)
                         .indent()
                         .addStatement(
                             "type.%M(),",
@@ -679,7 +679,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
             FunSpec
                 .builder("booleanize")
                 .returns(BOOLEAN)
-                .addStatement("return %T.instance.booleanize(rawPtr)", variantBinding)
+                .addStatement("return %T.booleanize(rawPtr)", variantBinding)
                 .build(),
         )
 
@@ -692,7 +692,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                     CodeBlock
                         .builder()
                         .addStatement("val result = %T()", godotStringClass)
-                        .addStatement("%T.instance.stringifyRaw(rawPtr, result.rawPtr)", variantBinding)
+                        .addStatement("%T.stringifyRaw(rawPtr, result.rawPtr)", variantBinding)
                         .addStatement("return result")
                         .build(),
                 )
@@ -715,7 +715,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .builder("hash")
                 .returns(LONG)
                 .addKdoc("Gets the hash of a Variant\n")
-                .addStatement("return %T.instance.hashRaw(rawPtr)", variantBinding)
+                .addStatement("return %T.hashRaw(rawPtr)", variantBinding)
                 .build(),
         )
 
@@ -759,7 +759,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                         .addKdoc("The number of recursive loops so far.")
                         .build(),
                 )
-                .addStatement("return %T.instance.recursiveHashRaw(rawPtr, depth)", variantBinding)
+                .addStatement("return %T.recursiveHashRaw(rawPtr, depth)", variantBinding)
                 .build(),
         )
 
@@ -770,7 +770,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .returns(BOOLEAN)
                 .addKdoc("Compares two Variants by their hash")
                 .addParameter("other", variantClassName)
-                .addStatement("return %T.instance.hashCompare(rawPtr, other.rawPtr)", variantBinding)
+                .addStatement("return %T.hashCompare(rawPtr, other.rawPtr)", variantBinding)
                 .build(),
         )
 
@@ -790,7 +790,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                     CodeBlock
                         .builder()
                         .addStatement("val result = %T()", variantClassName)
-                        .addStatement("%T.instance.duplicate(rawPtr, result.rawPtr, deep)", variantBinding)
+                        .addStatement("%T.duplicate(rawPtr, result.rawPtr, deep)", variantBinding)
                         .addStatement("return result")
                         .build(),
                 )
@@ -808,7 +808,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .addKdoc("\n\n")
                 .addKdoc("The instance ID will be returned even if the object is no longer valid -\n")
                 .addKdoc("use [GodotObject.getInstanceId] to check if the object is still valid.")
-                .addStatement("return %T.instance.getObjectInstanceIdRaw(rawPtr)", variantBinding)
+                .addStatement("return %T.getObjectInstanceIdRaw(rawPtr)", variantBinding)
                 .build(),
         )
     }
@@ -1057,7 +1057,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .addParameter("type", variantTypeClass)
                 .addParameter("member", stringNameClass)
                 .addStatement(
-                    "return %T.instance♢.hasMember(type.%M(), member.rawPtr)",
+                    "return %T♢.hasMember(type.%M(), member.rawPtr)",
                     variantBinding,
                     implPackageRegistry.memberNameForOrDefault("toGDE"),
                 )
@@ -1071,7 +1071,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .addParameter("from", variantTypeClass)
                 .addParameter("to", variantTypeClass)
                 .addStatement(
-                    "return %T.instance♢.canConvert(from.%M(), to.%M())",
+                    "return %T♢.canConvert(from.%M(), to.%M())",
                     variantBinding,
                     implPackageRegistry.memberNameForOrDefault("toGDE"),
                     implPackageRegistry.memberNameForOrDefault("toGDE"),
@@ -1086,7 +1086,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .addParameter("from", variantTypeClass)
                 .addParameter("to", variantTypeClass)
                 .addStatement(
-                    "return %T.instance♢.canConvertStrict(from.%M(), to.%M())",
+                    "return %T♢.canConvertStrict(from.%M(), to.%M())",
                     variantBinding,
                     implPackageRegistry.memberNameForOrDefault("toGDE"),
                     implPackageRegistry.memberNameForOrDefault("toGDE"),
@@ -1121,7 +1121,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .builder("fromTypeFptr_$subclassName", fromType, KModifier.PRIVATE)
                 .delegate(
                     buildLazyBlock {
-                        addStatement("%T.instance.variantFromTypeConstructorRaw(%L)", getBinding, gdxType)
+                        addStatement("%T.variantFromTypeConstructorRaw(%L)", getBinding, gdxType)
                         withIndent {
                             addStatement("?: error(%S)", "Missing variant-from-type constructor for '$subclassName'")
                         }
@@ -1133,7 +1133,7 @@ class VariantImplGen(private val typeResolver: TypeResolver) {
                 .builder("toTypeFptr_$subclassName", toType, KModifier.PRIVATE)
                 .delegate(
                     buildLazyBlock {
-                        addStatement("%T.instance.variantToTypeConstructorRaw(%L)", getBinding, gdxType)
+                        addStatement("%T.variantToTypeConstructorRaw(%L)", getBinding, gdxType)
                         withIndent {
                             addStatement("?: error(%S)", "Missing variant-to-type constructor for '$subclassName'")
                         }

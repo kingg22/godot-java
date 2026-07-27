@@ -20,7 +20,7 @@ import io.github.kingg22.godot.codegen.types.memScoped
  *
  * Each utility function gets:
  * 1. A private `lazy(PUBLICATION)` property that loads the `GDExtensionPtrUtilityFunction`
- *    via `VariantBinding.instance.getPtrUtilityFunctionRaw`, using a temporary `StringName`.
+ *    via `VariantBinding.getPtrUtilityFunctionRaw`, using a temporary `StringName`.
  * 2. A function body that invokes the loaded pointer, packing arguments appropriately.
  *
  * ## Argument mapping
@@ -55,7 +55,7 @@ class UtilityFunctionImplGen(private val typeResolver: TypeResolver) {
             .delegate(
                 buildLazyBlock {
                     beginControlFlow("%T(%S).use { name ->", stringNameClass, fn.name)
-                    addStatement("%T.instance", variantBindingClass)
+                    addStatement("%T", variantBindingClass)
                     withIndent {
                         addStatement(".getPtrUtilityFunctionRaw(name.rawPtr, %LL)", fn.hash)
                         addStatement("?: error(%S)", "Missing utility function '${fn.name}'")

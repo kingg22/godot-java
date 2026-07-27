@@ -35,13 +35,13 @@ val createInstanceFunc: GDExtensionClassCreateInstance2 = staticCFunction { _, _
     println("CreateInstanceFunc: Ref created")
     val selfPtr = selfRef.asCPointer()
     println("CreateInstanceFunc: setInstance")
-    ObjectBinding.instance.setInstanceRaw(
+    ObjectBinding.setInstanceRaw(
         base,
         "CustomSignalClass".toStringName().rawPtr,
         selfPtr,
     )
     memScoped {
-        ObjectBinding.instance.setInstanceBindingRaw(
+        ObjectBinding.setInstanceBindingRaw(
             pO = base,
             pToken = BindingProcAddressHolder.library,
             pBinding = selfPtr,

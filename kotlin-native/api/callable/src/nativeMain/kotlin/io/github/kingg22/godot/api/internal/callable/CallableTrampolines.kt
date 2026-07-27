@@ -92,6 +92,6 @@ public object CallableTrampolines {
             rIsValid[0] = validFlag
         }
         val string = callable?.toString() ?: "Invalid Callable"
-        StringBinding.instance.newWithUtf8Chars(rReturnPtr, string)
+        StringBinding.newWithUtf8Chars(rReturnPtr, string)
     }
 }

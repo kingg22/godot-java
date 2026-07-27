@@ -16,7 +16,7 @@ import kotlinx.cinterop.memScoped
 // Tienes que usar la función de GDExtension para obtener el binding
 @InternalBinding
 public fun getInstanceBinding(objectPtr: GDExtensionObjectPtr): GDExtensionClassInstancePtr? = memScoped {
-    ObjectBinding.instance.getInstanceBindingRaw(
+    ObjectBinding.getInstanceBindingRaw(
         pO = objectPtr,
         pToken = BindingProcAddressHolder.library,
         pCallbacks = cValue<GDExtensionInstanceBindingCallbacks> {

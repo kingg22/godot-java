@@ -22,7 +22,7 @@ import io.github.kingg22.godot.codegen.types.*
  * - **Static methods**: `p_base = null`
  * - **Instance methods**: `p_base = rawPtr`
  *
- * The fptr is loaded via `VariantBinding.instance.getPtrBuiltinMethodRaw(variantType, name, hash)`.
+ * The fptr is loaded via `VariantBinding.getPtrBuiltinMethodRaw(variantType, name, hash)`.
  * Properties are emitted as top-level `private val` lazy delegates in the class file.
  */
 class BuiltinMethodImplGen(private val typeResolver: TypeResolver) {
@@ -47,7 +47,7 @@ class BuiltinMethodImplGen(private val typeResolver: TypeResolver) {
         val body = buildLazyBlock {
             beginControlFlow("%T(%S).use { name ->", stringNameClass, method.name)
                 .addStatement(
-                    "%T.instance.getPtrBuiltinMethodRaw(%N, name.rawPtr, %LL)",
+                    "%T.getPtrBuiltinMethodRaw(%N, name.rawPtr, %LL)",
                     variantBinding,
                     variantType,
                     method.hash,
@@ -471,7 +471,7 @@ class BuiltinMethodImplGen(private val typeResolver: TypeResolver) {
                 "// First call with null rText to get the actual byte length needed (excluding null terminator)",
             )
             .addStatement(
-                "val length = %T.instance.%L(rawPtr, null, 0)",
+                "val length = %T.%L(rawPtr, null, 0)",
                 implPackageRegistry.classNameForOrDefault("StringBinding"),
                 methodName,
             )
@@ -480,7 +480,7 @@ class BuiltinMethodImplGen(private val typeResolver: TypeResolver) {
             .addStatement("val buffer = %M<%T>(length + 1)", cinteropAllocArray, nativeBuffer)
             .addStatement("// Write the chars to the buffer")
             .addStatement(
-                "val _ = %T.instance.%L(rawPtr, buffer, length + 1)",
+                "val _ = %T.%L(rawPtr, buffer, length + 1)",
                 implPackageRegistry.classNameForOrDefault("StringBinding"),
                 methodName,
             )
@@ -530,7 +530,7 @@ class BuiltinMethodImplGen(private val typeResolver: TypeResolver) {
             .returns(ctx.classNameForOrDefault("String"))
             .beginControlFlow("return %T(null).also", ctx.classNameForOrDefault("String"))
             .addStatement(
-                "%T.instance.newWithUtf8Chars(it.rawPtr, value)",
+                "%T.newWithUtf8Chars(it.rawPtr, value)",
                 implPackageRegistry.classNameForOrDefault("StringBinding"),
             )
             .endControlFlow()
@@ -552,7 +552,7 @@ class BuiltinMethodImplGen(private val typeResolver: TypeResolver) {
             .beginControlFlow("return %T(null).also", ctx.classNameForOrDefault("String"))
             .beginControlFlow("%M", memScoped)
             .addStatement(
-                "%T.instance.newWithUtf32CharsRaw(it.rawPtr, value.%M.%M.%M())",
+                "%T.newWithUtf32CharsRaw(it.rawPtr, value.%M.%M.%M())",
                 implPackageRegistry.classNameForOrDefault("StringBinding"),
                 cinteropStrUtf32,
                 cinteropPtr,

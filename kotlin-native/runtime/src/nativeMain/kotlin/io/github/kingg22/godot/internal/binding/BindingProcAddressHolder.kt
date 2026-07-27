@@ -1,6 +1,5 @@
 package io.github.kingg22.godot.internal.binding
 
-import io.github.kingg22.godot.internal.binding.BindingProcAddressHolder.Companion.instance
 import io.github.kingg22.godot.internal.ffi.GDExtensionClassLibraryPtr
 import io.github.kingg22.godot.internal.ffi.GDExtensionInterfaceGetProcAddress
 

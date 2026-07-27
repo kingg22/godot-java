@@ -221,7 +221,7 @@ class GodotBindingGenerator : Generator {
             .addStatement("val obj = instancePtr.%M<%T>()", GET_INSTANCE_PTR, classType)
             .beginControlFlow("if (returnValue != null)")
             .addStatement(
-                "%T.instance.newCopyRaw(returnValue, obj.%L.%M().rawPtr)",
+                "%T.newCopyRaw(returnValue, obj.%L.%M().rawPtr)",
                 VARIANT_BINDING,
                 propName,
                 TO_VARIANT,

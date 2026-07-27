@@ -50,7 +50,7 @@ public fun <T : GodotObject> createInstanceFunc(
     try {
         // println("[Kogot] CreateInstance: Creating $parentClassName instance")
         val base = parentClassName.toStringName().use { str ->
-            ClassDBBinding.instance.constructObject2Raw(str.rawPtr)
+            ClassDBBinding.constructObject3Raw(str.rawPtr)
         } ?: error("Failed to construct base $parentClassName")
         // println("[Kogot] CreateInstance: Base $parentClassName constructed. $base")
 
@@ -65,7 +65,7 @@ public fun <T : GodotObject> createInstanceFunc(
         val selfPtr = selfRef.asCPointer()
 
         className.toStringName().use { str ->
-            ObjectBinding.instance.setInstanceRaw(
+            ObjectBinding.setInstanceRaw(
                 base,
                 str.rawPtr,
                 selfPtr,
@@ -73,7 +73,7 @@ public fun <T : GodotObject> createInstanceFunc(
         }
 
         memScoped {
-            ObjectBinding.instance.setInstanceBindingRaw(
+            ObjectBinding.setInstanceBindingRaw(
                 pO = base,
                 pToken = BindingProcAddressHolder.library,
                 pBinding = selfPtr,
@@ -136,12 +136,12 @@ public val createToStringFunc: GDExtensionClassToString = staticCFunction { inst
     isValidPtr.pointed.value = GDExtensionBool.TRUE
 
     memScoped {
-        StringBinding.instance.newWithUtf16CharsRaw(outStrPtr, toStringMsg.ptr)
+        StringBinding.newWithUtf16CharsRaw(outStrPtr, toStringMsg.ptr)
     }
 }
 
 @InternalBinding
-public fun classCreationInfo5(
+public fun classCreationInfo6(
     createInstance: GDExtensionClassCreateInstance2,
     getVirtual: GDExtensionClassGetVirtual2,
     ptrUserData: COpaquePointer,
@@ -149,7 +149,7 @@ public fun classCreationInfo5(
     isVirtual: GDExtensionBool = GDExtensionBool.FALSE,
     isAbstract: GDExtensionBool = GDExtensionBool.FALSE,
     isExposed: GDExtensionBool = GDExtensionBool.TRUE,
-): CValue<GDExtensionClassCreationInfo5> = cValue<GDExtensionClassCreationInfo5> {
+): CValue<GDExtensionClassCreationInfo6> = cValue {
     is_virtual = isVirtual
     is_abstract = isAbstract
     is_exposed = isExposed
@@ -191,12 +191,12 @@ public inline fun <reified T : GodotObject> registerClass(
 ) {
     // println("[Kogot] Registering $className extends $parentClassName")
 
-    val info = classCreationInfo5(createInstance, getVirtual, StableRef.create(T::class).asCPointer())
+    val info = classCreationInfo6(createInstance, getVirtual, StableRef.create(T::class).asCPointer())
 
     className.toStringName().use { classStringName ->
         parentClassName.toStringName().use { parentStringName ->
             memScoped {
-                ClassDBBinding.instance.registerExtensionClass5Raw(
+                ClassDBBinding.registerExtensionClass6Raw(
                     BindingProcAddressHolder.library,
                     classStringName.rawPtr,
                     parentStringName.rawPtr,

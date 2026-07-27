@@ -424,7 +424,7 @@ data class ReturnArgInfo(
  *   after the call completes
  *
  * ## EngineMethodImplGen methodBindPtrcallRaw signature
- * `ObjectBinding.instance.methodBindPtrcallRaw(bind, p_object, p_args, r_ret)`
+ * `ObjectBinding.methodBindPtrcallRaw(bind, p_object, p_args, r_ret)`
  * - r_ret: COpaquePointer? - just needs the pointer, no reinterpret needed
  * - For engine/builtin types: pass retPtr.%M (the pointer to COpaquePointerVar.value)
  *

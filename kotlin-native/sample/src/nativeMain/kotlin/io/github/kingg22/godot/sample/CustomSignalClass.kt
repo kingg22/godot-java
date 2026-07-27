@@ -10,7 +10,7 @@ import io.github.kingg22.godot.internal.binding.BindingProcAddressHolder
 import io.github.kingg22.godot.internal.binding.ClassDBBinding
 import io.github.kingg22.godot.internal.ffi.FALSE
 import io.github.kingg22.godot.internal.ffi.GDExtensionBool
-import io.github.kingg22.godot.internal.ffi.GDExtensionClassCreationInfo5
+import io.github.kingg22.godot.internal.ffi.GDExtensionClassCreationInfo6
 import io.github.kingg22.godot.internal.ffi.GDExtensionPropertyInfo
 import io.github.kingg22.godot.internal.ffi.GDExtensionVariantType
 import io.github.kingg22.godot.internal.ffi.TRUE
@@ -22,7 +22,7 @@ import kotlinx.cinterop.memScoped
 class CustomSignalClass(nativePtr: COpaquePointer) : Node(nativePtr)
 
 fun registerCustomSignalClass() {
-    val info = cValue<GDExtensionClassCreationInfo5> {
+    val info = cValue<GDExtensionClassCreationInfo6> {
         is_virtual = GDExtensionBool.FALSE
         is_abstract = GDExtensionBool.FALSE
         is_exposed = GDExtensionBool.TRUE
@@ -48,7 +48,7 @@ fun registerCustomSignalClass() {
 
     // ONly requires memScoped to get the ptr of GDExtensionClassCreationInfo5
     memScoped {
-        ClassDBBinding.instance.registerExtensionClass5Raw(
+        ClassDBBinding.registerExtensionClass6Raw(
             BindingProcAddressHolder.library,
             "CustomSignalClass".toStringName().rawPtr,
             "Node".toStringName().rawPtr,
@@ -76,7 +76,7 @@ fun registerSignalsForCustomSignalClass(
 
     try {
         memScoped {
-            ClassDBBinding.instance.registerExtensionClassSignalRaw(
+            ClassDBBinding.registerExtensionClassSignalRaw(
                 BindingProcAddressHolder.library,
                 className.rawPtr,
                 signalName.rawPtr,

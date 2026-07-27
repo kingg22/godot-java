@@ -16,7 +16,7 @@ import io.github.kingg22.godot.codegen.utils.withExceptionContext
  * a stub backend), each generated function receives:
  *
  * 1. A private `lazy(PUBLICATION)` property that resolves the `GDExtensionPtrUtilityFunction`
- *    pointer via `VariantBinding.instance.getPtrUtilityFunctionRaw`.
+ *    pointer via `VariantBinding.getPtrUtilityFunctionRaw`.
  * 2. A real function body that invokes the pointer, replacing the default `TODO()` stub.
  *
  * When [implGen] is `null` (stub backends, test harnesses), only the public API shape is

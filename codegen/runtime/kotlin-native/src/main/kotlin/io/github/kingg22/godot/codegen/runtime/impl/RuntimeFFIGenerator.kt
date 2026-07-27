@@ -1,7 +1,6 @@
 package io.github.kingg22.godot.codegen.runtime.impl
 
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -9,6 +8,7 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.withIndent
 import io.github.kingg22.godot.codegen.impl.buildLazyBlock
 import io.github.kingg22.godot.codegen.impl.createFile
 import io.github.kingg22.godot.codegen.models.config.CodegenOptions
@@ -18,7 +18,6 @@ import io.github.kingg22.godot.codegen.types.K_SUPPRESS
 import io.github.kingg22.godot.codegen.types.cinteropCstr
 import io.github.kingg22.godot.codegen.types.cinteropInvoke
 import io.github.kingg22.godot.codegen.types.cinteropReinterpret
-import io.github.kingg22.godot.codegen.types.lazyMethod
 import io.github.kingg22.godot.codegen.types.memScoped
 
 private val PLATFORM_TYPES = setOf(
@@ -53,22 +52,9 @@ class RuntimeFFIGenerator(private val packageName: String) {
         skipPlatformSpecificApis: Boolean,
     ): FileSpec {
         val className = packageRegistry.bindingClassName(prefix)
-        val constructorParam = ParameterSpec
-            .builder(
-                "getProcAddress",
-                resolver.resolve("GDExtensionInterfaceGetProcAddress").copy(nullable = false),
-            )
-            .build()
 
         val typeSpec = TypeSpec
-            .classBuilder(className)
-            .primaryConstructor(
-                FunSpec
-                    .constructorBuilder()
-                    .addParameter(constructorParam)
-                    .addModifiers(KModifier.PRIVATE)
-                    .build(),
-            )
+            .objectBuilder(className)
             .addKdoc(
                 "Runtime bindings for `%L_*` symbols loaded through `getProcAddress`.\n\n" +
                     "Generated from `gdextension_interface.json`.",
@@ -81,7 +67,6 @@ class RuntimeFFIGenerator(private val packageName: String) {
                     .addMember("%S", "DEPRECATION_ERROR")
                     .build(),
             )
-            .addType(buildCompanionObject(className))
             .apply {
                 interfaces.forEach { iface ->
                     if (skipPlatformSpecificApis && iface.name in PLATFORM_TYPES) return@forEach
@@ -95,29 +80,11 @@ class RuntimeFFIGenerator(private val packageName: String) {
         return createFile(typeSpec, className.simpleName, packageRegistry.rootPackage)
     }
 
-    context(packageRegistry: RuntimePackageRegistry)
-    private fun buildCompanionObject(className: ClassName): TypeSpec = TypeSpec
-        .companionObjectBuilder()
-        .addProperty(
-            PropertySpec
-                .builder("instance", className)
-                .delegate(
-                    buildLazyBlock {
-                        addStatement(
-                            "%T(%T.getProcAddress)",
-                            className,
-                            packageRegistry.classNameForOrDefault("BindingProcAddressHolder"),
-                        )
-                    },
-                )
-                .build(),
-        )
-        .build()
-
-    context(resolver: RuntimeTypeResolver)
+    context(packageRegistry: RuntimePackageRegistry, resolver: RuntimeTypeResolver)
     private fun buildFunctionPointerProperty(iface: Interface): PropertySpec {
         val aliasType = resolver.resolveInterfaceAlias(iface)
         val propertyName = functionPointerPropertyName(iface)
+        val procAddressHolder = packageRegistry.classNameForOrDefault("BindingProcAddressHolder")
 
         return PropertySpec
             .builder(propertyName, aliasType)
@@ -126,23 +93,15 @@ class RuntimeFFIGenerator(private val packageName: String) {
                 iface.deprecated?.let { addAnnotation(deprecatedAnnotation(it)) }
             }
             .delegate(
-                CodeBlock
-                    .builder()
-                    .beginControlFlow("%M(PUBLICATION)", lazyMethod)
-                    .add(
-                        CodeBlock
-                            .builder()
-                            .beginControlFlow("%M", memScoped)
-                            .addStatement("getProcAddress(%S.%M.ptr)", iface.name, cinteropCstr)
-                            .indent()
-                            .addStatement("?.%M()", cinteropReinterpret)
-                            .addStatement("?: error(%S)", "Failed to load Godot symbol '${iface.name}'")
-                            .unindent()
-                            .endControlFlow()
-                            .build(),
-                    )
-                    .endControlFlow()
-                    .build(),
+                buildLazyBlock {
+                    beginControlFlow("%M", memScoped)
+                        .addStatement("%T.getProcAddress(%S.%M.ptr)", procAddressHolder, iface.name, cinteropCstr)
+                        .withIndent {
+                            addStatement("?.%M()", cinteropReinterpret)
+                            addStatement("?: error(%S)", "Failed to load Godot symbol '${iface.name}'")
+                        }
+                    endControlFlow()
+                },
             )
             .build()
     }

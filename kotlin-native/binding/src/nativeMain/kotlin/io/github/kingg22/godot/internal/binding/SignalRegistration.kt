@@ -22,7 +22,7 @@ public fun registerCustomSignal(className: String, signal: RegisterSignal) {
                     this.hint_string = param.hintString.toStringName().rawPtr
                     this.usage = param.usages.toEnumMask().value.toUInt()
                 }
-                ClassDBBinding.instance.registerExtensionClassSignalRaw(
+                ClassDBBinding.registerExtensionClassSignalRaw(
                     BindingProcAddressHolder.library,
                     className.rawPtr,
                     signalName.rawPtr,

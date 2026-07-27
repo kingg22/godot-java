@@ -228,7 +228,7 @@ class BuiltinClassImplGen(private val typeResolver: TypeResolver, private val me
                     .builder()
                     .beginControlFlow("%M", memScoped)
                     .addStatement(
-                        "%T.instance.newWithUtf16CharsRaw(rawPtr, value.%M.%M)",
+                        "%T.newWithUtf16CharsRaw(rawPtr, value.%M.%M)",
                         stringBinding,
                         cinteropStrUtf16,
                         cinteropPtr,
@@ -237,7 +237,7 @@ class BuiltinClassImplGen(private val typeResolver: TypeResolver, private val me
                     .build()
 
             "StringName" -> CodeBlock.builder()
-                .addStatement("%T.instance.nameNewWithUtf8Chars(rawPtr, value)", stringBinding).build()
+                .addStatement("%T.nameNewWithUtf8Chars(rawPtr, value)", stringBinding).build()
 
             "NodePath" -> CodeBlock.builder()
                 .beginControlFlow(
@@ -320,7 +320,7 @@ class BuiltinClassImplGen(private val typeResolver: TypeResolver, private val me
                         .delegate(
                             buildLazyBlock {
                                 addStatement(
-                                    "%T.instance.getPtrConstructorRaw(%N, %L)",
+                                    "%T.getPtrConstructorRaw(%N, %L)",
                                     variantBinding,
                                     variantType,
                                     ctor.index,
@@ -348,7 +348,7 @@ class BuiltinClassImplGen(private val typeResolver: TypeResolver, private val me
                         )
                         .delegate(
                             buildLazyBlock {
-                                addStatement("%T.instance.getPtrDestructorRaw(%N)", variantBinding, variantType)
+                                addStatement("%T.getPtrDestructorRaw(%N)", variantBinding, variantType)
                                 withIndent {
                                     addStatement("?: error(%S)", "Missing builtin destructor for ${builtinClass.name}")
                                 }
@@ -372,7 +372,7 @@ class BuiltinClassImplGen(private val typeResolver: TypeResolver, private val me
                             buildLazyBlock {
                                 beginControlFlow("%T(%S).use { sn ->", stringNameClass, member.name)
                                     .addStatement(
-                                        "%T.instance.getPtrGetterRaw(%N, sn.rawPtr)",
+                                        "%T.getPtrGetterRaw(%N, sn.rawPtr)",
                                         variantBinding,
                                         variantType,
                                     )
@@ -398,7 +398,7 @@ class BuiltinClassImplGen(private val typeResolver: TypeResolver, private val me
                             buildLazyBlock {
                                 beginControlFlow("%T(%S).use { sn ->", stringNameClass, member.name)
                                     .addStatement(
-                                        "%T.instance.getPtrSetterRaw(%N, sn.rawPtr)",
+                                        "%T.getPtrSetterRaw(%N, sn.rawPtr)",
                                         variantBinding,
                                         variantType,
                                     )
@@ -436,7 +436,7 @@ class BuiltinClassImplGen(private val typeResolver: TypeResolver, private val me
                             )
                             .delegate(
                                 buildLazyBlock {
-                                    addStatement("%T.instance", variantBinding)
+                                    addStatement("%T", variantBinding)
                                     withIndent {
                                         addStatement(".getPtrOperatorEvaluatorRaw(")
                                         withIndent {
@@ -574,10 +574,10 @@ class BuiltinClassImplGen(private val typeResolver: TypeResolver, private val me
         if (ctor.usesKotlinStringBridge) {
             return when (builtinClass.name) {
                 "String" -> CodeBlock.builder()
-                    .addStatement("%T.instance.newWithUtf8Chars(rawPtr, value)", stringBinding).build()
+                    .addStatement("%T.newWithUtf8Chars(rawPtr, value)", stringBinding).build()
 
                 "StringName" -> CodeBlock.builder()
-                    .addStatement("%T.instance.nameNewWithUtf8Chars(rawPtr, value)", stringBinding).build()
+                    .addStatement("%T.nameNewWithUtf8Chars(rawPtr, value)", stringBinding).build()
 
                 "NodePath" -> CodeBlock.builder()
                     .beginControlFlow(
