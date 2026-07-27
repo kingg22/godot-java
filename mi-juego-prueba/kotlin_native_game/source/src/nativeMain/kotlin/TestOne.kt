@@ -13,11 +13,11 @@ import io.github.kingg22.godot.api.core.node.TextEdit
 import io.github.kingg22.godot.api.core.node.Window
 import io.github.kingg22.godot.api.core.refcounted.Texture2D
 import io.github.kingg22.godot.api.singleton.Engine
-import io.github.kingg22.godot.api.singleton.ResourceLoader
 import io.github.kingg22.godot.api.utils.GD
 import io.github.kingg22.godot.api.utils.print
 import io.github.kingg22.godot.binding.instantiate
 import io.github.kingg22.godot.castTo
+import io.github.kingg22.godot.load
 import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.ExperimentalForeignApi
 
@@ -49,7 +49,7 @@ private const val SPRITE_COUNT = 5
             println("[SpriteBench] _ready started")
 
             // Try to create Texture2D - but first let's test WITHOUT texture
-            val icon = ResourceLoader.instance.load("res://icon.svg".toGodotString()).castTo(::Texture2D)
+            val icon = GD.load<Texture2D>("res://icon.svg", factory = ::Texture2D)
             println("[SpriteBench] Texture2D wrapper created")
 
             // get root from the engine singleton
