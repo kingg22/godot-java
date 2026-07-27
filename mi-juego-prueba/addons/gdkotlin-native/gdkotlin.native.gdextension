@@ -9,3 +9,6 @@ linux.release.x86_64 = "res://kotlin_native_game/exported/build/bin/linuxX64/rel
 
 windows.debug.x86_64 = "res://kotlin_native_game/exported/build/bin/mingwX64/debugShared/godot_kotlin_sample.dll"
 windows.release.x86_64 = "res://kotlin_native_game/exported/build/bin/mingwX64/releaseShared/godot_kotlin_sample.dll"
+
+macos.debug.arm64 = "res://kotlin_native_game/exported/build/bin/macosArm64/debugShared/libgodot_kotlin_sample.dylib"
+macos.release.arm64 = "res://kotlin_native_game/exported/build/bin/macosArm64/releaseShared/libgodot_kotlin_sample.dylib"
