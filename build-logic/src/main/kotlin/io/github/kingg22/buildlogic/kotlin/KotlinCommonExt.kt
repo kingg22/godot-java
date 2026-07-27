@@ -6,7 +6,13 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 fun <T : HasConfigurableKotlinCompilerOptions<*>> T.enableContextParameters() {
-    compilerOptions.freeCompilerArgs.add("-Xcontext-parameters")
+    compilerOptions.languageVersion.map { kotlinVersion ->
+        kotlinVersion.version.toDoubleOrNull()?.let {
+            if (it >= 2.4) {
+                compilerOptions.freeCompilerArgs.add("-Xcontext-parameters")
+            }
+        }
+    }
 }
 
 internal fun <T : HasConfigurableKotlinCompilerOptions<*>> T.commonConfiguration(kotlinVersion: Provider<String>) {
