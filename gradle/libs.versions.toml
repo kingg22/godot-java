@@ -30,7 +30,7 @@ jspecify = "1.0.0"
 google-truth = "1.4.5"
 
 # https://github.com/kotest/kotest/releases
-kotest = "6.1.11"
+kotest = "6.2.3"
 
 # https://github.com/JetBrains/kotlin/releases
 kotlin = "2.4.20-Beta2"
