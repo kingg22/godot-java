@@ -1,8 +1,8 @@
-package io.github.kingg22.kogot.analysis.models
+package io.github.kingg22.kogot.processor.model
 
 /**
- * Represents a resolved type in the analysis.
- * This is a KSP-agnostic model - uses simple strings instead of KSType.
+ * Represents a resolved type.
+ * Uses simple strings instead of KSType so it's usable outside a KSP `Resolver` context.
  */
 data class TypeInfo(
     val qualifiedName: String,

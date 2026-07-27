@@ -1,7 +1,6 @@
-package io.github.kingg22.kogot.processor.bridge
+package io.github.kingg22.kogot.processor.ksp
 
 import com.google.devtools.ksp.isConstructor
-import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.FileLocation
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -10,57 +9,15 @@ import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
-import io.github.kingg22.kogot.analysis.context.AnalysisContext
-import io.github.kingg22.kogot.analysis.models.AnnotationInfo
-import io.github.kingg22.kogot.analysis.models.ClassInfo
-import io.github.kingg22.kogot.analysis.models.FunctionInfo
-import io.github.kingg22.kogot.analysis.models.ParameterInfo
-import io.github.kingg22.kogot.analysis.models.PropertyInfo
-import io.github.kingg22.kogot.analysis.models.TypeInfo
+import com.google.devtools.ksp.symbol.Nullability
+import io.github.kingg22.kogot.processor.model.AnnotationInfo
+import io.github.kingg22.kogot.processor.model.ClassInfo
+import io.github.kingg22.kogot.processor.model.FunctionInfo
+import io.github.kingg22.kogot.processor.model.ParameterInfo
+import io.github.kingg22.kogot.processor.model.PropertyInfo
+import io.github.kingg22.kogot.processor.model.TypeInfo
 
-/**
- * KSP-specific implementation of AnalysisContext.
- * Bridges KSP symbols to the backend-agnostic analysis layer.
- */
-class KspAnalysisContext(private val resolver: Resolver) : AnalysisContext {
-    override val backend: String = "ksp"
-
-    // Simple cache for resolved classes
-    private val classCache = mutableMapOf<String, ClassInfo?>()
-
-    override fun resolveClass(qualifiedName: String): ClassInfo? {
-        classCache[qualifiedName]?.let { return it }
-
-        val ksClass = resolver.getClassDeclarationByName(resolver.getKSNameFromString(qualifiedName))
-            ?: return null.also { classCache[qualifiedName] = null }
-
-        return ksClass.toClassInfo().also { classCache[qualifiedName] = it }
-    }
-
-    override fun getAllClasses(): List<ClassInfo> = emptyList()
-
-    override fun isGodotBuiltinType(qualifiedName: String): Boolean =
-        qualifiedName.startsWith("io.github.kingg22.godot.api.builtin.")
-
-    override fun isValidExportType(qualifiedName: String): Boolean {
-        if (qualifiedName in GodotBuiltinTypeNames.ALL) return true
-        if (isGodotBuiltinType(qualifiedName)) return true
-        return false
-    }
-
-    private object GodotBuiltinTypeNames {
-        val ALL = listOf(
-            "kotlin.Int",
-            "kotlin.Long",
-            "kotlin.Float",
-            "kotlin.Double",
-            "kotlin.Boolean",
-            "kotlin.String",
-            "kotlin.Byte",
-            "kotlin.Short",
-        )
-    }
-}
+private const val UNKNOWN = "<unknown>"
 
 /**
  * Extension to convert KSClassDeclaration to ClassInfo.
@@ -78,7 +35,7 @@ fun KSClassDeclaration.toClassInfo(): ClassInfo {
     val properties = this.getAllProperties().map { it.toPropertyInfo() }.toList()
     val functions = this.getAllFunctions().map { it.toFunctionInfo() }.toList()
 
-    val filePath = this.containingFile?.filePath ?: "<unknown>"
+    val filePath = this.containingFile?.filePath ?: UNKNOWN
     val line = this.getLineNumber()
 
     return ClassInfo(
@@ -109,21 +66,25 @@ private fun KSNode.getLineNumber(): Int {
 fun KSAnnotation.toAnnotationInfo(): AnnotationInfo {
     val annotationType = annotationType.resolve()
     val decl = annotationType.declaration
-    val qualifiedName = (decl as? KSClassDeclaration)?.qualifiedName?.asString() ?: "<unknown>"
+    val qualifiedName = (decl as? KSClassDeclaration)?.qualifiedName?.asString() ?: UNKNOWN
     val shortName = (decl as? KSClassDeclaration)?.simpleName?.asString() ?: qualifiedName
 
     val arguments = this.arguments.associate { arg ->
-        val name = arg.name?.asString() ?: "<unknown>"
+        val name = arg.name?.asString() ?: UNKNOWN
 
         val value = when (val v = arg.value) {
             is KSType -> {
                 val typeDecl = v.declaration
                 if (typeDecl is KSClassDeclaration) {
-                    typeDecl.qualifiedName?.asString() ?: "unknown"
+                    typeDecl.qualifiedName?.asString() ?: UNKNOWN
                 } else {
                     typeDecl.toString()
                 }
             }
+
+            // Enum-typed annotation arguments (e.g. Variant.Type.INT) resolve to the enum entry's
+            // own KSClassDeclaration, not a KSType wrapping it.
+            is KSClassDeclaration -> v.qualifiedName?.asString() ?: v.simpleName.asString()
 
             is KSAnnotation -> v.toAnnotationInfo()
 
@@ -139,6 +100,8 @@ fun KSAnnotation.toAnnotationInfo(): AnnotationInfo {
                             element.toString()
                         }
                     }
+
+                    is KSClassDeclaration -> element.qualifiedName?.asString() ?: element.simpleName.asString()
 
                     else -> element?.toString()
                 }
@@ -171,12 +134,12 @@ fun KSTypeReference.toTypeInfo(): TypeInfo? {
 fun KSType.toTypeInfo(): TypeInfo {
     val declaration = this.declaration
     val declQName = declaration.qualifiedName
-    val qualifiedName = declQName?.asString() ?: "<unknown>"
+    val qualifiedName = declQName?.asString() ?: UNKNOWN
 
     return TypeInfo(
         qualifiedName = qualifiedName,
         shortName = declaration.simpleName.asString(),
-        isNullable = this.nullability == com.google.devtools.ksp.symbol.Nullability.NULLABLE,
+        isNullable = this.nullability == Nullability.NULLABLE,
         isPrimitive = false,
     )
 }
@@ -185,7 +148,7 @@ fun KSType.toTypeInfo(): TypeInfo {
  * Extension to convert KSPropertyDeclaration to PropertyInfo.
  */
 fun KSPropertyDeclaration.toPropertyInfo(): PropertyInfo {
-    val typeInfo = type.toTypeInfo() ?: TypeInfo("<unknown>", "<unknown>")
+    val typeInfo = type.toTypeInfo() ?: TypeInfo(UNKNOWN, UNKNOWN)
     val annotations = this.annotations.map { it.toAnnotationInfo() }.toList()
     val modifiers = this.modifiers.map { it.name }.toSet()
 
@@ -209,8 +172,8 @@ fun KSFunctionDeclaration.toFunctionInfo(): FunctionInfo {
 
     val parameters = this.parameters.map { param ->
         ParameterInfo(
-            name = param.name?.asString() ?: "<param>",
-            type = param.type.toTypeInfo() ?: TypeInfo("<unknown>", "<unknown>"),
+            name = param.name?.asString() ?: UNKNOWN,
+            type = param.type.toTypeInfo() ?: TypeInfo(UNKNOWN, UNKNOWN),
             hasDefaultValue = param.hasDefault,
         )
     }

@@ -1,42 +1,64 @@
-package io.github.kingg22.kogot.processor.generation.kotlin
+package io.github.kingg22.kogot.processor.generators.kotlin
 
-import com.google.devtools.ksp.symbol.KSAnnotation
-import com.squareup.kotlinpoet.*
-import io.github.kingg22.kogot.analysis.models.ClassInfo
-import io.github.kingg22.kogot.analysis.models.PropertyInfo
-import io.github.kingg22.kogot.analysis.models.getParentClassShortName
-import io.github.kingg22.kogot.analysis.models.hasExport
-import io.github.kingg22.kogot.analysis.models.hasGodotAnnotation
-import io.github.kingg22.kogot.analysis.models.inheritsFromNode2D
-import io.github.kingg22.kogot.analysis.models.inheritsFromSprite2D
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.withIndent
 import io.github.kingg22.kogot.processor.diagnostics.DiagnosticCode
 import io.github.kingg22.kogot.processor.diagnostics.DiagnosticLocation
 import io.github.kingg22.kogot.processor.diagnostics.DiagnosticMessage
-import io.github.kingg22.kogot.processor.generation.GeneratedFile
-import io.github.kingg22.kogot.processor.generation.GeneratedOutput
-import io.github.kingg22.kogot.processor.generation.Generator
-import io.github.kingg22.kogot.processor.generation.GeneratorContext
+import io.github.kingg22.kogot.processor.model.AnnotationInfo
+import io.github.kingg22.kogot.processor.model.ClassInfo
+import io.github.kingg22.kogot.processor.model.PropertyInfo
+import io.github.kingg22.kogot.processor.model.getParentClassShortName
+import io.github.kingg22.kogot.processor.model.getRegisterSignalAnnotation
+import io.github.kingg22.kogot.processor.model.hasExport
+import io.github.kingg22.kogot.processor.model.hasGodotAnnotation
+import io.github.kingg22.kogot.processor.model.inheritsFromNode2D
+import io.github.kingg22.kogot.processor.model.inheritsFromSprite2D
+import io.github.kingg22.kogot.processor.resolver.DefaultVariantTypeResolver
+import io.github.kingg22.kogot.processor.resolver.VariantTypeResolver
 
 private const val GETTER_PREFIX = "_get_"
 private const val SETTER_PREFIX = "_set_"
 
-class GodotBindingGenerator : Generator {
-    override val name: String = "GodotBindingGenerator"
+/**
+ * A generated Kotlin file, ready to be written by the caller.
+ *
+ * @param sourceClassNames qualified names of the `ClassInfo`s this file was derived from, used by the
+ *   caller to scope KSP incremental-compilation dependencies to the actual source files involved.
+ */
+data class GeneratedFile(
+    val relativePath: String,
+    val content: String,
+    val sourceClassNames: List<String> = emptyList(),
+)
 
-    override fun generate(context: GeneratorContext, classes: List<ClassInfo>): GeneratedOutput {
+/** Result of a generation pass: the files produced plus any diagnostics raised along the way. */
+data class GenerationResult(val files: List<GeneratedFile>, val diagnostics: List<DiagnosticMessage>)
+
+/**
+ * Generates Kotlin binding code (`<Class>_Binding` objects) for `@Godot`-annotated classes.
+ */
+class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = DefaultVariantTypeResolver()) {
+
+    fun generate(classes: List<ClassInfo>): GenerationResult {
         val files = mutableListOf<GeneratedFile>()
         val diagnostics = mutableListOf<DiagnosticMessage>()
 
         val godotClasses = classes.filter { it.hasGodotAnnotation() }
 
         if (godotClasses.isEmpty()) {
-            return GeneratedOutput(emptyList(), emptyList())
+            return GenerationResult(emptyList(), emptyList())
         }
 
         for (classInfo in godotClasses) {
             try {
-                val propertyAnnotations = context.propertyAnnotations[classInfo.qualifiedName] ?: emptyMap()
-                files.add(generateBindingFile(classInfo, propertyAnnotations))
+                files.add(generateBindingFile(classInfo))
             } catch (e: Exception) {
                 diagnostics.add(
                     DiagnosticMessage.error(
@@ -54,13 +76,10 @@ class GodotBindingGenerator : Generator {
 
         files.add(generateCallbacksFile(godotClasses))
 
-        return GeneratedOutput(files, diagnostics)
+        return GenerationResult(files, diagnostics)
     }
 
-    private fun generateBindingFile(
-        classInfo: ClassInfo,
-        propertyAnnotations: Map<String, List<KSAnnotation>>,
-    ): GeneratedFile {
+    private fun generateBindingFile(classInfo: ClassInfo): GeneratedFile {
         val bindingClassName = "${classInfo.shortName}_Binding"
         val packageName = classInfo.packageName
 
@@ -83,18 +102,18 @@ class GodotBindingGenerator : Generator {
         val typeSpec = TypeSpec
             .objectBuilder(bindingClassName)
             .addAnnotation(InternalBindingClassName)
-            .generateRegisterFun(classInfo, classType, godotBaseClass, propertyAnnotations)
+            .generateRegisterFun(classInfo, classType, godotBaseClass)
             .build()
 
-        // fileSpec.addFunction(generateCreateInstanceFun(classInfo, classType, godotBaseClass))
         fileSpec.addType(typeSpec)
 
         val content = StringBuilder()
         fileSpec.build().writeTo(content)
 
         return GeneratedFile(
-            "${packageName.replace('.', '/')}/$bindingClassName.kt",
-            content.toString(),
+            relativePath = "${packageName.replace('.', '/')}/$bindingClassName.kt",
+            content = content.toString(),
+            sourceClassNames = listOf(classInfo.qualifiedName),
         )
     }
 
@@ -102,7 +121,6 @@ class GodotBindingGenerator : Generator {
         classInfo: ClassInfo,
         classType: ClassName,
         baseClass: String,
-        propertyAnnotations: Map<String, List<KSAnnotation>>,
     ): TypeSpec.Builder = apply {
         val typeSpecBuilder = this
         val funSpec = FunSpec
@@ -125,17 +143,12 @@ class GodotBindingGenerator : Generator {
             .addStatement("⇤)")
 
         // Add signal registrations
-        val registerSignalProperties = classInfo.properties.filter { prop ->
-            propertyAnnotations[prop.name]
-                ?.any { it.shortName.asString() == "RegisterSignal" }
-                ?: false
-        }
+        val registerSignalProperties = classInfo.properties.filter { it.getRegisterSignalAnnotation() != null }
 
         for (prop in registerSignalProperties) {
-            val ksAnnotation = propertyAnnotations[prop.name]
-                ?.first { it.shortName.asString() == "RegisterSignal" }
-            if (ksAnnotation != null) {
-                val annotationCode = buildRegisterSignalAnnotationFromKSAnnotation(prop, ksAnnotation)
+            val annotation = prop.getRegisterSignalAnnotation()
+            if (annotation != null) {
+                val annotationCode = buildRegisterSignalAnnotationCode(prop, annotation)
                 funSpec
                     .addStatement("%M(⇥", REGISTER_CUSTOM_SIGNAL)
                     .addStatement("%S,", classInfo.shortName)
@@ -149,7 +162,7 @@ class GodotBindingGenerator : Generator {
          */
         val exportProperties = classInfo.properties.filter { it.hasExport() }
         for (prop in exportProperties) {
-            val variantType = mapTypeToVariantType(prop.type.qualifiedName)
+            val variantType = typeResolver.resolve(prop.type.qualifiedName)
             val isMutable = prop.isMutable
             val propGetterName = "_godot_get_${prop.name}"
             val propSetterName = if (isMutable) "_godot_set_${prop.name}" else null
@@ -262,7 +275,7 @@ class GodotBindingGenerator : Generator {
                 "obj.%L = variantValue.%M<%T>()",
                 propName,
                 VARIANT_GET_VALUE_OR_NULL,
-                mapKotlinTypeToVariantReturnType(variantType),
+                typeResolver.toKotlinPoetType(variantType),
             )
             .withIndent {
                 beginControlFlow("?: run")
@@ -285,48 +298,28 @@ class GodotBindingGenerator : Generator {
             .build()
     }
 
-    private fun mapKotlinTypeToVariantReturnType(variantType: String): ClassName = when (variantType) {
-        "INT" -> INT
-        "FLOAT" -> FLOAT
-        "BOOL" -> BOOLEAN
-        "STRING" -> STRING
-        "VECTOR2" -> VECTOR2_CLASS_NAME
-        "VECTOR3" -> VECTOR3_CLASS_NAME
-        else -> VARIANT_CLASS_NAME
-    }
-
-    private fun buildRegisterSignalAnnotationFromKSAnnotation(
-        prop: PropertyInfo,
-        annotation: KSAnnotation,
-    ): CodeBlock {
+    private fun buildRegisterSignalAnnotationCode(prop: PropertyInfo, annotation: AnnotationInfo): CodeBlock {
         val builder = CodeBlock.builder()
         builder.addStatement("%T(⇥", REGISTER_SIGNAL_CLASS_NAME)
 
-        // Extract params from the KSAnnotation directly
-        val paramsArg = annotation.arguments.find { it.name?.asString() == "params" }
-        val nameArg = annotation.arguments.find { it.name?.asString() == "name" }
+        val signalName = (annotation.arguments["name"] as? String)?.takeIf { it.isNotEmpty() } ?: prop.name
 
-        val signalName = nameArg?.value?.toString()?.takeIf { it.isNotEmpty() } ?: prop.name
-
-        // Handle params list
-        val paramsList = paramsArg?.value as? List<*>
-        val paramAnnotations = paramsList.orEmpty().filterIsInstance<KSAnnotation>()
+        @Suppress("UNCHECKED_CAST")
+        val paramAnnotations = annotation.arguments["params"] as? List<AnnotationInfo> ?: emptyList()
 
         if (paramAnnotations.isNotEmpty()) {
             paramAnnotations.forEach { paramAnn ->
-                // Extract type and name from the param annotation
-                val typeArg = paramAnn.arguments.find { it.name?.asString() == "type" }
-                val nameArgVal = paramAnn.arguments.find { it.name?.asString() == "name" }
-                val paramName = nameArgVal?.value?.toString().orEmpty()
-                val typeEntry = typeArg?.value?.toString()
+                val paramName = (paramAnn.arguments["name"] as? String).orEmpty()
+                val typeQualifiedName = paramAnn.arguments["type"] as? String
                     ?: error(
-                        "Missing type for signal parameter in ${prop.name}, signal param: $paramName. Type arg: $typeArg",
+                        "Missing type for signal parameter in ${prop.name}, signal param: $paramName",
                     )
+                val entryName = typeQualifiedName.substringAfterLast('.')
                 builder.addStatement(
                     "%T(%T.%L, %S),", // Param(Variant.Type.NIL, "name")
                     REGISTER_SIGNAL_PARAM_CLASS_NAME,
-                    VARIANT_CLASS_NAME,
-                    typeEntry,
+                    VARIANT_TYPE_CLASS_NAME,
+                    entryName,
                     paramName,
                 )
             }
@@ -335,47 +328,6 @@ class GodotBindingGenerator : Generator {
         builder.addStatement("⇤),")
 
         return builder.build()
-    }
-
-    private fun mapTypeToVariantType(qualifiedName: String): String = when (qualifiedName) {
-        "kotlin.Int", "kotlin.Long" -> "INT"
-        "kotlin.Float", "kotlin.Double" -> "FLOAT"
-        "kotlin.Boolean" -> "BOOL"
-        "kotlin.String" -> "STRING"
-        "io.github.kingg22.godot.api.builtin.Vector2" -> "VECTOR2"
-        "io.github.kingg22.godot.api.builtin.Vector2i" -> "VECTOR2I"
-        "io.github.kingg22.godot.api.builtin.Vector3" -> "VECTOR3"
-        "io.github.kingg22.godot.api.builtin.Vector3i" -> "VECTOR3I"
-        "io.github.kingg22.godot.api.builtin.Rect2" -> "RECT2"
-        "io.github.kingg22.godot.api.builtin.Rect2i" -> "RECT2I"
-        "io.github.kingg22.godot.api.builtin.Transform2D" -> "TRANSFORM2D"
-        "io.github.kingg22.godot.api.builtin.Vector4" -> "VECTOR4"
-        "io.github.kingg22.godot.api.builtin.Vector4i" -> "VECTOR4I"
-        "io.github.kingg22.godot.api.builtin.Plane" -> "PLANE"
-        "io.github.kingg22.godot.api.builtin.Quaternion" -> "QUATERNION"
-        "io.github.kingg22.godot.api.builtin.Aabb" -> "AABB"
-        "io.github.kingg22.godot.api.builtin.Basis" -> "BASIS"
-        "io.github.kingg22.godot.api.builtin.Transform3D" -> "TRANSFORM3D"
-        "io.github.kingg22.godot.api.builtin.Projection" -> "PROJECTION"
-        "io.github.kingg22.godot.api.builtin.Color" -> "COLOR"
-        "io.github.kingg22.godot.api.builtin.StringName" -> "STRING_NAME"
-        "io.github.kingg22.godot.api.builtin.NodePath" -> "NODE_PATH"
-        "io.github.kingg22.godot.api.builtin.Rid" -> "RID"
-        "io.github.kingg22.godot.api.builtin.Callable" -> "CALLABLE"
-        "io.github.kingg22.godot.api.builtin.Signal" -> "SIGNAL"
-        "io.github.kingg22.godot.api.builtin.VariantDictionary" -> "DICTIONARY"
-        "io.github.kingg22.godot.api.builtin.VariantArray" -> "ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedByteArray" -> "PACKED_BYTE_ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedInt32Array" -> "PACKED_INT32_ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedInt64Array" -> "PACKED_INT64_ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedFloat32Array" -> "PACKED_FLOAT32_ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedFloat64Array" -> "PACKED_FLOAT64_ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedStringArray" -> "PACKED_STRING_ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedVector2Array" -> "PACKED_VECTOR2_ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedVector3Array" -> "PACKED_VECTOR3_ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedColorArray" -> "PACKED_COLOR_ARRAY"
-        "io.github.kingg22.godot.api.builtin.PackedVector4Array" -> "PACKED_VECTOR4_ARRAY"
-        else -> "OBJECT"
     }
 
     private fun generateCallbacksFile(classes: List<ClassInfo>): GeneratedFile {
@@ -412,8 +364,9 @@ class GodotBindingGenerator : Generator {
         file.writeTo(content)
 
         return GeneratedFile(
-            "${packageName.replace('.', '/')}/$className.kt",
-            content.toString(),
+            relativePath = "${packageName.replace('.', '/')}/$className.kt",
+            content = content.toString(),
+            sourceClassNames = classes.map { it.qualifiedName },
         )
     }
 }

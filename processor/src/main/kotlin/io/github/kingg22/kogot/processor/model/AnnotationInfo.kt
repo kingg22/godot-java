@@ -1,4 +1,4 @@
-package io.github.kingg22.kogot.analysis.models
+package io.github.kingg22.kogot.processor.model
 
 /**
  * Represents an annotation applied to a declaration.

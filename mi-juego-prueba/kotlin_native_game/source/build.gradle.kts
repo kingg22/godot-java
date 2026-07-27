@@ -24,7 +24,3 @@ dependencies {
     add("kspLinuxX64", projects.processor)
     // put KSP on nativeMain source set when have more than one target
 }
-
-ksp {
-    arg("kogot.outputMode", "KOTLIN")
-}

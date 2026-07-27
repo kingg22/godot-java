@@ -1,4 +1,4 @@
-package io.github.kingg22.kogot.analysis.models
+package io.github.kingg22.kogot.processor.model
 
 /**
  * Represents a function/method of a class.

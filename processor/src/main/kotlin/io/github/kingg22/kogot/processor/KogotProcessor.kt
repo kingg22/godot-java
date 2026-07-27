@@ -8,28 +8,27 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import io.github.kingg22.kogot.processor.bridge.toClassInfo
+import com.google.devtools.ksp.symbol.KSFile
 import io.github.kingg22.kogot.processor.diagnostics.DiagnosticCode
 import io.github.kingg22.kogot.processor.diagnostics.DiagnosticLocation
 import io.github.kingg22.kogot.processor.diagnostics.DiagnosticMessage
 import io.github.kingg22.kogot.processor.diagnostics.DiagnosticRenderer
-import io.github.kingg22.kogot.processor.generation.GeneratedOutput
-import io.github.kingg22.kogot.processor.generation.GeneratorContext
-import io.github.kingg22.kogot.processor.generation.GeneratorOptions
-import io.github.kingg22.kogot.processor.generation.json.JsonGenerator
-import io.github.kingg22.kogot.processor.generation.kotlin.GodotBindingGenerator
-import io.github.kingg22.kogot.processor.validation.ValidationContext
-import io.github.kingg22.kogot.processor.validation.ValidationResultImpl
-import io.github.kingg22.kogot.processor.validation.ValidatorPipeline
+import io.github.kingg22.kogot.processor.generators.kotlin.GodotBindingGenerator
+import io.github.kingg22.kogot.processor.ksp.toClassInfo
+import io.github.kingg22.kogot.processor.model.ClassInfo
+import io.github.kingg22.kogot.processor.model.GodotPrimitives
+import io.github.kingg22.kogot.processor.model.TypeInfo
+import io.github.kingg22.kogot.processor.model.getExportedProperties
+import io.github.kingg22.kogot.processor.model.isGodotBuiltin
 
 /**
  * KSP SymbolProcessor for Kogot bindings.
  */
 class KogotProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor {
 
-    private val options: KogotOptions = KogotOptions.fromMap(environment.options)
     private val codeGenerator: CodeGenerator = environment.codeGenerator
     private val logger: KSPLogger = environment.logger
+    private val generator = GodotBindingGenerator()
 
     override fun process(resolver: Resolver): List<KSClassDeclaration> {
         logger.info("KogotProcessor: Starting processing")
@@ -42,25 +41,25 @@ class KogotProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor 
             return emptyList()
         }
 
-        // Run validation
-        val validationResult = runValidation(classes)
+        val classInfos = classes.map { it.toClassInfo() }
+        val containingFileByQualifiedName = classes.zip(classInfos)
+            .mapNotNull { (ksClass, info) -> ksClass.containingFile?.let { info.qualifiedName to it } }
+            .toMap()
 
-        // Report validation errors
-        for (error in validationResult.errors) {
-            logger.error(DiagnosticRenderer.renderRustc(error))
+        // Validate
+        val validationDiagnostics = validateClasses(classInfos)
+        for (diagnostic in validationDiagnostics) {
+            when (diagnostic.severity) {
+                ERROR -> logger.error(DiagnosticRenderer.renderRustc(diagnostic))
+                WARNING -> logger.warn(DiagnosticRenderer.renderRustc(diagnostic))
+                INFO -> logger.info(DiagnosticRenderer.renderRustc(diagnostic))
+            }
         }
-        for (warning in validationResult.warnings) {
-            logger.warn(DiagnosticRenderer.renderRustc(warning))
-        }
+        if (validationDiagnostics.any { it.isError() }) return emptyList()
 
-        // Stop if validation failed
-        if (!validationResult.isValid) return emptyList()
-
-        // Generate output
-        val generatedOutput = runGeneration(classes)
-
-        // Report generation diagnostics
-        for (diagnostic in generatedOutput.diagnostics) {
+        // Generate
+        val result = generator.generate(classInfos)
+        for (diagnostic in result.diagnostics) {
             when (diagnostic.severity) {
                 ERROR -> logger.error(DiagnosticRenderer.renderRustc(diagnostic))
                 WARNING -> logger.warn(DiagnosticRenderer.renderRustc(diagnostic))
@@ -68,123 +67,57 @@ class KogotProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor 
             }
         }
 
-        // Write generated files
-        for (file in generatedOutput.files) {
-            writeGeneratedFile(file.relativePath, file.content)
+        for ((relativePath, content, sourceClassNames) in result.files) {
+            writeGeneratedFile(relativePath, content, sourceClassNames, containingFileByQualifiedName)
         }
 
         return emptyList()
     }
 
-    private fun extractClasses(resolver: Resolver): List<KSClassDeclaration> {
-        val classes = mutableListOf<KSClassDeclaration>()
-
+    private fun extractClasses(resolver: Resolver): Set<KSClassDeclaration> {
         // Find all classes with @Godot annotation
         val godotAnnotation = "io.github.kingg22.godot.api.annotations.Godot"
 
-        resolver.getSymbolsWithAnnotation(godotAnnotation)
+        return resolver.getSymbolsWithAnnotation(godotAnnotation)
             .filterIsInstance<KSClassDeclaration>()
-            .forEach { if (!classes.contains(it)) classes.add(it) }
-
-        return classes
+            .toSet()
     }
 
-    private fun runValidation(classes: List<KSClassDeclaration>): ValidationResultImpl {
-        val pipeline = ValidatorPipeline.empty()
-        val result = ValidationResultImpl()
+    private fun validateClasses(classInfos: List<ClassInfo>): List<DiagnosticMessage> {
+        val diagnostics = mutableListOf<DiagnosticMessage>()
 
-        for (ksClass in classes) {
-            val classInfo = ksClass.toClassInfo()
-            val context = ValidationContext(
-                classInfo = classInfo,
-                options = io.github.kingg22.kogot.processor.validation.ValidationOptions(),
-            )
-
-            val classResult = pipeline.execute(context, stopOnFirstError = false)
-            result.merge(classResult)
-
-            // Additional basic validation
-            if (classInfo.annotations.any { it.shortName == "Export" }) {
-                val exportedProps = classInfo.properties.filter {
-                    it.annotations.any { ann -> ann.shortName == "Export" }
-                }
-                for (prop in exportedProps) {
-                    // Basic type checking
-                    if (!isValidExportType(prop.type.qualifiedName)) {
-                        result.addError(
-                            DiagnosticMessage.error(
-                                code = DiagnosticCode.INVALID_EXPORT_TYPE,
-                                message = "@Export on unsupported type '${prop.type.qualifiedName}'",
-                                location = DiagnosticLocation(
-                                    classInfo.filePath,
-                                    classInfo.lineNumber,
-                                    0,
-                                ),
-                                help = "Supported types: primitives (Int, Float, String, etc.) and Godot builtin types",
-                                note = "This property will not appear in the Inspector",
+        for (classInfo in classInfos) {
+            for ((_, type) in classInfo.getExportedProperties()) {
+                if (!isValidExportType(type)) {
+                    diagnostics.add(
+                        DiagnosticMessage.error(
+                            code = DiagnosticCode.INVALID_EXPORT_TYPE,
+                            message = "@Export on unsupported type '${type.qualifiedName}'",
+                            location = DiagnosticLocation(
+                                classInfo.filePath,
+                                classInfo.lineNumber,
+                                0,
                             ),
-                        )
-                    }
+                            help = "Supported types: primitives (Int, Float, String, etc.) and Godot builtin types",
+                            note = "This property will not appear in the Inspector",
+                        ),
+                    )
                 }
             }
         }
 
-        return result
+        return diagnostics
     }
 
-    private fun isValidExportType(qualifiedName: String): Boolean {
-        val primitives = listOf(
-            "kotlin.Int",
-            "kotlin.Long",
-            "kotlin.Short",
-            "kotlin.Byte",
-            "kotlin.Float",
-            "kotlin.Double",
-            "kotlin.Boolean",
-            "kotlin.String",
-        )
-        return qualifiedName in primitives || qualifiedName.startsWith("io.github.kingg22.godot.api.builtin.")
-    }
+    private fun isValidExportType(type: TypeInfo): Boolean =
+        GodotPrimitives.isPrimitive(type.qualifiedName) || type.isGodotBuiltin()
 
-    private fun runGeneration(classes: List<KSClassDeclaration>): GeneratedOutput {
-        val classInfos = classes.map { it.toClassInfo() }
-
-        // Build property annotations map: classQualifiedName -> propertyName -> annotations
-        val propertyAnnotations = classes.associate { ksClass ->
-            val qName = ksClass.qualifiedName?.asString() ?: ""
-            qName to ksClass.getAllProperties().associate { prop ->
-                prop.simpleName.asString() to prop.annotations.toList()
-            }
-        }
-
-        val context = GeneratorContext(
-            outputPackage = options.generatedPackage,
-            options = GeneratorOptions(),
-            propertyAnnotations = propertyAnnotations,
-        )
-
-        val outputs = mutableListOf<GeneratedOutput>()
-
-        // Generate Kotlin code if requested
-        if (options.outputMode == OutputMode.KOTLIN || options.outputMode == OutputMode.BOTH) {
-            val kotlinGenerator = GodotBindingGenerator()
-            outputs.add(kotlinGenerator.generate(context, classInfos))
-        }
-
-        // Generate JSON if requested
-        if (options.outputMode == OutputMode.JSON || options.outputMode == OutputMode.BOTH) {
-            val jsonGenerator = JsonGenerator()
-            outputs.add(jsonGenerator.generate(context, classInfos))
-        }
-
-        // Merge outputs
-        return GeneratedOutput(
-            files = outputs.flatMap { it.files },
-            diagnostics = outputs.flatMap { it.diagnostics },
-        )
-    }
-
-    private fun writeGeneratedFile(relativePath: String, content: String) {
+    private fun writeGeneratedFile(
+        relativePath: String,
+        content: String,
+        sourceClassNames: List<String>,
+        containingFileByQualifiedName: Map<String, KSFile>,
+    ) {
         val parts = relativePath.split("/")
         val packageName = if (parts.size > 1) parts.dropLast(1).joinToString(".") else ""
         // Remove .kt extension if present since extensionName will add it
@@ -194,11 +127,18 @@ class KogotProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor 
 
         logger.info("Generating file: $relativePath with ${content.length} chars")
 
+        val sourceFiles = sourceClassNames.mapNotNull { containingFileByQualifiedName[it] }.distinct()
+        val dependencies = if (sourceFiles.isEmpty()) {
+            Dependencies.ALL_FILES
+        } else {
+            Dependencies(false, *sourceFiles.toTypedArray())
+        }
+
         codeGenerator.createNewFile(
             packageName = packageName,
             fileName = fileName,
             extensionName = "kt",
-            dependencies = Dependencies.ALL_FILES, // FIXME
+            dependencies = dependencies,
         ).writer().use { it.write(content) }
     }
 

@@ -1,4 +1,4 @@
-package io.github.kingg22.kogot.analysis.models
+package io.github.kingg22.kogot.processor.model
 
 /**
  * Represents a class declaration.
@@ -78,8 +78,8 @@ fun ClassInfo.getLifecycleMethods(): List<FunctionInfo> {
     // Find _process(delta: Double) - applicable to both Sprite2D and Node2D
     val processFunc = functions.find { func ->
         func.name == "_process" &&
-        func.parameters.size == 1 &&
-        func.parameters[0].type.qualifiedName == "kotlin.Double"
+            func.parameters.size == 1 &&
+            func.parameters[0].type.qualifiedName == "kotlin.Double"
     }
     if (processFunc != null) {
         funcs.add(processFunc)

@@ -88,11 +88,8 @@ include(
 include("mi-juego-prueba:kotlin_native_game:source")
 include("mi-juego-prueba:kotlin_native_game:exported")
 
-// processor, and analysis
-include(
-    "processor",
-    "analysis",
-)
+// processor
+include("processor")
 
 // codegen
 include(

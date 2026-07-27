@@ -1,4 +1,4 @@
-package io.github.kingg22.kogot.analysis.models
+package io.github.kingg22.kogot.processor.model
 
 /**
  * Represents a parameter of a function.

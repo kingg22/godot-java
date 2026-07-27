@@ -36,10 +36,4 @@ object DiagnosticRenderer {
 
         return sb.toString()
     }
-
-    /**
-     * Renders a diagnostic in compact single-line format.
-     */
-    fun renderCompact(message: DiagnosticMessage): String =
-        "[${message.code}] ${message.location.filePath}:${message.location.line} - ${message.mainMessage}"
 }

@@ -1,4 +1,4 @@
-package io.github.kingg22.kogot.processor.generation.kotlin
+package io.github.kingg22.kogot.processor.generators.kotlin
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
