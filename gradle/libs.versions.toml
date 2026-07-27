@@ -33,7 +33,7 @@ google-truth = "1.4.5"
 kotest = "6.1.11"
 
 # https://github.com/JetBrains/kotlin/releases
-kotlin = "2.4.20-Beta2"
+kotlin = "2.5.0-saturn-677"
 
 # https://github.com/Kotlin/kotlinx.serialization/releases
 kotlinx-serialization = "1.11.0"
