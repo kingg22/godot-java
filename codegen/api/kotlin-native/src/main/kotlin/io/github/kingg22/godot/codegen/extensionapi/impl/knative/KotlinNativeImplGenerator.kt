@@ -56,7 +56,8 @@ class KotlinNativeImplGenerator(override val typeResolver: TypeResolver) : CodeI
     private val nativeStructureBodyImpl = KNativeImplGen()
     private val nativeStructure = KNativeStructureGenerator(typeResolver, nativeStructureBodyImpl)
     private val utilFuncImplGen = UtilityFunctionImplGen(typeResolver)
-    private val utils = NativeUtilityFunctionGenerator(methodGenerator, overloadGen, utilFuncImplGen)
+    private val globalConstantGen = NativeGlobalConstantGenerator()
+    private val utils = NativeUtilityFunctionGenerator(methodGenerator, overloadGen, utilFuncImplGen, globalConstantGen)
 
     context(ctx: Context, gdeInterface: GDExtensionInterface?)
     override fun generate(api: ExtensionApi): Sequence<FileSpec> = sequence {
@@ -79,7 +80,7 @@ class KotlinNativeImplGenerator(override val typeResolver: TypeResolver) : CodeI
 
         yieldAll(builtinClassesPaths)
 
-        yield(utils.generateFile(api.utilityFunctions))
+        yield(utils.generateFile(api.utilityFunctions, api.globalConstants))
 
         val nativeStructuresPaths = ctx.model.nativeStructures.asSequence().mapNotNull {
             nativeStructure.generateFile(it)
@@ -108,11 +109,5 @@ class KotlinNativeImplGenerator(override val typeResolver: TypeResolver) : CodeI
 
         // Builtin missing: Variant
         yield(variant.generateFile(nestedEnums))
-
-        if (api.globalConstants.isNotEmpty()) {
-            logger.warning {
-                "Global constants not supported yet. Found: [${api.globalConstants.joinToString()}]"
-            }
-        }
     }
 }

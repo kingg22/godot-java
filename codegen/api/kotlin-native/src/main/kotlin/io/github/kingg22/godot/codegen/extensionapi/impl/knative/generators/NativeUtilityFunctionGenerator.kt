@@ -5,11 +5,12 @@ import com.squareup.kotlinpoet.TypeSpec
 import io.github.kingg22.godot.codegen.extensionapi.Context
 import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.UtilityFunctionImplGen
 import io.github.kingg22.godot.codegen.impl.createFile
+import io.github.kingg22.godot.codegen.models.extensionapi.GlobalConstant
 import io.github.kingg22.godot.codegen.models.extensionapi.UtilityFunction
 import io.github.kingg22.godot.codegen.utils.withExceptionContext
 
 /**
- * Generates the `GD` object that exposes Godot API utility functions.
+ * Generates the `GD` object that exposes Godot API utility functions and [GlobalConstant]s.
  *
  * When [implGen] is provided (i.e. we're in the native *implementation* backend rather than
  * a stub backend), each generated function receives:
@@ -20,15 +21,19 @@ import io.github.kingg22.godot.codegen.utils.withExceptionContext
  *
  * When [implGen] is `null` (stub backends, test harnesses), only the public API shape is
  * generated — all bodies are `TODO()`.
+ *
+ * `global_constants` need no such split: they're compile-time literals, so [globalConstantGen]
+ * produces the same `const val` properties regardless of backend.
  */
 class NativeUtilityFunctionGenerator(
     private val methodGen: NativeMethodGenerator,
     private val overloadGen: TypeOverloadGenerator,
     private val implGen: UtilityFunctionImplGen,
+    private val globalConstantGen: NativeGlobalConstantGenerator = NativeGlobalConstantGenerator(),
 ) {
     context(context: Context)
-    fun generateFile(functions: List<UtilityFunction>): FileSpec {
-        val spec = generateSpec(functions)
+    fun generateFile(functions: List<UtilityFunction>, constants: List<GlobalConstant> = emptyList()): FileSpec {
+        val spec = generateSpec(functions, constants)
         return createFile(spec, spec.name!!, context.packageForUtilObject()) {
             // Add all lazy function-pointer properties
             functions.forEach { fn ->
@@ -40,7 +45,7 @@ class NativeUtilityFunctionGenerator(
     }
 
     context(context: Context)
-    fun generateSpec(functions: List<UtilityFunction>): TypeSpec {
+    fun generateSpec(functions: List<UtilityFunction>, constants: List<GlobalConstant> = emptyList()): TypeSpec {
         withExceptionContext({ "Generating utility functions, count: ${functions.size}" }) {
             val functionsSpec = functions.flatMap { fn ->
                 withExceptionContext({ "Error generating utility function '${fn.name}'" }) {
@@ -82,6 +87,7 @@ class NativeUtilityFunctionGenerator(
                 .addKdoc("Utility functions for Godot API.")
 
             typeBuilder.addFunctions(functionsSpec)
+            typeBuilder.addProperties(globalConstantGen.generateProperties(constants))
             return typeBuilder.build()
         }
     }

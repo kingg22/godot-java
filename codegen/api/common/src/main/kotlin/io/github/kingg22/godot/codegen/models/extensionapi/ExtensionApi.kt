@@ -2,7 +2,6 @@ package io.github.kingg22.godot.codegen.models.extensionapi
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonElement
 
 @Serializable
 class ExtensionApi(
@@ -12,7 +11,7 @@ class ExtensionApi(
         emptyList(),
     @SerialName("builtin_classes") val builtinClasses: List<BuiltinClass> = emptyList(),
     val classes: List<EngineClass> = emptyList(),
-    @SerialName("global_constants") val globalConstants: List<JsonElement> = emptyList(),
+    @SerialName("global_constants") val globalConstants: List<GlobalConstant> = emptyList(),
     @SerialName("global_enums") val globalEnums: List<ApiEnum> = emptyList(),
     @SerialName("utility_functions") val utilityFunctions: List<UtilityFunction> = emptyList(),
     @SerialName("native_structures") val nativeStructures: List<NativeStructure> = emptyList(),
