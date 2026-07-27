@@ -46,7 +46,7 @@ ksp-plugin = "2.3.10"
 ksp-api = "2.3.10"
 
 # https://github.com/uber/NullAway/releases
-nullaway = "0.13.4"
+nullaway = "0.13.8"
 
 # https://github.com/tbroyer/gradle-nullaway-plugin/releases
 nullaway-gradle = "3.1.0"
