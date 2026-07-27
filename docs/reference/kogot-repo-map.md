@@ -9,28 +9,28 @@ Quick navigation aid for the kogot codebase. Where to find what.
 
 ## Module Map
 
-| Module                       | Purpose                                        | Key Files                                             |
-|------------------------------|------------------------------------------------|-------------------------------------------------------|
-| `analysis/`                  | KSP backend-agnostic metadata extraction       | `extractors/`, `models/ClassInfo.kt`                  |
-| `codegen/`                   | Godot API model + KotlinPoet generation        | `models/extensionapi/`, `impl/KotlinPoetGenerator.kt` |
-| `processor/`                 | KSP compiler plugin (annotation processing)    | `KogotProcessor.kt`, `generation/kotlin/`             |
-| `kotlin-native/annotations/` | User annotations: @Godot, @Export, @Rpc, @Tool | -                                                     |
-| `kotlin-native/api/`         | User API + **generated** Godot classes         | `build/generated/` (2000+ files)                      |
-| `kotlin-native/binding/`     | Runtime binding registration                   | `ClassRegistrationHelpers.kt`                         |
-| `kotlin-native/ffi/`         | Low-level FFI to Godot C functions             | `.def` cinterop files                                 |
-| `kotlin-native/runtime/`     | Kotlin/Native runtime support                  | -                                                     |
-| `jvm-ffm/`                   | Java FFM integration (incomplete)              | -                                                     |
-| `build-logic/`               | Gradle convention plugins                      | `buildlogic.*.gradle.kts`                             |
+| Module                          | Purpose                                                                  | Key Files                                             |
+|----------------------------------|---------------------------------------------------------------------------|--------------------------------------------------------|
+| `codegen/`                       | Godot API model + KotlinPoet generation                                   | `models/extensionapi/`, `impl/KotlinPoetGenerator.kt` |
+| `processor/`                     | KSP compiler plugin (extraction + validation + codegen, unified MVP module since commit `96af87c` — the old `analysis/` module was merged in here) | `KogotProcessor.kt`, `ksp/`, `model/`, `diagnostics/`, `generators/`, `resolver/` |
+| `kotlin-native/api/annotations/` | User annotations: @Godot, @Export, @Rpc, @Tool, @RegisterSignal, ...       | -                                                      |
+| `kotlin-native/api/generated/`   | **Generated** Godot API classes (2000+ files, produced by `codegen/`)     | `build/generated/`                                    |
+| `kotlin-native/api/callable/`, `signal/`, `utils/`, `testing/`, `chore/` | User-facing API support modules                    | -                                                      |
+| `kotlin-native/binding/`         | Runtime binding registration                                              | `ClassRegistrationHelpers.kt`, `SignalRegistration.kt`, `NodeVirtualCalls.kt` |
+| `kotlin-native/ffi/`             | Low-level FFI to Godot C functions                                        | `.def` cinterop files                                 |
+| `kotlin-native/runtime/`         | Kotlin/Native runtime support                                             | -                                                      |
+| `jvm-ffm/`                       | Java FFM integration. **Paused/on hold**: this project is exploration-first — Kotlin/Native is being worked out completely first since it's the harder target; whatever gets learned there should replicate more easily to Java FFM afterward. Not being actively developed right now. | `api/`, `ffm/`, `runtime/`, `native-register/`        |
+| `build-logic/`                   | Gradle convention plugins                                                 | `buildlogic.*.gradle.kts`                             |
 
 ## Generated vs Hand-Written
 
 **Generated** (don't edit directly):
-- `kotlin-native/api/build/generated/sources/godotApi/**` - Godot API classes
-- `processor/build/generated/**` - KSP processor output
+- `kotlin-native/api/generated/build/generated/**` - Godot API classes
+- `processor/build/generated/**` - KSP processor output (per-user-class `*_Binding.kt`)
 
 **Hand-written**:
-- All source in `analysis/`, `codegen/`, `processor/`
-- `kotlin-native/annotations/`, `binding/`, `ffi/`, `runtime/`
+- All source in `codegen/`, `processor/`
+- `kotlin-native/annotations/` (now `kotlin-native/api/annotations/`), `binding/`, `ffi/`, `runtime/`
 
 ## Key Files by Task
 
@@ -39,7 +39,7 @@ Quick navigation aid for the kogot codebase. Where to find what.
 | Add new Godot builtin type  | `codegen/models/extensionapi/`, run codegen            |
 | Add new engine class        | `codegen/` + run API generation                        |
 | Fix KSP processor           | `processor/KogotProcessor.kt`                          |
-| Add new annotation          | `kotlin-native/annotations/` + `processor/validation/` |
+| Add new annotation          | `kotlin-native/api/annotations/` + validation in `processor/KogotProcessor.kt` (no separate `validation/` dir) |
 | Modify binding registration | `kotlin-native/binding/ClassRegistrationHelpers.kt`    |
 | Change FFI layer            | `kotlin-native/ffi/` + `.def` files                    |
 | Debug spritebench           | `mi-juego-prueba/kotlin_native_game/`                  |
@@ -53,7 +53,7 @@ Quick navigation aid for the kogot codebase. Where to find what.
 
 **Codegen flow:**
 ```
-Godot JSON API → codegen/models/ → KotlinPoetGenerator → kotlin-native/api/build/generated/
+Godot JSON API → codegen/models/ → KotlinPoetGenerator → kotlin-native/api/generated/build/generated/
 ```
 
 **Registration flow:**

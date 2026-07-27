@@ -95,8 +95,11 @@ Root agent receives: agent outputs as summaries, not raw file contents.
 
 ## Reference Files (load when relevant)
 - @docs/reference/kogot-repo-map.md — module locations and code flows
-- @docs/reference/binding-roadmap.md — current status, what's done vs pending
 - @docs/reference/external-bindings-reference.md — Obtain reference to external bindings in other languages
+
+## Roadmap / status
+GH Issues + the GH Project are the single source of truth for what's done vs pending — https://github.com/users/kingg22/projects/2
+Do not maintain a local roadmap doc; it goes stale. Check issues/project state instead of assuming from memory.
 
 Load these at the start of any task that involves exploring unfamiliar modules
 or planning new features. Do not load for targeted bug fixes.
