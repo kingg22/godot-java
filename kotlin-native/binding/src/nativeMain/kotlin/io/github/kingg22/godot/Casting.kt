@@ -3,13 +3,21 @@ package io.github.kingg22.godot
 import io.github.kingg22.godot.api.GodotNative
 import io.github.kingg22.godot.api.builtin.toStringName
 import io.github.kingg22.godot.api.core.GodotObject
-import io.github.kingg22.godot.internal.binding.ClassDBBinding
-import io.github.kingg22.godot.internal.binding.ObjectBinding
 import io.github.kingg22.godot.internal.ffi.GDExtensionObjectPtr
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-@Suppress("DEPRECATION")
+/**
+ * `ClassDBBinding.getClassTagRaw` + `ObjectBinding.castToRaw` (GDExtension's `classdb_get_class_tag` /
+ * `object_cast_to`) were deprecated in Godot 4.7: "Use the `is_class` method on `Object` to check if an
+ * object can be cast instead. If true, the previous pointer can be reinterpreted as a pointer to the
+ * target type." There is no pointer-level cast to perform on the Kotlin/Native side either: a
+ * [GDExtensionObjectPtr] is already an opaque, type-erased pointer, so "reinterpreting" it is just
+ * handing the same pointer value to [factory].
+ *
+ * FIXME [factory] always constructs a new Kotlin wrapper instance instead of reusing one already bound
+ * to that native pointer (see https://github.com/kingg22/kogot/issues/120 discussion).
+ */
 @PublishedApi
 internal inline fun <Convert : GodotNative> castToInternal(
     rawPtr: GDExtensionObjectPtr,
@@ -18,20 +26,12 @@ internal inline fun <Convert : GodotNative> castToInternal(
 ): Convert? {
     contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
 
-    val classTagPtr = godotClassName.toStringName().use { str ->
-        ClassDBBinding
-            .getClassTagRaw(str.rawPtr)
-            ?: return null
+    val isRequestedClass = godotClassName.toStringName().use { className ->
+        GodotObject(rawPtr).isClass(className)
     }
+    if (!isRequestedClass) return null
 
-    val castedPtr = ObjectBinding.castToRaw(
-        rawPtr,
-        classTagPtr,
-    ) ?: return null
-
-    // FIXME must getInstance of the already kotlin instance instead of creating a new one!!
-    // But only create if the instance is not already a kotlin instance
-    return factory(castedPtr)
+    return factory(rawPtr)
 }
 
 // -----------------------------------------------------------------------------
