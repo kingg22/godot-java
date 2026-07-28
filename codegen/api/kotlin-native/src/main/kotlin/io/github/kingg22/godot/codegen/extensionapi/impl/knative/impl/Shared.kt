@@ -245,12 +245,19 @@ fun buildReturnAlloc(
             // Vector2i(rawPtr = null) -> nativeHeap.alloc(size, align)); mirrors buildOperatorBody.
             ctx.isBuiltin(returnType) -> addStatement("val retPtr = %T()", kotlinType)
 
+            // Array/Dictionary/TypedArray/TypedDictionary are Variant-compatible builtins too, just
+            // spelled with lowercase/compound type strings ("array", "typedarray::Node", ...) that
+            // never satisfy ctx.isBuiltin's exact-name check. Godot's ptrcall performs a real
+            // assignment into the destination (releasing/retaining the internal refcounted pointer),
+            // not a raw pointer write — the destination must be an already-constructed, valid empty
+            // container. Same fix pattern as the scalar builtins above.
             returnType.startsWith("array") ||
                 returnType.startsWith("dictionary") ||
                 returnType.startsWith("typeddictionary") ||
-                returnType.startsWith("typedarray") ||
-                kotlinType == COPAQUE_POINTER ||
-                ctx.isEngineClass(returnType) ->
+                returnType.startsWith("typedarray") ->
+                addStatement("val retPtr = %T()", kotlinType)
+
+            kotlinType == COPAQUE_POINTER || ctx.isEngineClass(returnType) ->
                 addStatement("val retPtr = %M<%T>()", cinteropAlloc, C_OPAQUE_POINTER_VAR)
 
             kotlinType is ParameterizedTypeName && kotlinType.rawType == C_POINTER -> addStatement(
@@ -312,11 +319,14 @@ fun buildReturnRead(
         // straight into its own native storage, so there's no pointer to dereference or null-check.
         ctx.isBuiltin(returnType) -> CodeBlock.ofStatement("${preAppendReturn}retPtr")
 
-        ctx.isEngineClass(returnType) ||
-            returnType.startsWith("array") ||
+        // retPtr is already the constructed container instance (see buildReturnAlloc) — ptrcall
+        // assigned straight into it, so there's no pointer to dereference or null-check either.
+        returnType.startsWith("array") ||
             returnType.startsWith("dictionary") ||
             returnType.startsWith("typeddictionary") ||
-            returnType.startsWith("typedarray") -> {
+            returnType.startsWith("typedarray") -> CodeBlock.ofStatement("${preAppendReturn}retPtr")
+
+        ctx.isEngineClass(returnType) -> {
             CodeBlock
                 .builder()
                 .addStatement("$preAppendReturn%T(", kotlinType)
@@ -442,9 +452,11 @@ data class ReturnArgInfo(
  * - `bool` → needsPtrInInvoke=false, asCodeBlock="retPtr" (GdBool instance, not pointer)
  * - CVar types (Int, Long, Float, Double, etc.) → needsPtrInInvoke=true, asCodeBlock="retPtr.%M" (cinteropPtr)
  * - COPAQUE_POINTER, enums, bitfields, C_POINTER → needsPtrInInvoke=false, asCodeBlock="retPtr.%M" (cinteropPtr)
- * - Builtins → needsPtrInInvoke=false, asCodeBlock="retPtr.rawPtr" (retPtr is the constructed instance
- *   from [buildReturnAlloc]; its own rawPtr is already the correctly-sized destination, no reinterpret)
- * - Engine classes, arrays, dicts, typed dicts, typed arrays:
+ * - Builtins, arrays, dicts, typed dicts, typed arrays → needsPtrInInvoke=false, asCodeBlock="retPtr.rawPtr"
+ *   (retPtr is the constructed instance from [buildReturnAlloc]; its own rawPtr is already the
+ *   correctly-sized destination — a struct for builtins, an already-constructed container for
+ *   arrays/dicts — no reinterpret needed)
+ * - Engine classes:
  *   - forBuiltinInvoke=true → needsPtrInInvoke=true, asCodeBlock="retPtr.%M.%M()" (cinteropPtr.reinterpret())
  *   - forBuiltinInvoke=false → needsPtrInInvoke=true, asCodeBlock="retPtr.%M" (cinteropPtr)
  * - Fallback → needsPtrInInvoke=false, asCodeBlock="retPtr"
@@ -459,15 +471,19 @@ fun returnArgExpression(returnType: String?, kotlinType: TypeName, forBuiltinInv
     // Godot's own builtin_classes list includes those alongside Vector2i/Color/etc.
     val isBuiltinReturn = returnType != null && cVarType == null && ctx.isBuiltin(returnType)
 
-    // Engine classes and collections: need raw pointer for the invoke call.
-    // The type is constructed via reinterpret() after the call (BuiltinMethodImplGen path).
-    val isEngineOrCollection = returnType != null && (
-        ctx.findEngineClass(returnType) != null ||
-            returnType.startsWith("array") ||
+    // Array/Dictionary/TypedArray/TypedDictionary: same "already constructed instance" pattern as
+    // isBuiltinReturn above (see buildReturnAlloc) — these lowercase/compound type strings never
+    // satisfy ctx.isBuiltin's exact-name check, so they need their own explicit condition here.
+    val isCollectionReturn = returnType != null && (
+        returnType.startsWith("array") ||
             returnType.startsWith("dictionary") ||
             returnType.startsWith("typeddictionary") ||
             returnType.startsWith("typedarray")
         )
+
+    // Engine classes: need raw pointer for the invoke call.
+    // The type is constructed via reinterpret() after the call (BuiltinMethodImplGen path).
+    val isEngineReturn = returnType != null && ctx.findEngineClass(returnType) != null
 
     // CVar types (IntVar, LongVar, etc.): need pointer to stack-allocated variable.
     val isCVar = cVarType != null
@@ -482,8 +498,10 @@ fun returnArgExpression(returnType: String?, kotlinType: TypeName, forBuiltinInv
 
         isBuiltinReturn -> ReturnArgInfo(CodeBlock.of("retPtr.rawPtr"), needsPtrInInvoke = false)
 
-        isEngineOrCollection ->
-            // Engine/collection types: invoke needs retPtr.%M (the raw pointer).
+        isCollectionReturn -> ReturnArgInfo(CodeBlock.of("retPtr.rawPtr"), needsPtrInInvoke = false)
+
+        isEngineReturn ->
+            // Engine types: invoke needs retPtr.%M (the raw pointer).
             // asCodeBlock differs based on context:
             // - forBuiltinInvoke=true: include .reinterpret() for post-call type construction
             // - forBuiltinInvoke=false: just retPtr.%M for methodBindPtrcallRaw
