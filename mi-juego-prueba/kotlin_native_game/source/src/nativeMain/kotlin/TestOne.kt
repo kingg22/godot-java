@@ -1,10 +1,12 @@
 @file:OptIn(ExperimentalForeignApi::class)
 
+import io.github.kingg22.godot.api.annotations.ExportMethod
 import io.github.kingg22.godot.api.annotations.Godot
 import io.github.kingg22.godot.api.builtin.Callable
 import io.github.kingg22.godot.api.builtin.Vector2
 import io.github.kingg22.godot.api.builtin.Vector2i
 import io.github.kingg22.godot.api.builtin.toGodotString
+import io.github.kingg22.godot.api.builtin.toStringName
 import io.github.kingg22.godot.api.builtin.toVariant
 import io.github.kingg22.godot.api.core.Node
 import io.github.kingg22.godot.api.core.SceneTree
@@ -43,6 +45,9 @@ private const val SPRITE_COUNT = 5
     init {
         GD.print("A new SpriteBench was created with pointer ${nativePtr.rawValue}")
     }
+
+    @ExportMethod
+    fun addTwo(a: Int, b: Int): Int = a + b
 
     override fun _ready() {
         try {
@@ -97,6 +102,12 @@ private const val SPRITE_COUNT = 5
             returnVariant = callable2.call(15L.toVariant())
             println(
                 "[SpriteBench] Callable2 returned: ${returnVariant.stringify().toKString()}, is nil: ${returnVariant.isNil()}, value: ${returnVariant.toIntOrNull()}",
+            )
+
+            println("[SpriteBench] calling @ExportMethod addTwo(3, 4) via Object.call")
+            val addTwoResult = call("addTwo".toStringName(), 3.toVariant(), 4.toVariant())
+            println(
+                "[SpriteBench] addTwo returned: ${addTwoResult.toIntOrNull()} (expected 7)",
             )
         } catch (e: Throwable) {
             println("[SpriteBench] === _ready failed ===")

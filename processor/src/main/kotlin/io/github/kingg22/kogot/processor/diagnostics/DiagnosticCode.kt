@@ -7,6 +7,8 @@ package io.github.kingg22.kogot.processor.diagnostics
 data class DiagnosticCode(val code: String) {
     companion object {
         val INVALID_EXPORT_TYPE = DiagnosticCode("KOGOT-101")
+        val INVALID_EXPORT_METHOD_TYPE = DiagnosticCode("KOGOT-102")
+        val UNSUPPORTED_METHOD_DEFAULT_ARGUMENT = DiagnosticCode("KOGOT-103")
         val GENERATION_FAILED = DiagnosticCode("KOGOT-201")
     }
 

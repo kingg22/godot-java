@@ -18,6 +18,7 @@ import io.github.kingg22.kogot.processor.ksp.toClassInfo
 import io.github.kingg22.kogot.processor.model.ClassInfo
 import io.github.kingg22.kogot.processor.model.GodotPrimitives
 import io.github.kingg22.kogot.processor.model.TypeInfo
+import io.github.kingg22.kogot.processor.model.getExportedMethods
 import io.github.kingg22.kogot.processor.model.getExportedProperties
 import io.github.kingg22.kogot.processor.model.isGodotBuiltin
 
@@ -102,6 +103,54 @@ class KogotProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor 
                             note = "This property will not appear in the Inspector",
                         ),
                     )
+                }
+            }
+
+            for (function in classInfo.getExportedMethods()) {
+                val returnType = function.returnType
+                if (returnType != null && !isValidExportType(returnType)) {
+                    diagnostics.add(
+                        DiagnosticMessage.error(
+                            code = DiagnosticCode.INVALID_EXPORT_METHOD_TYPE,
+                            message =
+                                "@ExportMethod '${function.name}' has unsupported return type " +
+                                    "'${returnType.qualifiedName}'",
+                            location = DiagnosticLocation(classInfo.filePath, classInfo.lineNumber, 0),
+                            help = "Supported types: primitives (Int, Float, String, etc.) and Godot builtin types",
+                            note = "This method will not be registered",
+                        ),
+                    )
+                }
+
+                for (parameter in function.parameters) {
+                    if (!isValidExportType(parameter.type)) {
+                        diagnostics.add(
+                            DiagnosticMessage.error(
+                                code = DiagnosticCode.INVALID_EXPORT_METHOD_TYPE,
+                                message =
+                                    "@ExportMethod '${function.name}' has unsupported parameter type " +
+                                        "'${parameter.type.qualifiedName}' for '${parameter.name}'",
+                                location = DiagnosticLocation(classInfo.filePath, classInfo.lineNumber, 0),
+                                help =
+                                    "Supported types: primitives (Int, Float, String, etc.) and Godot builtin types",
+                                note = "This method will not be registered",
+                            ),
+                        )
+                    }
+
+                    if (parameter.hasDefaultValue) {
+                        diagnostics.add(
+                            DiagnosticMessage.error(
+                                code = DiagnosticCode.UNSUPPORTED_METHOD_DEFAULT_ARGUMENT,
+                                message =
+                                    "@ExportMethod '${function.name}' parameter '${parameter.name}' has a " +
+                                        "default value, which is not supported yet",
+                                location = DiagnosticLocation(classInfo.filePath, classInfo.lineNumber, 0),
+                                help = "Remove the default value or call this method without @ExportMethod",
+                                note = "This method will not be registered",
+                            ),
+                        )
+                    }
                 }
             }
         }

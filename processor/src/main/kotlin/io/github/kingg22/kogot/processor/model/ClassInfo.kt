@@ -40,6 +40,11 @@ fun ClassInfo.getExportedProperties(): List<PropertyInfo> = properties.filter { 
 fun ClassInfo.getRpcFunctions(): List<FunctionInfo> = functions.filter { it.hasRpc() }
 
 /**
+ * Returns all functions exported via @ExportMethod (callable from GDScript/the editor).
+ */
+fun ClassInfo.getExportedMethods(): List<FunctionInfo> = functions.filter { it.hasExportMethod() }
+
+/**
  * Checks if this class inherits from Node (directly or transitively).
  */
 fun ClassInfo.inheritsFromNode(): Boolean =

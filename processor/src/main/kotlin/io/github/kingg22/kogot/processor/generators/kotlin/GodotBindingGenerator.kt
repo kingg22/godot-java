@@ -14,7 +14,9 @@ import io.github.kingg22.kogot.processor.diagnostics.DiagnosticLocation
 import io.github.kingg22.kogot.processor.diagnostics.DiagnosticMessage
 import io.github.kingg22.kogot.processor.model.AnnotationInfo
 import io.github.kingg22.kogot.processor.model.ClassInfo
+import io.github.kingg22.kogot.processor.model.FunctionInfo
 import io.github.kingg22.kogot.processor.model.PropertyInfo
+import io.github.kingg22.kogot.processor.model.getExportedMethods
 import io.github.kingg22.kogot.processor.model.getParentClassShortName
 import io.github.kingg22.kogot.processor.model.getRegisterSignalAnnotation
 import io.github.kingg22.kogot.processor.model.hasExport
@@ -226,6 +228,17 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
             )
         }
 
+        /*
+         Add method registrations
+         */
+        val exportedMethods = classInfo.getExportedMethods()
+        for (function in exportedMethods) {
+            val trampolineName = "_godot_call_${function.name}"
+            val trampolineProperty = generateMethodInvocationTrampoline(trampolineName, function, classType)
+            typeSpecBuilder.addProperty(trampolineProperty)
+            funSpec.addCode(buildRegisterMethodCode(classInfo, function, trampolineName))
+        }
+
         typeSpecBuilder.addFunction(funSpec.build())
     }
 
@@ -332,6 +345,135 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
             .builder(trampolineName, GDExtensionClassMethodCall, KModifier.PRIVATE)
             .initializer(initializer)
             .build()
+    }
+
+    /**
+     * Generates a `GDExtensionClassMethodCall` trampoline for an `@ExportMethod`-annotated function:
+     * reads each argument out of the `args` array as a `Variant`, calls the real user method, and (if it
+     * has a return value) writes the result back. Mirrors [generateGetterMethodTrampoline] /
+     * [generateSetterMethodTrampoline] but generalized to N arguments.
+     */
+    private fun generateMethodInvocationTrampoline(
+        trampolineName: String,
+        function: FunctionInfo,
+        classType: ClassName,
+    ): PropertySpec {
+        val builder = CodeBlock
+            .builder()
+            .beginControlFlow("%M { _, instancePtr, args, _, returnValue, rError ->", STATIC_C_FUNCTION)
+            .addStatement("val obj = instancePtr.%M<%T>()", GET_INSTANCE_PTR, classType)
+
+        if (function.parameters.isNotEmpty()) {
+            builder
+                .beginControlFlow("if (args == null)")
+                .addStatement(
+                    "rError.%M(%T.%N, 0)",
+                    CallErrorWritePtr,
+                    GDExtensionCallErrorType,
+                    "GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT",
+                )
+                .addStatement("return@%M", STATIC_C_FUNCTION)
+                .endControlFlow()
+        }
+
+        val argNames = function.parameters.mapIndexed { index, parameter ->
+            val variantType = typeResolver.resolve(parameter.type.qualifiedName)
+            val kotlinType = typeResolver.toKotlinPoetType(variantType)
+            val argName = "arg$index"
+
+            builder
+                .addStatement("val rawArg$index = args.%M(${index}L)", CINTEROP_GET)
+                .beginControlFlow("if (rawArg$index == null)")
+                .addStatement(
+                    "rError.%M(%T.%N, %L)",
+                    CallErrorWritePtr,
+                    GDExtensionCallErrorType,
+                    "GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT",
+                    index,
+                )
+                .addStatement("return@%M", STATIC_C_FUNCTION)
+                .endControlFlow()
+                .addStatement(
+                    "val %L = %T(rawArg$index).%M<%T>()",
+                    argName,
+                    VARIANT_CLASS_NAME,
+                    VARIANT_GET_VALUE_OR_NULL,
+                    kotlinType,
+                )
+                .withIndent {
+                    beginControlFlow("?: run")
+                        .addStatement(
+                            "rError.%M(%T.%N, %L)",
+                            CallErrorWritePtr,
+                            GDExtensionCallErrorType,
+                            "GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT",
+                            index,
+                        )
+                        .addStatement("return@%M", STATIC_C_FUNCTION)
+                    endControlFlow()
+                }
+
+            argName
+        }
+
+        val callFormat = "obj.%N(${argNames.joinToString(", ")})"
+        if (function.returnType != null) {
+            builder
+                .addStatement("val result = $callFormat", function.name)
+                .beginControlFlow("if (returnValue != null)")
+                .addStatement("%T.newCopyRaw(returnValue, result.%M().rawPtr)", VARIANT_BINDING, TO_VARIANT)
+                .endControlFlow()
+        } else {
+            builder.addStatement(callFormat, function.name)
+        }
+
+        val initializer = builder
+            .addStatement("rError.%M()", CallErrorWritePtr)
+            .endControlFlow()
+            .build()
+
+        return PropertySpec
+            .builder(trampolineName, GDExtensionClassMethodCall, KModifier.PRIVATE)
+            .initializer(initializer)
+            .build()
+    }
+
+    /** Builds the `registerMethod(...)` call for an `@ExportMethod`-annotated function. */
+    private fun buildRegisterMethodCode(
+        classInfo: ClassInfo,
+        function: FunctionInfo,
+        trampolineName: String,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        builder.addStatement("%M(⇥", REGISTER_METHOD)
+        builder.addStatement("%S,", classInfo.shortName)
+        builder.addStatement("%S,", function.name)
+
+        val hasReturnValue = function.returnType != null
+        val returnVariantType = function.returnType?.let { typeResolver.resolve(it.qualifiedName) } ?: "NIL"
+        builder.addStatement("hasReturnValue = %L,", hasReturnValue)
+        builder.addStatement("returnType = %T.%L,", VARIANT_TYPE_CLASS_NAME, returnVariantType)
+
+        if (function.parameters.isEmpty()) {
+            builder.addStatement("arguments = emptyList(),")
+        } else {
+            builder.addStatement("arguments = listOf(⇥")
+            for (parameter in function.parameters) {
+                val variantType = typeResolver.resolve(parameter.type.qualifiedName)
+                builder.addStatement(
+                    "%T(%T.%L, %S),",
+                    METHOD_ARGUMENT_CLASS_NAME,
+                    VARIANT_TYPE_CLASS_NAME,
+                    variantType,
+                    parameter.name,
+                )
+            }
+            builder.addStatement("⇤),")
+        }
+
+        builder.addStatement("callFunction = %N,", trampolineName)
+        builder.addStatement("⇤)")
+        return builder.build()
     }
 
     private fun buildRegisterSignalAnnotationCode(prop: PropertyInfo, annotation: AnnotationInfo): CodeBlock {

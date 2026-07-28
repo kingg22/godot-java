@@ -34,3 +34,17 @@ fun FunctionInfo.isValidRpcTarget(): Boolean {
     // RPC functions cannot have out parameters (we don't track out specifically here, but void return is expected)
     return returnType != null
 }
+
+/**
+ * Returns true if this function has @ExportMethod annotation.
+ */
+fun FunctionInfo.hasExportMethod(): Boolean = annotations.any {
+    it.shortName == "ExportMethod" || it.matches("io.github.kingg22.godot.api.annotations.ExportMethod")
+}
+
+/**
+ * Returns the @ExportMethod annotation or null if not present.
+ */
+fun FunctionInfo.getExportMethodAnnotation(): AnnotationInfo? = annotations.find {
+    it.shortName == "ExportMethod" || it.matches("io.github.kingg22.godot.api.annotations.ExportMethod")
+}

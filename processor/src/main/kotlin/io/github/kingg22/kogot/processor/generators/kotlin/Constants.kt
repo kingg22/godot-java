@@ -20,6 +20,7 @@ val C_VALUE = MemberName(K_CINTEROP_PKG, "cValue")
 val AS_STABLE_REF = MemberName(K_CINTEROP_PKG, "asStableRef", true)
 val POINTED = MemberName(K_CINTEROP_PKG, "pointed", true)
 val POINTED_VALUE = MemberName(K_CINTEROP_PKG, "value", true)
+val CINTEROP_GET = MemberName(K_CINTEROP_PKG, "get", true)
 
 val ObjectBindingClassName = ClassName(GODOT_INTERNAL_BINDING_PKG, "ObjectBinding")
 val BindingProcAddressHolderClassName = ClassName(GODOT_INTERNAL_BINDING_PKG, "BindingProcAddressHolder")
