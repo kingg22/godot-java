@@ -1,5 +1,5 @@
 // Klib ABI Dump
-// Targets: [linuxX64]
+// Targets: [linuxX64, macosArm64, mingwX64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -8,6 +8,13 @@
 // Library unique name: <kogot.kotlin-native.api:chore>
 open annotation class io.github.kingg22.godot.api.builtin/MustBeVariant : kotlin/Annotation { // io.github.kingg22.godot.api.builtin/MustBeVariant|null[0]
     constructor <init>() // io.github.kingg22.godot.api.builtin/MustBeVariant.<init>|<init>(){}[0]
+}
+
+open annotation class io.github.kingg22.godot.api.internal/GodotVirtualMethod : kotlin/Annotation { // io.github.kingg22.godot.api.internal/GodotVirtualMethod|null[0]
+    constructor <init>(kotlin/String) // io.github.kingg22.godot.api.internal/GodotVirtualMethod.<init>|<init>(kotlin.String){}[0]
+
+    final val godotName // io.github.kingg22.godot.api.internal/GodotVirtualMethod.godotName|{}godotName[0]
+        final fun <get-godotName>(): kotlin/String // io.github.kingg22.godot.api.internal/GodotVirtualMethod.godotName.<get-godotName>|<get-godotName>(){}[0]
 }
 
 open annotation class io.github.kingg22.godot.api.internal/UsedFromCodegenGeneratedCode : kotlin/Annotation { // io.github.kingg22.godot.api.internal/UsedFromCodegenGeneratedCode|null[0]
