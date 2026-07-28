@@ -360,17 +360,21 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
     ): PropertySpec {
         val builder = CodeBlock
             .builder()
-            .beginControlFlow("%M { _, instancePtr, args, _, returnValue, rError ->", STATIC_C_FUNCTION)
+            .beginControlFlow("%M { _, instancePtr, args, argCount, returnValue, rError ->", STATIC_C_FUNCTION)
             .addStatement("val obj = instancePtr.%M<%T>()", GET_INSTANCE_PTR, classType)
 
         if (function.parameters.isNotEmpty()) {
+            val expected = function.parameters.size
             builder
-                .beginControlFlow("if (args == null)")
+                .beginControlFlow("if (args == null || argCount != ${expected}L)")
                 .addStatement(
-                    "rError.%M(%T.%N, 0)",
+                    "rError.%M(if (argCount < ${expected}L) %T.%N else %T.%N, argCount.toInt(), %L)",
                     CallErrorWritePtr,
                     GDExtensionCallErrorType,
-                    "GDEXTENSION_CALL_ERROR_INVALID_ARGUMENT",
+                    "GDEXTENSION_CALL_ERROR_TOO_FEW_ARGUMENTS",
+                    GDExtensionCallErrorType,
+                    "GDEXTENSION_CALL_ERROR_TOO_MANY_ARGUMENTS",
+                    expected,
                 )
                 .addStatement("return@%M", STATIC_C_FUNCTION)
                 .endControlFlow()

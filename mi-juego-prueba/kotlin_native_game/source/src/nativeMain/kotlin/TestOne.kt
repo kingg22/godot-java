@@ -9,7 +9,6 @@ import io.github.kingg22.godot.api.builtin.toGodotString
 import io.github.kingg22.godot.api.builtin.toStringName
 import io.github.kingg22.godot.api.builtin.toVariant
 import io.github.kingg22.godot.api.core.Node
-import io.github.kingg22.godot.api.core.Object
 import io.github.kingg22.godot.api.core.SceneTree
 import io.github.kingg22.godot.api.core.node.Node2D
 import io.github.kingg22.godot.api.core.node.TextEdit
@@ -123,7 +122,10 @@ private const val SPRITE_COUNT = 5
             if (currentFrame >= START_FRAME) {
                 if (frameIndex == FRAME_COUNT) {
                     println("[SpriteBench] Frame count reached, freeing children")
-                    val _ = getChildren().map(Callable { child: Object -> Node(child.rawPtr).queueFree() })
+                    val children = getChildren()
+                    for (i in 0 until children.size()) {
+                        Node(children[i].toObject().rawPtr).queueFree()
+                    }
 
                     val outText = StringBuilder(FRAME_COUNT * 12)
                     for (t in frameTimes) {

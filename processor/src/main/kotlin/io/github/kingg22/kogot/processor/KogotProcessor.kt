@@ -117,7 +117,8 @@ class KogotProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor 
                                     "'${returnType.qualifiedName}'",
                             location = DiagnosticLocation(classInfo.filePath, classInfo.lineNumber, 0),
                             help = "Supported types: primitives (Int, Float, String, etc.) and Godot builtin types",
-                            note = "This method will not be registered",
+                            note = "This is a compile error: binding generation is aborted for the whole " +
+                                "build until it's fixed",
                         ),
                     )
                 }
@@ -133,7 +134,8 @@ class KogotProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor 
                                 location = DiagnosticLocation(classInfo.filePath, classInfo.lineNumber, 0),
                                 help =
                                     "Supported types: primitives (Int, Float, String, etc.) and Godot builtin types",
-                                note = "This method will not be registered",
+                                note = "This is a compile error: binding generation is aborted for the whole " +
+                                "build until it's fixed",
                             ),
                         )
                     }
@@ -147,7 +149,8 @@ class KogotProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor 
                                         "default value, which is not supported yet",
                                 location = DiagnosticLocation(classInfo.filePath, classInfo.lineNumber, 0),
                                 help = "Remove the default value or call this method without @ExportMethod",
-                                note = "This method will not be registered",
+                                note = "This is a compile error: binding generation is aborted for the whole " +
+                                "build until it's fixed",
                             ),
                         )
                     }
