@@ -14,6 +14,7 @@ import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.Implementa
 import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.KNativeImplGen
 import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.UtilityFunctionImplGen
 import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.VariantImplGen
+import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.VirtualCallImplGen
 import io.github.kingg22.godot.codegen.models.extensionapi.ExtensionApi
 import io.github.kingg22.godot.codegen.models.extensioninterface.GDExtensionInterface
 import io.github.kingg22.godot.codegen.utils.logger
@@ -42,6 +43,7 @@ class KotlinNativeImplGenerator(override val typeResolver: TypeResolver) : CodeI
     )
     private val engineClassImplGen = EngineClassImplGen()
     private val engineMethodImplGen = EngineMethodImplGen(typeResolver)
+    private val virtualCallImplGen = VirtualCallImplGen(typeResolver)
     private val engineClass = NativeEngineClassGenerator(
         typeResolver,
         engineMethodImplGen,
@@ -50,7 +52,9 @@ class KotlinNativeImplGenerator(override val typeResolver: TypeResolver) : CodeI
         overloadGen,
         enumGen,
         engineClassImplGen,
+        virtualCallImplGen,
     )
+    private val engineVirtualCalls = NativeEngineVirtualCallsGenerator(virtualCallImplGen)
     private val variantImplGen = VariantImplGen(typeResolver)
     private val variant = NativeVariantGenerator(enumGen, variantImplGen)
     private val nativeStructureBodyImpl = KNativeImplGen()
@@ -73,6 +77,7 @@ class KotlinNativeImplGenerator(override val typeResolver: TypeResolver) : CodeI
         nativeStructureBodyImpl.initialize(implPackageRegistry)
         engineClassImplGen.initialize(implPackageRegistry)
         engineMethodImplGen.initialize(implPackageRegistry)
+        virtualCallImplGen.initialize(implPackageRegistry)
 
         val builtinClassesPaths = ctx.model.builtins.asSequence().mapNotNull {
             builtinClass.generateFile(it)
@@ -93,6 +98,12 @@ class KotlinNativeImplGenerator(override val typeResolver: TypeResolver) : CodeI
         }
 
         yieldAll(godotClassesPaths)
+
+        val virtualCallsPaths = ctx.model.engineClasses.asSequence().mapNotNull {
+            engineVirtualCalls.generateFile(it)
+        }
+
+        yieldAll(virtualCallsPaths)
 
         val (nestedEnums, globalEnums) = ctx.model.globalEnums.partition { it.ownerName != null }
 

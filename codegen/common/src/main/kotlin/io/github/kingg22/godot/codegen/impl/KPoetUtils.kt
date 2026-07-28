@@ -45,6 +45,7 @@ fun FileSpec.Builder.commonConfiguration() = apply {
             .addMember("%S", "GrazieInspection")
             .addMember("%S", "GrazieStyle")
             .addMember("%S", "NOTHING_TO_INLINE")
+            .addMember("%S", "UNNECESSARY_SAFE_CALL")
             .build(),
     )
 }

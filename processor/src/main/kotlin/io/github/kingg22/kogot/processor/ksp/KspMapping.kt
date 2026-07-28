@@ -1,5 +1,6 @@
 package io.github.kingg22.kogot.processor.ksp
 
+import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.symbol.FileLocation
 import com.google.devtools.ksp.symbol.KSAnnotation
@@ -9,6 +10,7 @@ import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeReference
+import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Nullability
 import io.github.kingg22.kogot.processor.model.AnnotationInfo
 import io.github.kingg22.kogot.processor.model.ClassInfo
@@ -16,8 +18,10 @@ import io.github.kingg22.kogot.processor.model.FunctionInfo
 import io.github.kingg22.kogot.processor.model.ParameterInfo
 import io.github.kingg22.kogot.processor.model.PropertyInfo
 import io.github.kingg22.kogot.processor.model.TypeInfo
+import io.github.kingg22.kogot.processor.model.VirtualMethodOverride
 
 private const val UNKNOWN = "<unknown>"
+private const val GODOT_VIRTUAL_METHOD_FQN = "io.github.kingg22.godot.api.internal.GodotVirtualMethod"
 
 /**
  * Extension to convert KSClassDeclaration to ClassInfo.
@@ -38,6 +42,11 @@ fun KSClassDeclaration.toClassInfo(): ClassInfo {
     val filePath = this.containingFile?.filePath ?: UNKNOWN
     val line = this.getLineNumber()
 
+    val overriddenVirtualMethods = this.getDeclaredFunctions()
+        .filter { Modifier.OVERRIDE in it.modifiers }
+        .mapNotNull { it.findVirtualMethodOverride() }
+        .toList()
+
     return ClassInfo(
         qualifiedName = qualifiedName,
         shortName = simpleName.asString(),
@@ -49,7 +58,39 @@ fun KSClassDeclaration.toClassInfo(): ClassInfo {
         modifiers = modifiers,
         filePath = filePath,
         lineNumber = line,
+        overriddenVirtualMethods = overriddenVirtualMethods,
     )
+}
+
+/**
+ * Walks the override chain via [KSFunctionDeclaration.findOverridee] up to the engine-generated root
+ * declaration annotated `@GodotVirtualMethod`, if any. Annotations aren't inherited across `override`,
+ * so the user's own declaration never carries it directly — only the original `api/generated` stub does.
+ */
+private fun KSFunctionDeclaration.findVirtualMethodOverride(): VirtualMethodOverride? {
+    var current: KSFunctionDeclaration? = this
+    while (current != null) {
+        val marker = current.annotations.firstOrNull { it.isGodotVirtualMethod() }
+        if (marker != null) {
+            val godotName = marker.arguments.firstOrNull { it.name?.asString() == "godotName" }?.value as? String
+            val owner = current.parentDeclaration as? KSClassDeclaration
+            if (godotName != null && owner != null) {
+                return VirtualMethodOverride(
+                    godotName = godotName,
+                    enginePackageName = owner.packageName.asString(),
+                    engineClassShortName = owner.simpleName.asString(),
+                )
+            }
+            return null
+        }
+        current = current.findOverridee() as? KSFunctionDeclaration
+    }
+    return null
+}
+
+private fun KSAnnotation.isGodotVirtualMethod(): Boolean {
+    val decl = this.annotationType.resolve().declaration as? KSClassDeclaration ?: return false
+    return decl.qualifiedName?.asString() == GODOT_VIRTUAL_METHOD_FQN
 }
 
 /**

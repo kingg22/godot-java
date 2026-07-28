@@ -14,6 +14,7 @@ data class ClassInfo(
     val modifiers: Set<String> = emptySet(),
     val filePath: String = "",
     val lineNumber: Int = 0,
+    val overriddenVirtualMethods: List<VirtualMethodOverride> = emptyList(),
 )
 
 /**
@@ -66,34 +67,3 @@ fun ClassInfo.inheritsFromNode2D(): Boolean =
  * Returns the parent class short name (first supertype).
  */
 fun ClassInfo.getParentClassShortName(): String? = supertypes.firstOrNull()?.shortName
-
-/**
- * Returns lifecycle methods to bind based on parent class.
- * - Sprite2D subclasses: only _process(delta: Double)
- * - Node2D (not Sprite2D) subclasses: _ready() and _process(delta: Double)
- */
-fun ClassInfo.getLifecycleMethods(): List<FunctionInfo> {
-    val funcs = mutableListOf<FunctionInfo>()
-
-    // Find _process(delta: Double) - applicable to both Sprite2D and Node2D
-    val processFunc = functions.find { func ->
-        func.name == "_process" &&
-            func.parameters.size == 1 &&
-            func.parameters[0].type.qualifiedName == "kotlin.Double"
-    }
-    if (processFunc != null) {
-        funcs.add(processFunc)
-    }
-
-    // Find _ready() - only for Node2D (not Sprite2D)
-    if (inheritsFromNode2D() && !inheritsFromSprite2D()) {
-        val readyFunc = functions.find { func ->
-            func.name == "_ready" && func.parameters.isEmpty()
-        }
-        if (readyFunc != null) {
-            funcs.add(readyFunc)
-        }
-    }
-
-    return funcs
-}

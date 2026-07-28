@@ -1,5 +1,6 @@
 package io.github.kingg22.kogot.processor.generators.kotlin
 
+import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
@@ -25,6 +26,12 @@ import io.github.kingg22.kogot.processor.resolver.VariantTypeResolver
 
 private const val GETTER_PREFIX = "_get_"
 private const val SETTER_PREFIX = "_set_"
+
+/** `_physics_process` -> `physicsProcess`, matching codegen's `VirtualCallImplGen.trampolineName`. */
+private fun godotVirtualTrampolineName(godotName: String): String =
+    godotName.removePrefix("_").split("_").filter { it.isNotEmpty() }.mapIndexed { index, part ->
+        if (index == 0) part else part.replaceFirstChar(Char::uppercaseChar)
+    }.joinToString("")
 
 /**
  * A generated Kotlin file, ready to be written by the caller.
@@ -139,7 +146,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
                 classType,
             )
             .addStatement("},")
-            .addStatement("%T.getVirtual,", NodeVirtualDispatcherClassName)
+            .addGetVirtualArgument(classInfo)
             .addStatement("⇤)")
 
         // Add signal registrations
@@ -161,18 +168,17 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
          Add property registrations
          */
         val exportProperties = classInfo.properties.filter { it.hasExport() }
-        for (prop in exportProperties) {
-            val variantType = typeResolver.resolve(prop.type.qualifiedName)
-            val isMutable = prop.isMutable
-            val propGetterName = "_godot_get_${prop.name}"
-            val propSetterName = if (isMutable) "_godot_set_${prop.name}" else null
-            val setterName = if (isMutable) SETTER_PREFIX + prop.name else ""
-            val getterName = GETTER_PREFIX + prop.name
+        for ((name, type, isMutable) in exportProperties) {
+            val variantType = typeResolver.resolve(type.qualifiedName)
+            val propGetterName = "_godot_get_$name"
+            val propSetterName = if (isMutable) "_godot_set_$name" else null
+            val setterName = if (isMutable) SETTER_PREFIX + name else ""
+            val getterName = GETTER_PREFIX + name
 
             // Generate getter trampoline
             val getterProperty = generateGetterMethodTrampoline(
                 trampolineName = propGetterName,
-                propName = prop.name,
+                propName = name,
                 classType = classType,
             )
             typeSpecBuilder.addProperty(getterProperty)
@@ -181,7 +187,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
             if (isMutable) {
                 val setterProperty = generateSetterMethodTrampoline(
                     trampolineName = propSetterName!!,
-                    propName = prop.name,
+                    propName = name,
                     classType = classType,
                     variantType = variantType,
                 )
@@ -212,7 +218,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
                 "%M(%S, %S, %T.%L, %S, %S)",
                 REGISTER_PROPERTY,
                 classInfo.shortName,
-                prop.name,
+                name,
                 VARIANT_TYPE_CLASS_NAME,
                 variantType,
                 getterName,
@@ -221,6 +227,36 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
         }
 
         typeSpecBuilder.addFunction(funSpec.build())
+    }
+
+    /**
+     * Appends the `getVirtual` argument to a `registerClass<T>(...)` call: a per-class `staticCFunction`
+     * dispatching only the Godot virtual methods this specific class overrides (from
+     * [ClassInfo.overriddenVirtualMethods]), resolved to their `<EngineClass>VirtualCalls` trampolines.
+     */
+    private fun FunSpec.Builder.addGetVirtualArgument(classInfo: ClassInfo): FunSpec.Builder = apply {
+        val overrides = classInfo.overriddenVirtualMethods
+        if (overrides.isEmpty()) {
+            addStatement("%M { _, _, _ -> null },", STATIC_C_FUNCTION)
+            return@apply
+        }
+
+        beginControlFlow("%M { _, funcNamePtr, _ ->", STATIC_C_FUNCTION)
+        beginControlFlow("%M(funcNamePtr) { funcName ->", RESOLVE_VIRTUAL_CALL)
+        beginControlFlow("when (funcName)·{")
+        overrides.forEach { override ->
+            addStatement(
+                "%S as %T -> %T.%N",
+                override.godotName,
+                ANY,
+                ClassName(override.enginePackageName, "${override.engineClassShortName}VirtualCalls"),
+                godotVirtualTrampolineName(override.godotName),
+            )
+        }
+        addStatement("else -> null")
+        endControlFlow()
+        endControlFlow()
+        addCode("⇤},\n")
     }
 
     private fun generateGetterMethodTrampoline(

@@ -1,5 +1,6 @@
 package io.github.kingg22.godot.codegen.extensionapi.impl.knative.generators
 
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.KModifier
@@ -12,12 +13,14 @@ import io.github.kingg22.godot.codegen.extensionapi.TypeResolver
 import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.EngineClassImplGen
 import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.EngineMethodImplGen
 import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.EnginePropertyImplGen
+import io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl.VirtualCallImplGen
 import io.github.kingg22.godot.codegen.extensionapi.resolver.addKdocIfPresent
 import io.github.kingg22.godot.codegen.extensionapi.resolver.experimentalApiAnnotation
 import io.github.kingg22.godot.codegen.impl.createFile
 import io.github.kingg22.godot.codegen.impl.renameGodotClass
 import io.github.kingg22.godot.codegen.models.extensionapi.domain.ResolvedEngineClass
 import io.github.kingg22.godot.codegen.types.API_STATUS_NON_EXTENSIBLE
+import io.github.kingg22.godot.codegen.types.GODOT_VIRTUAL_METHOD
 import io.github.kingg22.godot.codegen.utils.withExceptionContext
 
 class NativeEngineClassGenerator(
@@ -28,6 +31,7 @@ class NativeEngineClassGenerator(
     private val overloadGen: TypeOverloadGenerator,
     private val enumGenerator: NativeEnumGenerator,
     private val engineClassImplGen: EngineClassImplGen,
+    private val virtualCallImplGen: VirtualCallImplGen,
 ) {
 
     context(context: Context)
@@ -66,7 +70,14 @@ class NativeEngineClassGenerator(
                     className = cls.name,
                     codeBody = body.buildMethodBody(method, cls.name),
                 ) {
-                    if (method.isVirtual) addModifiers(KModifier.OPEN)
+                    if (method.isVirtual) {
+                        addModifiers(KModifier.OPEN)
+                        if (virtualCallImplGen.isSupported(method)) {
+                            addAnnotation(
+                                AnnotationSpec.builder(GODOT_VIRTUAL_METHOD).addMember("%S", method.name).build(),
+                            )
+                        }
+                    }
 
                     if (method.name == "get" || method.name == "set") addModifiers(KModifier.OPERATOR)
                 }
