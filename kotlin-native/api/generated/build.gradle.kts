@@ -15,7 +15,9 @@ kotlin {
     explicitApi()
 
     @OptIn(ExperimentalAbiValidation::class)
-    abiValidation()
+    abiValidation {
+        keepLocallyUnsupportedTargets.set(true)
+    }
 
     compilerOptions {
         optIn.addAll(

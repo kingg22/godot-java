@@ -11,7 +11,9 @@ kotlin {
     explicitApi()
 
     @OptIn(ExperimentalAbiValidation::class)
-    abiValidation()
+    abiValidation {
+        keepLocallyUnsupportedTargets.set(true)
+    }
 
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     dependencies {
