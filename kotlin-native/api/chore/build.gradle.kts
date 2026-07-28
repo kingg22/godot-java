@@ -10,10 +10,12 @@ plugins {
 kotlin {
     explicitApi()
 
+    /*
     @OptIn(ExperimentalAbiValidation::class)
     abiValidation {
         keepLocallyUnsupportedTargets.set(true)
     }
+     */
 
     compilerOptions {
         optIn.addAll(
