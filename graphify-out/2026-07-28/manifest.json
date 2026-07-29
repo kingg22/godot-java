@@ -1,0 +1,1882 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1785109347.944375,
+    "ast_hash": "9276b535256dc065bd7b8b84e15abd95",
+    "semantic_hash": ""
+  },
+  ".claude/settings.local.json": {
+    "mtime": 1785118692.828075,
+    "ast_hash": "6e012b4fd72dec28a05bd673e7866f32",
+    "semantic_hash": ""
+  },
+  "build-logic/build.gradle.kts": {
+    "mtime": 1785109347.946672,
+    "ast_hash": "d9c5fa770e1f00f7152f59e10956b918",
+    "semantic_hash": ""
+  },
+  "build-logic/settings.gradle.kts": {
+    "mtime": 1785109347.94672,
+    "ast_hash": "df9492c5040d0e75818d2cf4001822ea",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/common/CommonStylesConventionsPlugin.kt": {
+    "mtime": 1785109347.946939,
+    "ast_hash": "595e837586b708f2d76a1408723d215f",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/dokka/DokkaConventionsPlugin.kt": {
+    "mtime": 1785109347.947003,
+    "ast_hash": "ad1afb4784b204316281e8015341a336",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/godot/GodotCodegenConventionsPlugin.kt": {
+    "mtime": 1785109347.9471223,
+    "ast_hash": "760214fad0b2143ed37e0562859473b4",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/godot/chore/GodotCodegenChoreExtension.kt": {
+    "mtime": 1785109347.9471867,
+    "ast_hash": "136a0232a9dae60312dcadd8d4a941d7",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/godot/chore/GodotCodegenChorePlugin.kt": {
+    "mtime": 1785109347.947232,
+    "ast_hash": "9c3c580cd40a772a461c94a2d6f415c3",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/godot/conventions/CodegenBackend.kt": {
+    "mtime": 1785109347.94729,
+    "ast_hash": "38d1437dadce86cbfe3115ec9c96f878",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/godot/conventions/CodegenKind.kt": {
+    "mtime": 1785109347.9473279,
+    "ast_hash": "f9c03fdcb9b73b0bd7ca0099decaf729",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/godot/conventions/GodotCodegenDsl.kt": {
+    "mtime": 1785109347.9473724,
+    "ast_hash": "90976c64723ce7d2af263a52196dedbf",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/godot/conventions/GodotCodegenExtension.kt": {
+    "mtime": 1785109347.9474154,
+    "ast_hash": "76e2c9e0018578b0391b0332d60d6bad",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/godot/task/GenerateGodotTask.kt": {
+    "mtime": 1785109347.9475176,
+    "ast_hash": "28a2a5a5ba1aa9cf99614b650ba6d42d",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/java/JavaLibraryConventionsPlugin.kt": {
+    "mtime": 1785109347.9475935,
+    "ast_hash": "ba6b69d4dda8ba8f66863106aece3372",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/java/JavaNullCheckConventionsPlugin.kt": {
+    "mtime": 1785109347.9476366,
+    "ast_hash": "c6ed4e8a013c165cd7c6f7f9d9b18b3d",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/java/JavaStylesConventionsPlugin.kt": {
+    "mtime": 1785109347.9476793,
+    "ast_hash": "d5be18eb4629e42ceaed466f806bbdd2",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/jvm/JvmToolchainConventionsPlugin.kt": {
+    "mtime": 1785109347.947736,
+    "ast_hash": "6250ad72177346db4aa8d9f39a63924c",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/jvm/TestingJvmConventionsPlugin.kt": {
+    "mtime": 1785115628.522,
+    "ast_hash": "3a9e5c0550f35ff55db8178b5c2f2031",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/kotlin/KotlinApplicationConventionsPlugin.kt": {
+    "mtime": 1785109347.9478517,
+    "ast_hash": "eea22e8617067ec07300fd071d7730aa",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/kotlin/KotlinCommonExt.kt": {
+    "mtime": 1785113282.505,
+    "ast_hash": "d81967090cc57d32da93e6bbb99a3147",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/kotlin/KotlinJvmCommonConventionsPlugin.kt": {
+    "mtime": 1785109347.9479353,
+    "ast_hash": "596e5a15fb7d362b07ca12ca9aeeaa85",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/kotlin/KotlinLibraryConventionsPlugin.kt": {
+    "mtime": 1785109347.9479804,
+    "ast_hash": "5e6d6b0cf2b523dcdbf1b8c36e126d37",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/kotlin/KotlinMultiplatformConventionsPlugin.kt": {
+    "mtime": 1785109347.9480286,
+    "ast_hash": "05539505be015cc360dc707969e7e757",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/buildlogic/kotlin/KotlinStylesConventionsPlugin.kt": {
+    "mtime": 1785109347.94808,
+    "ast_hash": "8b9e869ae9004e1a1c20b4f80a716a22",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/JextractPlugin.kt": {
+    "mtime": 1785109347.9482222,
+    "ast_hash": "76d67d3899517bbc2d1c710448c7829c",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/extension/IncludesSpec.kt": {
+    "mtime": 1785109347.9482894,
+    "ast_hash": "e0b9fc453ffbd0c15eb3bd5ebad143f0",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/extension/JextractExtension.kt": {
+    "mtime": 1785109347.9483726,
+    "ast_hash": "349ca6220274b5d6fa0c83c6015ed4ff",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/internal/JextractPlatform.kt": {
+    "mtime": 1785109347.9484363,
+    "ast_hash": "a45e31140928983b3c53dd6ddea2beda",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/internal/JextractReleases.kt": {
+    "mtime": 1785109347.9485095,
+    "ast_hash": "d7dcedb9b5d0a20d167e0fa98e2da633",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/internal/Sha256Check.kt": {
+    "mtime": 1785109347.948555,
+    "ast_hash": "a3cf1f24efc75848b020561712a599d6",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/tasks/DownloadJextractTask.kt": {
+    "mtime": 1785109347.948626,
+    "ast_hash": "64167f0e67db82f49a0ac449dc7254c2",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/tasks/ExtractJextractTask.kt": {
+    "mtime": 1785109347.948732,
+    "ast_hash": "7bbaee4ea63c0db0b0bb17b577eb2a5e",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/tasks/JextractDumpIncludesTask.kt": {
+    "mtime": 1785109347.9488034,
+    "ast_hash": "38db9c6780e813cc4acd45c080dfb600",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/tasks/JextractRunTask.kt": {
+    "mtime": 1785109347.9488604,
+    "ast_hash": "57d7ddde04c17ea85f54ea3cef910d9b",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/tasks/JextractTask.kt": {
+    "mtime": 1785109347.9489303,
+    "ast_hash": "a230a9d1404e81e262773f318a481626",
+    "semantic_hash": ""
+  },
+  "build-logic/src/main/kotlin/io/github/kingg22/jextract/gradle/tasks/JextractVersionTask.kt": {
+    "mtime": 1785109347.9489837,
+    "ast_hash": "9ad824eb07d07f3d701363884bf68864",
+    "semantic_hash": ""
+  },
+  "build.gradle.kts": {
+    "mtime": 1785109347.9490397,
+    "ast_hash": "191d0b920560f7970855f15d2237ec72",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/build.gradle.kts": {
+    "mtime": 1785109347.9492872,
+    "ast_hash": "9a2a8b8c1d752dfb6bda3d363766b5f5",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/Backend.kt": {
+    "mtime": 1785109347.9495373,
+    "ast_hash": "e47e77395503c974895dce4b3730a007",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/CachedTypeResolver.kt": {
+    "mtime": 1785109347.9495897,
+    "ast_hash": "79240c9b53a1718602ccb16d2443c1ce",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/CodeImplGenerator.kt": {
+    "mtime": 1785109347.9496353,
+    "ast_hash": "eb10472e81febbd49f4fadd7c12d48c2",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/Context.kt": {
+    "mtime": 1785109347.949703,
+    "ast_hash": "8b9d79d96402a1d77913b945b1315496",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/ExperimentalTypesRegistry.kt": {
+    "mtime": 1785109347.949768,
+    "ast_hash": "c90d65e14beeef912e1bb704460f36b5",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/InheritanceTree.kt": {
+    "mtime": 1785109347.9498088,
+    "ast_hash": "2061be0ef684a51fda0120e8bcc84699",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/PackageRegistryFactory.kt": {
+    "mtime": 1785109347.9498553,
+    "ast_hash": "703e6c32461d5d45761e72b56f8aa99d",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/TypeResolver.kt": {
+    "mtime": 1785109347.9499025,
+    "ast_hash": "b1e61f55b5975d20953d2026fcff3aa4",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/experimental/ExperimentalTypes4_6_1.kt": {
+    "mtime": 1785109347.950035,
+    "ast_hash": "723d7b1caa44757fbd5e684e5d97285e",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/noop/EmptyContext.kt": {
+    "mtime": 1785109347.95011,
+    "ast_hash": "b3da11c89a9f7a4a90e3794f00ef77de",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/noop/NoOpPackageRegistry.kt": {
+    "mtime": 1785109347.9501598,
+    "ast_hash": "624b4dea85cc17d2bc0270542df7692b",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/resolver/ClassCodegenLevel.kt": {
+    "mtime": 1785109347.9502583,
+    "ast_hash": "df6f8bd6ab526cec12b598b0b6524389",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/resolver/EnumConstantResolver.kt": {
+    "mtime": 1785109347.9503493,
+    "ast_hash": "3f8d669623bab00e72f09332c7d4be81",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/resolver/EnumeratorShortener.kt": {
+    "mtime": 1785109347.9504242,
+    "ast_hash": "241c6117a732f1ec82fd914fe25f15e4",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/resolver/KDocFormatter.kt": {
+    "mtime": 1785109347.95051,
+    "ast_hash": "e9b8016d94bec777b1700a20f503d7b7",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/resolver/NativeStructureParser.kt": {
+    "mtime": 1785109347.9505677,
+    "ast_hash": "fef6e0b3a29585d6dcd00e2698b56904",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/resolver/ResolverUtils.kt": {
+    "mtime": 1785109347.9506102,
+    "ast_hash": "8ad0d420cb356113adc5f9e2ef7313fa",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/ApiEnum.kt": {
+    "mtime": 1785109347.9507034,
+    "ast_hash": "8dbbca99bf12b3646bb327f909bb9792",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/BuiltinClass.kt": {
+    "mtime": 1785109347.9507463,
+    "ast_hash": "3ef3ea0bde7cf96ddcb84fbca00ecf62",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/BuiltinClassMemberOffsets.kt": {
+    "mtime": 1785109347.9507844,
+    "ast_hash": "c2a561387a0333929d8b01f8e4a8e1ac",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/BuiltinSizes.kt": {
+    "mtime": 1785109347.9508219,
+    "ast_hash": "d3035c9f4b32bc6a50a33863ba771ef3",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/ClassDescriptor.kt": {
+    "mtime": 1785109347.9508705,
+    "ast_hash": "1785f2818ebed0e88556f7217e67190d",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/ConstantDescriptor.kt": {
+    "mtime": 1785109347.9509177,
+    "ast_hash": "518c0e4995682dff7fb4be0a8792847d",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/Documentable.kt": {
+    "mtime": 1785109347.9509606,
+    "ast_hash": "243b7a021686dc6ee7c5d65cb0143e6f",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/EngineClass.kt": {
+    "mtime": 1785109347.9510005,
+    "ast_hash": "049a3ccbc0ee03d88f6ad235a0680296",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/EnumConstant.kt": {
+    "mtime": 1785109347.9510434,
+    "ast_hash": "06e12a6dce0dc6e541b806b2fd529078",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/EnumDescriptor.kt": {
+    "mtime": 1785109347.951087,
+    "ast_hash": "b81b62ac123c90afb1dd0b967b98ee6b",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/ExtensionApi.kt": {
+    "mtime": 1785115466.2511294,
+    "ast_hash": "460ddf69ae8dbe5f7b86f6b092504c6f",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/GlobalConstant.kt": {
+    "mtime": 1785115466.2512708,
+    "ast_hash": "09eeeb3157a7a2540ef558ca02d00648",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/Hashable.kt": {
+    "mtime": 1785109347.9511728,
+    "ast_hash": "35b49b01842df971070d0bbb3804c24b",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/Header.kt": {
+    "mtime": 1785109347.9512155,
+    "ast_hash": "308227d868116e97665872678e768bb4",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/MethodArg.kt": {
+    "mtime": 1785109347.9512537,
+    "ast_hash": "aa17783e80816ebad2ed73280a1f4628",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/MethodDescriptor.kt": {
+    "mtime": 1785109347.951302,
+    "ast_hash": "fc43ee539171cf2a3fd2065881e0b924",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/MethodReturn.kt": {
+    "mtime": 1785109347.951343,
+    "ast_hash": "9bf18206ef2412d96fc24dddd326a759",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/Named.kt": {
+    "mtime": 1785109347.951394,
+    "ast_hash": "9f056fede202d51e4c2a7c9cb54aa004",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/NativeStructure.kt": {
+    "mtime": 1785109347.951436,
+    "ast_hash": "5fe661ab6a75a5fa9e423876f4a4f6bc",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/Singleton.kt": {
+    "mtime": 1785109347.9514768,
+    "ast_hash": "ca03718700a71ee71b22bc97c3707498",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/TypeMetaHolder.kt": {
+    "mtime": 1785109347.9515183,
+    "ast_hash": "e25e9a3b350363b5271faf6238903cf3",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/UtilityFunction.kt": {
+    "mtime": 1785109347.9515595,
+    "ast_hash": "75f31945c05851ca49f35f631d146574",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/domain/GodotVersion.kt": {
+    "mtime": 1785109347.9516335,
+    "ast_hash": "220e59b0ea1bb198fcdc9948708ca9c6",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/domain/ResolvedApiModel.kt": {
+    "mtime": 1785109347.951678,
+    "ast_hash": "91aaac6a5d18d18ca49b1475fb9b32b4",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/domain/ResolvedBuiltinClass.kt": {
+    "mtime": 1785109347.9517183,
+    "ast_hash": "ad6649e72a8e380986085d0903ab142e",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/domain/ResolvedBuiltinConstructor.kt": {
+    "mtime": 1785109347.9517572,
+    "ast_hash": "44a92053877c889c1d0606b0c23fc6db",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/domain/ResolvedBuiltinLayout.kt": {
+    "mtime": 1785109347.9517963,
+    "ast_hash": "9d5a0b396582afe3c0a01d98b3b40f21",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/domain/ResolvedEngineClass.kt": {
+    "mtime": 1785109347.9518876,
+    "ast_hash": "8c45301e708cb61d452f53ece3f89a91",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/domain/ResolvedEnum.kt": {
+    "mtime": 1785109347.95193,
+    "ast_hash": "ec423188c52aca09d1dd02b16da9ece0",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/domain/ResolvedNativeStructure.kt": {
+    "mtime": 1785109347.9519777,
+    "ast_hash": "5632a82a0dd781135d16c59f8378006c",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/test/kotlin/io/github/kingg22/godot/codegen/impl/extensionapi/GodotJsonFixtures.kt": {
+    "mtime": 1785109347.952233,
+    "ast_hash": "00e402a8c55c1fa65d76ebfc5dbc0feb",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/test/kotlin/io/github/kingg22/godot/codegen/impl/extensionapi/ResolvedBuiltinAlignTest.kt": {
+    "mtime": 1785109347.9523048,
+    "ast_hash": "2dd4398dbd4fa8ca7701d7cdbe0e9a91",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/test/kotlin/io/github/kingg22/godot/codegen/impl/extensionapi/resolver/EnumConstantResolverTest.kt": {
+    "mtime": 1785109347.9524105,
+    "ast_hash": "075343d8df37081443fcd4d465b52066",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/test/kotlin/io/github/kingg22/godot/codegen/impl/extensionapi/resolver/EnumeratorShortenerTest.kt": {
+    "mtime": 1785109347.9525056,
+    "ast_hash": "ab0ef3a6b9015ca22390cebd355c4d0f",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/test/kotlin/io/github/kingg22/godot/codegen/impl/extensionapi/resolver/KDocFormatterTest.kt": {
+    "mtime": 1785109347.9526005,
+    "ast_hash": "147001318080f9cd8c888a9b0b7be3dd",
+    "semantic_hash": ""
+  },
+  "codegen/api/common/src/test/kotlin/io/github/kingg22/godot/codegen/impl/extensionapi/resolver/NativeStructureParserTest.kt": {
+    "mtime": 1785109347.9526834,
+    "ast_hash": "a4c2082d92737f603013597110a71161",
+    "semantic_hash": ""
+  },
+  "codegen/api/java-ffm/build.gradle.kts": {
+    "mtime": 1785109347.952824,
+    "ast_hash": "2b2210c7cbb6f6036fe4cafb80959390",
+    "semantic_hash": ""
+  },
+  "codegen/api/java-ffm/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/jffm/JavaFfmBackend.kt": {
+    "mtime": 1785109347.9532561,
+    "ast_hash": "291e872a2b25bbf8c1dab2368f6b80c9",
+    "semantic_hash": ""
+  },
+  "codegen/api/java-ffm/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/jffm/JavaFfmImplGenerator.kt": {
+    "mtime": 1785109347.9533134,
+    "ast_hash": "9926bc0354f68e419b2ed06b8c3ed5c6",
+    "semantic_hash": ""
+  },
+  "codegen/api/java-ffm/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/jffm/JavaFfmPackageRegistry.kt": {
+    "mtime": 1785109347.9533696,
+    "ast_hash": "528b6021534340081edde49f827a7041",
+    "semantic_hash": ""
+  },
+  "codegen/api/java-ffm/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/jffm/JavaFfmTypeResolver.kt": {
+    "mtime": 1785109347.9534254,
+    "ast_hash": "76116dcf3607f49ded07b0a98175fcb7",
+    "semantic_hash": ""
+  },
+  "codegen/api/java-ffm/src/main/kotlin/io/github/kingg22/godot/codegen/runner/impl/JavaFfmApiRunner.kt": {
+    "mtime": 1785109347.95355,
+    "ast_hash": "622d49b74977bed9901603054b367238",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native-callable/build.gradle.kts": {
+    "mtime": 1785109347.9538167,
+    "ast_hash": "ad066153b89cc25a67e8dbae0c73593f",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native-callable/src/main/kotlin/io/github/kingg22/godot/codegen/callable/knative/KotlinNativeCallableGenerator.kt": {
+    "mtime": 1785109347.9542785,
+    "ast_hash": "9b5fe124933c77b0c985fcb0d9db6d35",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native-callable/src/main/kotlin/io/github/kingg22/godot/codegen/callable/knative/NativeCallablePackageRegistry.kt": {
+    "mtime": 1785109347.9543386,
+    "ast_hash": "b2c1bbf03c24ccc39f42e8aa3081bfbc",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native-callable/src/main/kotlin/io/github/kingg22/godot/codegen/runner/impl/KotlinNativeCallableRunner.kt": {
+    "mtime": 1785109347.954467,
+    "ast_hash": "7daf6b0e3b0d725a3c34f2421f99f29f",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/build.gradle.kts": {
+    "mtime": 1785109347.9547243,
+    "ast_hash": "3d1439086bd467955af1bc5230caec94",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/KotlinNativeBackend.kt": {
+    "mtime": 1785109347.9551928,
+    "ast_hash": "f6604acfaffcbd57fd668a72640ad867",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/KotlinNativeImplGenerator.kt": {
+    "mtime": 1785115466.251485,
+    "ast_hash": "8d1c136fc3c7145d357070458da2be2a",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/KotlinNativeTypeResolver.kt": {
+    "mtime": 1785109347.955382,
+    "ast_hash": "9fa59c73a26a1e9798f25039222d0bdb",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/NativePackageRegistry.kt": {
+    "mtime": 1785109347.9554732,
+    "ast_hash": "8d639a21421253e61b5d5ce79f865cf3",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/DefaultValueGenerator.kt": {
+    "mtime": 1785109347.9555874,
+    "ast_hash": "74e742b72ca7c326fd1885cd6069e008",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/GenericBuiltinInterceptor.kt": {
+    "mtime": 1785109347.9556842,
+    "ast_hash": "1b170c12aefd6b76221457ad801b9b93",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/KNativeStructureGenerator.kt": {
+    "mtime": 1785109347.9558063,
+    "ast_hash": "9ed81821b2c6b8b5be018540b88b3feb",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/NativeBuiltinClassGenerator.kt": {
+    "mtime": 1785109347.955886,
+    "ast_hash": "fe70417965597fc64a9a6ebe89c0d0cc",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/NativeEngineClassGenerator.kt": {
+    "mtime": 1785109347.9560323,
+    "ast_hash": "3cc588f23abd930bc6ecffe3527c9cbc",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/NativeEnumGenerator.kt": {
+    "mtime": 1785109347.956132,
+    "ast_hash": "1c6f3cf05605529a7b318da31df478a0",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/NativeGlobalConstantGenerator.kt": {
+    "mtime": 1785115466.2516716,
+    "ast_hash": "1a0643418367e998618ca539761701ee",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/NativeMethodGenerator.kt": {
+    "mtime": 1785109347.9562242,
+    "ast_hash": "a93f7fa445b6cb371224922972b9fe54",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/NativeUtilityFunctionGenerator.kt": {
+    "mtime": 1785118644.3465192,
+    "ast_hash": "2789ed595c51056e1d291604e071759c",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/NativeVariantGenerator.kt": {
+    "mtime": 1785109347.9563656,
+    "ast_hash": "46f2c8c9e9801c12397a2d3175573076",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/TypeAliasGenerator.kt": {
+    "mtime": 1785109347.9564173,
+    "ast_hash": "81002cb3cbc42950353429b4077bf399",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/TypeOverloadGenerator.kt": {
+    "mtime": 1785109347.956503,
+    "ast_hash": "2b8d749a85dda4d1c41382986262cae0",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/BuiltinClassImplGen.kt": {
+    "mtime": 1785118644.3467562,
+    "ast_hash": "f92ac4b506096344ff55ecc50f848c46",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/BuiltinMethodImplGen.kt": {
+    "mtime": 1785118644.3470173,
+    "ast_hash": "a8b24dc6576105aa4320574d51acfd35",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/EngineClassImplGen.kt": {
+    "mtime": 1785118644.347303,
+    "ast_hash": "3bc85f3c9965db7e8ca40df50ffa9abd",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/EngineMethodImplGen.kt": {
+    "mtime": 1785118644.3475912,
+    "ast_hash": "457fc97e745efb387c9c65377da728bf",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/EnginePropertyImplGen.kt": {
+    "mtime": 1785109347.956967,
+    "ast_hash": "1a2fa7e4a2729dff5cf56bcc0fc8d5dc",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/ImplementationPackageRegistry.kt": {
+    "mtime": 1785109347.9570317,
+    "ast_hash": "563fbf5b9116effdd5ea80ddf0236ab9",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/KNativeImplGen.kt": {
+    "mtime": 1785109347.9571197,
+    "ast_hash": "ae4f8d256255ed6cdebd5d8c6481c5a9",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/Shared.kt": {
+    "mtime": 1785118644.3478253,
+    "ast_hash": "c4e2f71d80c583e4fc40589faf746087",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/UtilityFunctionImplGen.kt": {
+    "mtime": 1785118644.3481023,
+    "ast_hash": "c2f9a89dd9a29dcc4998cf58489a2455",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/impl/VariantImplGen.kt": {
+    "mtime": 1785118644.348375,
+    "ast_hash": "75a7d488718c0fa4fcc344d18792cbd6",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/runner/impl/KotlinNativeApiRunner.kt": {
+    "mtime": 1785109347.9574933,
+    "ast_hash": "9a69bd3cf758164326ac9eb1d41f177b",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/test/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/KotlinNativeTypeResolverTest.kt": {
+    "mtime": 1785109347.9579725,
+    "ast_hash": "5031c6558dcb74d5f9d3a5531642e99a",
+    "semantic_hash": ""
+  },
+  "codegen/api/kotlin-native/src/test/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/NativeGlobalConstantGeneratorTest.kt": {
+    "mtime": 1785115466.2521267,
+    "ast_hash": "f9fc5ed7fc93f45f3991ca7d7eb51002",
+    "semantic_hash": ""
+  },
+  "codegen/build.gradle.kts": {
+    "mtime": 1785109347.9580142,
+    "ast_hash": "6d6ff5c3fc41cb7b9de9ad30dfadb7f0",
+    "semantic_hash": ""
+  },
+  "codegen/common/build.gradle.kts": {
+    "mtime": 1785109347.958087,
+    "ast_hash": "73e8237f257a4b60f985525a765c0165",
+    "semantic_hash": ""
+  },
+  "codegen/common/kotlin-native/build.gradle.kts": {
+    "mtime": 1785109347.958149,
+    "ast_hash": "e012011fbe3661516fce4fed415df4f5",
+    "semantic_hash": ""
+  },
+  "codegen/common/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/types/KNativeConstants.kt": {
+    "mtime": 1785109347.9584322,
+    "ast_hash": "6f3c6d57e799302391f04fae55df59ba",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/Main.kt": {
+    "mtime": 1785109347.9587674,
+    "ast_hash": "7a0ff3ddb4984c73d1a7c77aff1b0662",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/impl/FormatUtils.kt": {
+    "mtime": 1785109347.9588816,
+    "ast_hash": "32909760920f98f7165ca11c7403b749",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/impl/KPoetUtils.kt": {
+    "mtime": 1785109347.95893,
+    "ast_hash": "90bf74380bd1716f7aea676adec23bf2",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/config/ApiFilters.kt": {
+    "mtime": 1785109347.9590342,
+    "ast_hash": "cc79a77f2e1dbe712c58d9834fa825cf",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/config/BuildConfiguration.kt": {
+    "mtime": 1785109347.959083,
+    "ast_hash": "ca134bc57042aa1496fff910aa5d3bb6",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/config/CodegenConfig.kt": {
+    "mtime": 1785109347.9591312,
+    "ast_hash": "c3db38c6fcde34ee02b9b39d445fc653",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/config/CodegenOptions.kt": {
+    "mtime": 1785109347.9591804,
+    "ast_hash": "019903e0cca241fbd52cd30cbe2960d5",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/config/GeneratorBackend.kt": {
+    "mtime": 1785109347.9592292,
+    "ast_hash": "539ff1f5bf22c93da74f2949ca567f49",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/config/GeneratorKind.kt": {
+    "mtime": 1785109347.9592721,
+    "ast_hash": "8e60bb7e08d1d39387330f688529534a",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/rules/ApiItem.kt": {
+    "mtime": 1785109347.959346,
+    "ast_hash": "e662087d5df227f4e6142247f5463363",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/rules/CodegenRule.kt": {
+    "mtime": 1785109347.9593973,
+    "ast_hash": "771f470e2b5c1b29735e233ed77875f7",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/rules/ExcludeRule.kt": {
+    "mtime": 1785109347.9594433,
+    "ast_hash": "5b7f68a6548d9c12aea8322077b2e785",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/rules/ExcludeTypesRule.kt": {
+    "mtime": 1785109347.9594953,
+    "ast_hash": "47249130a4aca1ca9bf3812292ad8a5a",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/rules/IncludeKindRule.kt": {
+    "mtime": 1785109347.9595468,
+    "ast_hash": "724ec26248007e0be47be1603020646d",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/rules/IncludeRule.kt": {
+    "mtime": 1785109347.9595938,
+    "ast_hash": "6540505298b6a83a4b6756e7a0c9c7ac",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/rules/RuleEngine.kt": {
+    "mtime": 1785109347.9596634,
+    "ast_hash": "d7b8a03ea8642a33e76d7bb88a8dd373",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/runner/AbstractCodegenRunner.kt": {
+    "mtime": 1785116616.928,
+    "ast_hash": "251253f83621b1840db7a125f92dd42b",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/runner/CodegenRegistry.kt": {
+    "mtime": 1785109347.959807,
+    "ast_hash": "6b42bd399366a07a935d99f9baaa39ca",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/runner/CodegenRunner.kt": {
+    "mtime": 1785109347.959854,
+    "ast_hash": "cb6559b06c6872f74c0736bac5767c82",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/runner/CodegenRunnerProvider.kt": {
+    "mtime": 1785109347.959912,
+    "ast_hash": "cbd69bec7a9e57e3037179bf13071a39",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/services/PackageRegistry.kt": {
+    "mtime": 1785109347.9600298,
+    "ast_hash": "4cf12c26a4f56d6a42421d81f57eb5aa",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/services/SimpleTypeResolver.kt": {
+    "mtime": 1785109347.960079,
+    "ast_hash": "b478e0d1249b99c6fa44e0c20d462a49",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/types/Constants.kt": {
+    "mtime": 1785109347.9601607,
+    "ast_hash": "1a9a5474a685344f26a21f2fb837c528",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/types/ExternalConstants.kt": {
+    "mtime": 1785109347.96021,
+    "ast_hash": "bfc42e42541478d102469366b15c81c5",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/utils/LoggerExt.kt": {
+    "mtime": 1785109347.9602826,
+    "ast_hash": "009a720d6483e4b7a8016c8d05b4a4d3",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/main/kotlin/io/github/kingg22/godot/codegen/utils/Utils.kt": {
+    "mtime": 1785109347.9603288,
+    "ast_hash": "8355d07b44fb3164a1c5e8baf539adbd",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/test/kotlin/io/github/kingg22/godot/codegen/impl/ScreamingSnakeCaseTest.kt": {
+    "mtime": 1785109347.9605687,
+    "ast_hash": "32be2a65db51038754875151064c61b2",
+    "semantic_hash": ""
+  },
+  "codegen/common/src/test/kotlin/io/github/kingg22/godot/codegen/impl/SnakeToCamelTest.kt": {
+    "mtime": 1785109347.960607,
+    "ast_hash": "edae1c1aa52cdb4e4878026307f2b99c",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/common/build.gradle.kts": {
+    "mtime": 1785109347.9607017,
+    "ast_hash": "be7c083c20820badd91d4a85338b01d6",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensioninterface/Arguments.kt": {
+    "mtime": 1785109347.9610343,
+    "ast_hash": "35f34f38e59f456c01d972822a8b0df5",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensioninterface/Deprecated.kt": {
+    "mtime": 1785109347.9610848,
+    "ast_hash": "01d5fe9eb770423c356b2f6d6183aef7",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensioninterface/GDExtensionInterface.kt": {
+    "mtime": 1785109347.961129,
+    "ast_hash": "d68a2fc808827ac82a2547e1ea1aca1b",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensioninterface/Interface.kt": {
+    "mtime": 1785109347.961169,
+    "ast_hash": "090410eb7869dbb1c1483ceb7afd8b09",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensioninterface/Member.kt": {
+    "mtime": 1785109347.9612153,
+    "ast_hash": "d5489d0d8cf06c152751c31afd6cc3de",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensioninterface/Types.kt": {
+    "mtime": 1785109347.96127,
+    "ast_hash": "7872f8341bd5c4bd90f0989e694bafdd",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensioninterface/ValueType.kt": {
+    "mtime": 1785109347.9613125,
+    "ast_hash": "58fbb8ca7c9d71a505ffd44f5228f43c",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensioninterface/domain/ResolvedRuntimeInterface.kt": {
+    "mtime": 1785109347.9613845,
+    "ast_hash": "eafc7043a6f8ac0c6ea0e640cf368bce",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/kotlin-native/build.gradle.kts": {
+    "mtime": 1785109347.9614708,
+    "ast_hash": "0360a345561fee0e1c83365cb0817862",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/runner/impl/KotlinNativeRuntimeRunner.kt": {
+    "mtime": 1785109347.9618237,
+    "ast_hash": "df9285508d403cb559be6853702c24a0",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/runtime/impl/RuntimeFFIConvenienceGen.kt": {
+    "mtime": 1785109347.9619434,
+    "ast_hash": "2bd3d8ad5b77299b40bc6b658077c273",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/runtime/impl/RuntimeFFIGenerator.kt": {
+    "mtime": 1785119832.062,
+    "ast_hash": "699f14c44987fe49d734b10d2ff80c14",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/runtime/impl/RuntimePackageRegistry.kt": {
+    "mtime": 1785109347.9620843,
+    "ast_hash": "8a9069605d7f850ae875af294fb68822",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/runtime/impl/RuntimeTypeResolver.kt": {
+    "mtime": 1785109347.962162,
+    "ast_hash": "c7d1a8b0a2452e289921c792dc392e49",
+    "semantic_hash": ""
+  },
+  "codegen/runtime/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/runtime/impl/Utils.kt": {
+    "mtime": 1785109347.9622076,
+    "ast_hash": "1724db3cd636cbc3165f09fe8ceb664b",
+    "semantic_hash": ""
+  },
+  "godot-version/track.sh": {
+    "mtime": 1785112890.3662436,
+    "ast_hash": "974a41b59e553dab78cb14cf51cca682",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_0/extension_api.json": {
+    "mtime": 1785109347.975869,
+    "ast_hash": "6106b971c09a8474ba2433e740657aea",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_0/extension_api_without_docs.json": {
+    "mtime": 1785109347.9798932,
+    "ast_hash": "873fc73fce637c58a0160a5eb7cb4b5e",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_0/gdextension_interface.h": {
+    "mtime": 1785109347.9840026,
+    "ast_hash": "a9679a49f25a9dd35dcc3b638cab48d0",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_0/gdextension_interface.json": {
+    "mtime": 1785109347.9841893,
+    "ast_hash": "f424956267070ec77e01ad284a89ec91",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_0/gdextension_interface.schema.json": {
+    "mtime": 1785109347.9842985,
+    "ast_hash": "79605885751d7bc6e3863ba64066380a",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_1/extension_api.json": {
+    "mtime": 1785109347.998342,
+    "ast_hash": "f4778fd1ebdd0c3b1af3ebce31262d90",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_1/extension_api_without_docs.json": {
+    "mtime": 1785109348.0001485,
+    "ast_hash": "0ab33ce307b96686da94e55bd8c2d523",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_1/gdextension_interface.h": {
+    "mtime": 1785109348.0003774,
+    "ast_hash": "a9679a49f25a9dd35dcc3b638cab48d0",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_1/gdextension_interface.json": {
+    "mtime": 1785109348.0013683,
+    "ast_hash": "8ad88279ef00f88633254b29f23f2b9f",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_1/gdextension_interface.schema.json": {
+    "mtime": 1785109348.001467,
+    "ast_hash": "79605885751d7bc6e3863ba64066380a",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_2/extension_api.json": {
+    "mtime": 1785109348.0100644,
+    "ast_hash": "43cdba4354ae46590ea16df3ac667825",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_2/extension_api_without_docs.json": {
+    "mtime": 1785109348.0126114,
+    "ast_hash": "be3057b66f9e113469619998da867002",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_2/gdextension_interface.h": {
+    "mtime": 1785109348.0167792,
+    "ast_hash": "a9679a49f25a9dd35dcc3b638cab48d0",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_2/gdextension_interface.json": {
+    "mtime": 1785109348.0169199,
+    "ast_hash": "f424956267070ec77e01ad284a89ec91",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_2/gdextension_interface.schema.json": {
+    "mtime": 1785109348.0170233,
+    "ast_hash": "79605885751d7bc6e3863ba64066380a",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_3/extension_api.json": {
+    "mtime": 1785112890.3889122,
+    "ast_hash": "3dd9e62edef1abba11471cb758a87d0a",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_3/extension_api_without_docs.json": {
+    "mtime": 1785112890.395508,
+    "ast_hash": "29d5ff674f71a2c99ca5c23f80f8a30b",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_3/gdextension_interface.h": {
+    "mtime": 1785112890.3974018,
+    "ast_hash": "a9679a49f25a9dd35dcc3b638cab48d0",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_3/gdextension_interface.json": {
+    "mtime": 1785112890.3975897,
+    "ast_hash": "f424956267070ec77e01ad284a89ec91",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_6_3/gdextension_interface.schema.json": {
+    "mtime": 1785112890.397708,
+    "ast_hash": "79605885751d7bc6e3863ba64066380a",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_0/extension_api.json": {
+    "mtime": 1785112890.4245026,
+    "ast_hash": "ecce7ed112e9998f50ac8209fd6635a6",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_0/extension_api_without_docs.json": {
+    "mtime": 1785112890.4318275,
+    "ast_hash": "4c18a2d3aeb631edfb41fc69ef757208",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_0/gdextension_interface.h": {
+    "mtime": 1785112890.433524,
+    "ast_hash": "9097bc7ce5072f317a82c47902311557",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_0/gdextension_interface.json": {
+    "mtime": 1785112890.4360123,
+    "ast_hash": "a7c43dfc14182ce33335bf017ea8c097",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_0/gdextension_interface.schema.json": {
+    "mtime": 1785112890.436141,
+    "ast_hash": "79605885751d7bc6e3863ba64066380a",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_1/extension_api.json": {
+    "mtime": 1785112890.559616,
+    "ast_hash": "e29db0c81e83e90d4628b7590fd4699a",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_1/extension_api_without_docs.json": {
+    "mtime": 1785112890.5706775,
+    "ast_hash": "04ee9685fd76df1386640c457aee3dab",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_1/gdextension_interface.h": {
+    "mtime": 1785112890.5709875,
+    "ast_hash": "9097bc7ce5072f317a82c47902311557",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_1/gdextension_interface.json": {
+    "mtime": 1785112890.5713017,
+    "ast_hash": "a7c43dfc14182ce33335bf017ea8c097",
+    "semantic_hash": ""
+  },
+  "godot-version/v4_7_1/gdextension_interface.schema.json": {
+    "mtime": 1785112890.571418,
+    "ast_hash": "79605885751d7bc6e3863ba64066380a",
+    "semantic_hash": ""
+  },
+  "gradlew": {
+    "mtime": 1785115471.909618,
+    "ast_hash": "a43be8432bac3ffd05b3769aa42fe996",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/api/build.gradle.kts": {
+    "mtime": 1785109348.0195634,
+    "ast_hash": "ec660749517da843fad38def564385c0",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/api/src/main/kotlin/io/github/kingg22/godot/api/GDExtensionInitializationFunction.kt": {
+    "mtime": 1785109348.0197988,
+    "ast_hash": "8c7b84269d8b47c22b1e01b129bbeb5e",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/ffm/build.gradle.kts": {
+    "mtime": 1785109348.0198672,
+    "ast_hash": "e2e60f182cdb3d34d4b68b28c472ac80",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/ffm/scripts/gdextension_jextract_includes.sh": {
+    "mtime": 1785109348.0199385,
+    "ast_hash": "6194b98a3f9c03af324c50036085627a",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/ffm/src/main/java/io/github/kingg22/godot/internal/ffm/FFMUtils.java": {
+    "mtime": 1785109348.0204058,
+    "ast_hash": "106adec29508995041c157e64a7e3fc9",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/ffm/src/main/java/io/github/kingg22/godot/internal/ffm/package-info.java": {
+    "mtime": 1785109348.0204446,
+    "ast_hash": "6e2ba38e096f188863c12d38df3d51b2",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/native-register/gdextension_init.c": {
+    "mtime": 1785109348.0205476,
+    "ast_hash": "cbf294d74bb6adebcd92af62afa2bae9",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/native-register/gdextension_init.h": {
+    "mtime": 1785109348.0205877,
+    "ast_hash": "c45ed2bb32a0c256d32f6187a91a18ce",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/native-register/gdextension_interface.h": {
+    "mtime": 1785109348.020715,
+    "ast_hash": "a9679a49f25a9dd35dcc3b638cab48d0",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/native-register/jvm_bridge_runtime.c": {
+    "mtime": 1785109348.0207837,
+    "ast_hash": "20b90107f4428caba4bee7e14e06dac7",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/native-register/jvm_bridge_runtime.h": {
+    "mtime": 1785109348.020831,
+    "ast_hash": "0497340870f7398b5dea1dae2868d2c8",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/build.gradle.kts": {
+    "mtime": 1785109348.0208917,
+    "ast_hash": "af288230d046b00270a8819d2a9c8da3",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/annotations/Initializer.java": {
+    "mtime": 1785109348.021143,
+    "ast_hash": "903827e8c4e30daae0a7c2bee0929f88",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/annotations/package-info.java": {
+    "mtime": 1785109348.0211835,
+    "ast_hash": "b77639458354eded243064cec14c77c7",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/bridge/BridgeContext.java": {
+    "mtime": 1785109348.0212638,
+    "ast_hash": "626e0160eb29b12b6d4624128543910e",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/bridge/GodotFFI.java": {
+    "mtime": 1785109348.0213487,
+    "ast_hash": "d023712e90e9717db2365abee483f04f",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/bridge/ScriptInstanceBridge.java": {
+    "mtime": 1785109348.0214553,
+    "ast_hash": "2db64ea42cfc70805fd3698b02ba1c9f",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/bridge/StringNameCache.java": {
+    "mtime": 1785109348.0215025,
+    "ast_hash": "994d0681e05bc3eedeb4c7a28feebf77",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/bridge/package-info.java": {
+    "mtime": 1785109348.0215461,
+    "ast_hash": "5d91033bbe3cb619505a920722bb992a",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/ffm/GDExtensionCallErrorType.java": {
+    "mtime": 1785109348.0216131,
+    "ast_hash": "d749c9ccd9e45d144a45ea8d5062334a",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/ffm/GDExtensionClassMethodArgumentMetadata.java": {
+    "mtime": 1785109348.0216599,
+    "ast_hash": "f207035d17e8410a4d8f88b6d2260954",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/ffm/GDExtensionClassMethodFlags.java": {
+    "mtime": 1785109348.0217075,
+    "ast_hash": "febf5ff55d9e42807a0d9e0b7bdb3128",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/ffm/GDExtensionInitializationLevel.java": {
+    "mtime": 1785109348.0217693,
+    "ast_hash": "347446adc549df6d3871f2230728a23b",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/ffm/GDExtensionPropertyHint.java": {
+    "mtime": 1785109348.0218227,
+    "ast_hash": "34a9ad4f5be112cb3437d7b1420bc5f1",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/ffm/GDExtensionPropertyUsageFlags.java": {
+    "mtime": 1785109348.021873,
+    "ast_hash": "4d0b3ec11ed8b04e2e7cbb8c28e2e1f6",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/ffm/GDExtensionVariantOperator.java": {
+    "mtime": 1785109348.0219579,
+    "ast_hash": "4441c9cb49d76fe1eff54bea40472a62",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/ffm/GDExtensionVariantType.java": {
+    "mtime": 1785109348.0220017,
+    "ast_hash": "11edc834d8a55a61a52d97a285e80857",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/ffm/package-info.java": {
+    "mtime": 1785109348.0220425,
+    "ast_hash": "6e2ba38e096f188863c12d38df3d51b2",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/initialization/BridgeLifecycle.java": {
+    "mtime": 1785109348.0221083,
+    "ast_hash": "6d50e14df6ea09bcffdcb78b4df727d3",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/initialization/GodotBridge.java": {
+    "mtime": 1785109348.0221758,
+    "ast_hash": "886f35e4bacc04ba646fe0cc2d826394",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/java/io/github/kingg22/godot/internal/initialization/package-info.java": {
+    "mtime": 1785109348.0222127,
+    "ast_hash": "1971f8814c1f9b793bba06e6541fd64e",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/kotlin/io/github/kingg22/godot/internal/bridge/ClassDBBridge.kt": {
+    "mtime": 1785109348.0224676,
+    "ast_hash": "ae41dd67c90dd23704a3807d95580895",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/kotlin/io/github/kingg22/godot/internal/wrapper/GodotVersion2.kt": {
+    "mtime": 1785109348.0225444,
+    "ast_hash": "2f4fe5f9d3c26c5d3199813d3801e557",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/main/kotlin/io/github/kingg22/godot/internal/wrapper/StructWrapper.kt": {
+    "mtime": 1785109348.0226095,
+    "ast_hash": "26bd0bbd433b9e70ce85a33236624dff",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/test/java/io/github/kingg22/godot/internal/initialization/BridgeLifecycleTest.java": {
+    "mtime": 1785109348.0228703,
+    "ast_hash": "d6d0938567c9f36888725a02ba115cd9",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/runtime/src/test/java/io/github/kingg22/godot/internal/initialization/package-info.java": {
+    "mtime": 1785109348.0229096,
+    "ast_hash": "1971f8814c1f9b793bba06e6541fd64e",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/annotations/build.gradle.kts": {
+    "mtime": 1785109348.0230868,
+    "ast_hash": "6c43114acaf61fcc5480184ca4404743",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/annotations/src/nativeMain/kotlin/io/github/kingg22/godot/api/annotations/Export.kt": {
+    "mtime": 1785109348.023349,
+    "ast_hash": "545b146210a352a5e1c243b16676c706",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/annotations/src/nativeMain/kotlin/io/github/kingg22/godot/api/annotations/Godot.kt": {
+    "mtime": 1785109348.023396,
+    "ast_hash": "c55d0fdfe1b0b899afe1ef3e5fb2c0fd",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/annotations/src/nativeMain/kotlin/io/github/kingg22/godot/api/annotations/RegisterSignal.kt": {
+    "mtime": 1785109348.0234394,
+    "ast_hash": "631b4e57a55d21a29d3cf973ac35c18c",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/annotations/src/nativeMain/kotlin/io/github/kingg22/godot/api/annotations/Rpc.kt": {
+    "mtime": 1785109348.023482,
+    "ast_hash": "6894ea9714c272917a9a3006d1af4496",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/annotations/src/nativeMain/kotlin/io/github/kingg22/godot/api/annotations/Tool.kt": {
+    "mtime": 1785109348.0235229,
+    "ast_hash": "62ac36c4571001cd51a9e78005eb15b5",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/build.gradle.kts": {
+    "mtime": 1785109348.0235643,
+    "ast_hash": "5bed0eaebfc77e0fac63e0852e762654",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/callable/build.gradle.kts": {
+    "mtime": 1785109348.0236292,
+    "ast_hash": "70c7d37eb9eb12119fa9af86607c3492",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/callable/src/nativeMain/kotlin/io/github/kingg22/godot/api/internal/callable/CallableBinding.kt": {
+    "mtime": 1785118644.3490598,
+    "ast_hash": "e3c4cc25eb5fd078db68d3b7fb7edff3",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/callable/src/nativeMain/kotlin/io/github/kingg22/godot/api/internal/callable/CallableTrampolines.kt": {
+    "mtime": 1785118644.3492517,
+    "ast_hash": "fa3974d887d9db936576980c15a991b3",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/callable/src/nativeMain/kotlin/io/github/kingg22/godot/api/internal/callable/KotlinCallable.kt": {
+    "mtime": 1785109348.0254197,
+    "ast_hash": "d511a719214e8aefba22694e91ffb504",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/build.gradle.kts": {
+    "mtime": 1785109348.0255857,
+    "ast_hash": "cc1e394066383a8459c72b35498c8890",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/DelicateGodotApi.kt": {
+    "mtime": 1785109348.0258143,
+    "ast_hash": "6c8a37e062da5c9a1c6f92d17c312b68",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/EnumMask.kt": {
+    "mtime": 1785109348.0258553,
+    "ast_hash": "c54d828c7c3959b58939f86b6944b2ff",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/ExperimentalForInheritanceGodotApi.kt": {
+    "mtime": 1785109348.025896,
+    "ast_hash": "9c03651c956bd39efc08628133400eac",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/ExperimentalGodotApi.kt": {
+    "mtime": 1785109348.0259352,
+    "ast_hash": "6a0f4586d75bc9ff779d2424c8566b50",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/ExperimentalGodotKotlin.kt": {
+    "mtime": 1785109348.025977,
+    "ast_hash": "f1b69b6523d89a4aa3c691a4bc526f16",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/GodotEnum.kt": {
+    "mtime": 1785109348.0260208,
+    "ast_hash": "29c0840302a3e55987484132e888aa34",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/GodotNative.kt": {
+    "mtime": 1785109348.0260637,
+    "ast_hash": "c7d79b8495f514fca72362aea08c0d97",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/InternalForInheritanceGodotApi.kt": {
+    "mtime": 1785109348.026105,
+    "ast_hash": "c2ae61df275c3993d83c76690acbf2ab",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/builtin/MustBeVariant.kt": {
+    "mtime": 1785109348.0261817,
+    "ast_hash": "81c3711eeeae1de93a1c5ca0c48970e0",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/chore/src/nativeMain/kotlin/io/github/kingg22/godot/api/internal/UsedFromCodegenGeneratedCode.kt": {
+    "mtime": 1785109348.0262592,
+    "ast_hash": "a7a155ed4c70b556457c032479bc4159",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/build.gradle.kts": {
+    "mtime": 1785109348.0296667,
+    "ast_hash": "e617095f4ce664d88e8d54c7d581dbc8",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/nativeInterop/cinterop/extension_api_native.h": {
+    "mtime": 1785109348.029803,
+    "ast_hash": "1bba88604c9e2978f8ec604b8db5c77e",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/builtin/Alias.kt": {
+    "mtime": 1785109348.0300715,
+    "ast_hash": "0737e21e15e4f36a23ee4fb18276b761",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/builtin/StringConverter.kt": {
+    "mtime": 1785109348.0301244,
+    "ast_hash": "02dcae26a6ca5464692c9cfc634dec9a",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/builtin/VariantConverter.kt": {
+    "mtime": 1785109348.0301647,
+    "ast_hash": "c0cc8acb91f4ee211bedd6314b0d2b5c",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/builtin/VariantValue.kt": {
+    "mtime": 1785109348.030208,
+    "ast_hash": "6030deaa406a13255f05934c2f45bb88",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/builtin/internal/BindingUtil.kt": {
+    "mtime": 1785109348.0303066,
+    "ast_hash": "2e7614b1b5ea7b904aca24abeaf49b68",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/builtin/internal/ConvertToVariant.kt": {
+    "mtime": 1785109348.0303693,
+    "ast_hash": "a959bb531ae0a6309133ec2aeecd21b2",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/core/Alias.kt": {
+    "mtime": 1785109348.030455,
+    "ast_hash": "cd70eb7293ac0325517f77e3cfbabfba",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/internal/Utils.kt": {
+    "mtime": 1785109348.0305276,
+    "ast_hash": "db9857a218eb1fdc3a76e99c2c3c842f",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/internal/callable/CallableFactory.kt": {
+    "mtime": 1785109348.0306118,
+    "ast_hash": "52735454b42f5b84bd0f7f8ebf0885ed",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/singleton/Alias.kt": {
+    "mtime": 1785109348.0306885,
+    "ast_hash": "daae8eaccd2eb952317c35d3f69e60e3",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/generated/src/nativeMain/kotlin/io/github/kingg22/godot/api/utils/Utils.kt": {
+    "mtime": 1785109348.0307708,
+    "ast_hash": "41427277ede7518e5d5ae6755759759d",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/signal/build.gradle.kts": {
+    "mtime": 1785109348.0308456,
+    "ast_hash": "e512bc163885674ed0f8305aeba872a8",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/testing/build.gradle.kts": {
+    "mtime": 1785109348.0309198,
+    "ast_hash": "34dc7c6cd9ba267aaaf87cb3f912939d",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/testing/src/nativeMain/kotlin/io/github/kingg22/godot/api/VariantTypeTestData.kt": {
+    "mtime": 1785109348.03129,
+    "ast_hash": "bb8741aa08d21b8b5b69c501bcccc7c9",
+    "semantic_hash": ""
+  },
+  "kotlin-native/api/utils/build.gradle.kts": {
+    "mtime": 1785109348.0314429,
+    "ast_hash": "d75dece077cc2a9d8e4a50527a57742f",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/build.gradle.kts": {
+    "mtime": 1785109348.0315247,
+    "ast_hash": "ad9b42e5d2257bf5aa5718fbc523b2c2",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/Casting.kt": {
+    "mtime": 1785163647.7091691,
+    "ast_hash": "fb6352df590c4c97057875f4b26548b6",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/binding/Factory.kt": {
+    "mtime": 1785118644.349707,
+    "ast_hash": "fc6b5c2a794b401eba849c4a81f73fcd",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/ClassRegistrationHelpers.kt": {
+    "mtime": 1785119163.391,
+    "ast_hash": "60182c0fdc2c9801457d875f7053d678",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/Helpers.kt": {
+    "mtime": 1785109348.032172,
+    "ast_hash": "2c394c16340951c30a6a58ae2fd13049",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/MethodRegistrationHelpers.kt": {
+    "mtime": 1785118644.3501246,
+    "ast_hash": "0bb0ff38b8e6f96163aea3819b63c2fc",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/NodeVirtualCalls.kt": {
+    "mtime": 1785109348.0323157,
+    "ast_hash": "034aadc4c6835fa43ff1efff8bb02d5b",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/NodeVirtualDispatcher.kt": {
+    "mtime": 1785109348.0323777,
+    "ast_hash": "d83fcfe5bdb010b823838680a5f76543",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/PropertyRegistrationHelpers.kt": {
+    "mtime": 1785118644.3503246,
+    "ast_hash": "58cbc8ecabe97f8eb0d2f3540c5b07cf",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/SignalRegistration.kt": {
+    "mtime": 1785118644.350495,
+    "ast_hash": "bab8596b4f2a6c111c769276bb73629c",
+    "semantic_hash": ""
+  },
+  "kotlin-native/ffi/build.gradle.kts": {
+    "mtime": 1785109348.0325773,
+    "ast_hash": "1efea05e2b2855d012f3b1455d9debcb",
+    "semantic_hash": ""
+  },
+  "kotlin-native/ffi/src/nativeMain/kotlin/io/github/kingg22/godot/internal/ffi/Utils.kt": {
+    "mtime": 1785109348.033048,
+    "ast_hash": "6950aa05550ab85146b6dbe4aed44170",
+    "semantic_hash": ""
+  },
+  "kotlin-native/runtime/build.gradle.kts": {
+    "mtime": 1785109348.0331774,
+    "ast_hash": "4cbb849b2dddc0afed82bd82471e9fe7",
+    "semantic_hash": ""
+  },
+  "kotlin-native/runtime/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/BindingInitializationCallbacks.kt": {
+    "mtime": 1785109348.0335505,
+    "ast_hash": "4184f3eb687efccaba0110f1d764b09c",
+    "semantic_hash": ""
+  },
+  "kotlin-native/runtime/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/BindingInterop.kt": {
+    "mtime": 1785109348.0336163,
+    "ast_hash": "f8f20e6cade431d15d32460669a758c7",
+    "semantic_hash": ""
+  },
+  "kotlin-native/runtime/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/BindingProcAddressHolder.kt": {
+    "mtime": 1785118644.3506837,
+    "ast_hash": "d722fc8cf21e7ec535500ad792055bc3",
+    "semantic_hash": ""
+  },
+  "kotlin-native/runtime/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/BindingUtils.kt": {
+    "mtime": 1785109348.0337243,
+    "ast_hash": "2137872a0f17a7fd41cac3dc3fd1cc1a",
+    "semantic_hash": ""
+  },
+  "kotlin-native/runtime/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/InternalBinding.kt": {
+    "mtime": 1785109348.033777,
+    "ast_hash": "90db479e5913ba02ce81105578552391",
+    "semantic_hash": ""
+  },
+  "kotlin-native/runtime/src/nativeMain/kotlin/io/github/kingg22/godot/internal/binding/StructMemory.kt": {
+    "mtime": 1785109348.0338564,
+    "ast_hash": "9127b014b2ac729816f346a62ef30627",
+    "semantic_hash": ""
+  },
+  "kotlin-native/sample/build.gradle.kts": {
+    "mtime": 1785109348.034165,
+    "ast_hash": "90a248c4c27bdf037282154fee7ebace",
+    "semantic_hash": ""
+  },
+  "kotlin-native/sample/src/nativeMain/kotlin/io/github/kingg22/godot/sample/CustomSignalClass.kt": {
+    "mtime": 1785119566.813,
+    "ast_hash": "0eb5a5ae760f4489c69b6cbcc45419bd",
+    "semantic_hash": ""
+  },
+  "kotlin-native/sample/src/nativeMain/kotlin/io/github/kingg22/godot/sample/Main.kt": {
+    "mtime": 1785109348.034814,
+    "ast_hash": "053734be5f2a7f2b4c7f9c4a6e5bf417",
+    "semantic_hash": ""
+  },
+  "kotlin-native/sample/src/nativeMain/kotlin/io/github/kingg22/godot/sample/RegisterClass.kt": {
+    "mtime": 1785118644.3510673,
+    "ast_hash": "49df870c68cbed3a6df24bfcda22b3ff",
+    "semantic_hash": ""
+  },
+  "mi-juego-prueba/kotlin_native_game/exported/build.gradle.kts": {
+    "mtime": 1785109348.0352604,
+    "ast_hash": "a5cd0b724610f170182ba2ab99d3cf19",
+    "semantic_hash": ""
+  },
+  "mi-juego-prueba/kotlin_native_game/exported/src/nativeMain/kotlin/Main.kt": {
+    "mtime": 1785109348.035394,
+    "ast_hash": "d2d5c3a4a25aede42fb2a5d174ee28f7",
+    "semantic_hash": ""
+  },
+  "mi-juego-prueba/kotlin_native_game/source/build.gradle.kts": {
+    "mtime": 1785122205.9438767,
+    "ast_hash": "b31eca943d95cec6131cd3b4f402fe14",
+    "semantic_hash": ""
+  },
+  "mi-juego-prueba/kotlin_native_game/source/src/nativeMain/kotlin/GodotArrayIterator.kt": {
+    "mtime": 1785109348.035575,
+    "ast_hash": "4e19b13e9af3eee627d16ce2281ecd71",
+    "semantic_hash": ""
+  },
+  "mi-juego-prueba/kotlin_native_game/source/src/nativeMain/kotlin/Sprite.kt": {
+    "mtime": 1785109348.0356178,
+    "ast_hash": "86bd66d4e74592ced3058bde05680c76",
+    "semantic_hash": ""
+  },
+  "mi-juego-prueba/kotlin_native_game/source/src/nativeMain/kotlin/SpriteBench.kt": {
+    "mtime": 1785119658.457,
+    "ast_hash": "bda30393434e419162d24a82642db958",
+    "semantic_hash": ""
+  },
+  "mi-juego-prueba/kotlin_native_game/source/src/nativeMain/kotlin/TestOne.kt": {
+    "mtime": 1785163127.279101,
+    "ast_hash": "fa3884de7093c5d2c435cc0ea7327b85",
+    "semantic_hash": ""
+  },
+  "processor/build.gradle.kts": {
+    "mtime": 1785122061.012692,
+    "ast_hash": "eb04484fc438cd8987cfbebafad9b7f0",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/KogotProcessor.kt": {
+    "mtime": 1785123296.777,
+    "ast_hash": "eef33642ab59e3c73fffab9ba0ecf040",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/diagnostics/DiagnosticCode.kt": {
+    "mtime": 1785121971.9023123,
+    "ast_hash": "3c34a9cc606ecf5c0fed3c7745ef0012",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/diagnostics/DiagnosticLocation.kt": {
+    "mtime": 1785109348.0364358,
+    "ast_hash": "7283f7a6020530efb9a24f5f07545c71",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/diagnostics/DiagnosticMessage.kt": {
+    "mtime": 1785109348.0364754,
+    "ast_hash": "ef6d4d014bfe86a22f59d591199ea18a",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/diagnostics/DiagnosticRenderer.kt": {
+    "mtime": 1785121974.0874388,
+    "ast_hash": "e2b228509282fbb4ea9fc2f99d6268cd",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/generators/kotlin/Constants.kt": {
+    "mtime": 1785121900.9579332,
+    "ast_hash": "5f7d01f4a2db57d9ac567bf1aeb2efd7",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/generators/kotlin/GodotBindingGenerator.kt": {
+    "mtime": 1785122376.7403119,
+    "ast_hash": "60e23131ef6eb7a4e6f564dfa638bcea",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/generators/kotlin/Shared.kt": {
+    "mtime": 1785123061.973,
+    "ast_hash": "2fc9cad800a4cf6f03afbb5af4e4290b",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/ksp/KspMapping.kt": {
+    "mtime": 1785122946.225,
+    "ast_hash": "035f6c1f59c76d5da4dc14fee945808d",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/model/AnnotationInfo.kt": {
+    "mtime": 1785121838.9957664,
+    "ast_hash": "04d342b5fbfe5b199ebac1c44ac82f0c",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/model/ClassInfo.kt": {
+    "mtime": 1785122426.4190984,
+    "ast_hash": "8b745a4a0ae490940015894c0cf7dfbd",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/model/FunctionInfo.kt": {
+    "mtime": 1785121827.806291,
+    "ast_hash": "408cb20db842792f4a0432f8a5b05261",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/model/ParameterInfo.kt": {
+    "mtime": 1785121832.4872508,
+    "ast_hash": "35f039ac09bc0344a03ba37429f218b5",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/model/PropertyInfo.kt": {
+    "mtime": 1785122426.2305706,
+    "ast_hash": "9ef7f43cd6f2dcbafadc3b6a5fdb3dfe",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/model/TypeInfo.kt": {
+    "mtime": 1785121836.4819374,
+    "ast_hash": "f0e32de00adaa1bb06be2ec051fa16e9",
+    "semantic_hash": ""
+  },
+  "processor/src/main/kotlin/io/github/kingg22/kogot/processor/resolver/VariantTypeResolver.kt": {
+    "mtime": 1785121877.1243777,
+    "ast_hash": "23a7a90eebe04767c317218ea873096d",
+    "semantic_hash": ""
+  },
+  "pyproject.toml": {
+    "mtime": 1785112955.9140005,
+    "ast_hash": "888130441d351c157683f8762ab8714a",
+    "semantic_hash": ""
+  },
+  "settings.gradle.kts": {
+    "mtime": 1785122060.0273316,
+    "ast_hash": "5b5df9a9d6b21a41dae1d3f14c972fdc",
+    "semantic_hash": ""
+  },
+  ".github/workflows/gradle.yml": {
+    "mtime": 1785115472.2120187,
+    "ast_hash": "e6bb152bc8ca071fddb92cfef8e44098",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1785152388.8796012,
+    "ast_hash": "1c2e952bfca46f7fc6c84a7baba34ec5",
+    "semantic_hash": ""
+  },
+  "CMakeLists.txt": {
+    "mtime": 1785109347.945666,
+    "ast_hash": "ebf85f7f0169defd3b8f9e14d3382f02",
+    "semantic_hash": ""
+  },
+  "CONTRIBUTING.md": {
+    "mtime": 1785109347.9457154,
+    "ast_hash": "61cbdac365fc87b0b7e78421664d537e",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1785109347.9457867,
+    "ast_hash": "ba08b6099513aa12b4a0553b9fa2751d",
+    "semantic_hash": ""
+  },
+  "build-logic/README.md": {
+    "mtime": 1785109347.946603,
+    "ast_hash": "98668ed6454c9538b6926ba5434ff8d4",
+    "semantic_hash": ""
+  },
+  "codegen/README.md": {
+    "mtime": 1785109347.9491673,
+    "ast_hash": "ce7e587dd7673c6e0b6dc078db0c51fa",
+    "semantic_hash": ""
+  },
+  "docs/external/annotations-gdscript.md": {
+    "mtime": 1785109347.9624307,
+    "ast_hash": "6dab57d9b8b35d96842cc2453e43c7cc",
+    "semantic_hash": ""
+  },
+  "docs/external/annotations-to-implement.md": {
+    "mtime": 1785109347.9625385,
+    "ast_hash": "81d7ae9aa25e9ad3fe0e7a2028ad4633",
+    "semantic_hash": ""
+  },
+  "docs/external/experimental_types_4.6.1.md": {
+    "mtime": 1785109347.962809,
+    "ast_hash": "e3c832695ebd28f35e52c3e2873ad76d",
+    "semantic_hash": ""
+  },
+  "docs/kogot_binding_philosophy.md": {
+    "mtime": 1785109347.9628975,
+    "ast_hash": "cf7bc975fda15cd0d5696f306141e8cc",
+    "semantic_hash": ""
+  },
+  "docs/notes/GDE-Rust_Architecture_Visual_Summary.md": {
+    "mtime": 1785109347.962998,
+    "ast_hash": "41e089d7efe7795888996f9278ad1220",
+    "semantic_hash": ""
+  },
+  "docs/notes/conversation-notes-godotsharp.md": {
+    "mtime": 1785109347.9630485,
+    "ast_hash": "f1336a78b9fe4d994fe7585d698d0cee",
+    "semantic_hash": ""
+  },
+  "docs/notes/gdext-rust.md": {
+    "mtime": 1785109347.9631264,
+    "ast_hash": "c7993c1777f553dbf3f9605179444e2d",
+    "semantic_hash": ""
+  },
+  "docs/notes/godot-rust-gdextension.md": {
+    "mtime": 1785109347.9632244,
+    "ast_hash": "4ad6a903b4abca3fe3aa5a7cd3191e43",
+    "semantic_hash": ""
+  },
+  "docs/notes/plan-gdextension-jvm-vs-godotsharp.md": {
+    "mtime": 1785109347.963274,
+    "ast_hash": "813b597bbe589bedc223a8cd7e872ec4",
+    "semantic_hash": ""
+  },
+  "docs/outdated/Summary-roadmap-20feb.md": {
+    "mtime": 1785109347.9633512,
+    "ast_hash": "67c6e7a7aec01486cc532bf307423c89",
+    "semantic_hash": ""
+  },
+  "docs/outdated/classdb-ffm-plan.md": {
+    "mtime": 1785109347.9634037,
+    "ast_hash": "a28b106af97d5c3b34a10d230842c509",
+    "semantic_hash": ""
+  },
+  "docs/outdated/gdextension-startup-initialization-review-2026-02-23.md": {
+    "mtime": 1785109347.9634936,
+    "ast_hash": "fc4a87c7ab7e8ccbe788035986b79239",
+    "semantic_hash": ""
+  },
+  "docs/outdated/godot-kt-cinterop-clean.md": {
+    "mtime": 1785109347.9636142,
+    "ast_hash": "c60000961344ffa5ea592c94de093a4a",
+    "semantic_hash": ""
+  },
+  "docs/outdated/roadmap-22feb.md": {
+    "mtime": 1785109347.963696,
+    "ast_hash": "37a50f91b3fe352cf4f7d9c24fd7766f",
+    "semantic_hash": ""
+  },
+  "docs/outdated/summary-6march.md": {
+    "mtime": 1785109347.963842,
+    "ast_hash": "09e0f599ecb7dbab7c8cabdcd107f40c",
+    "semantic_hash": ""
+  },
+  "docs/outdated/summary-abi.md": {
+    "mtime": 1785109347.9640305,
+    "ast_hash": "a26e8736811caf72299237a9a33bc52f",
+    "semantic_hash": ""
+  },
+  "docs/outdated/typed-arrays-impl.md": {
+    "mtime": 1785109347.9641266,
+    "ast_hash": "772f8734e7afc054bfe2a92060f96028",
+    "semantic_hash": ""
+  },
+  "docs/reference/external-bindings-reference.md": {
+    "mtime": 1785109347.964255,
+    "ast_hash": "d4b3b6c2a1ce97632fa79ffcb043eea8",
+    "semantic_hash": ""
+  },
+  "docs/reference/kogot-repo-map.md": {
+    "mtime": 1785152693.0697846,
+    "ast_hash": "64662e9514d9921e7cd7d71c355b4707",
+    "semantic_hash": ""
+  },
+  "docs/rules.md": {
+    "mtime": 1785109347.964355,
+    "ast_hash": "25ea8a4d89f50c92745c723e4ba409d1",
+    "semantic_hash": ""
+  },
+  "docs/swiftgodot-migration-plan.md": {
+    "mtime": 1785109347.964519,
+    "ast_hash": "df97424a2725ecbf5db1a5df07a773e7",
+    "semantic_hash": ""
+  },
+  "docs/technical-design/auto-registration.md": {
+    "mtime": 1785109347.9646008,
+    "ast_hash": "bdeea601a66a40ba3d10e5c152b88386",
+    "semantic_hash": ""
+  },
+  "docs/technical-design/compatibility_rules.md": {
+    "mtime": 1785109347.9647512,
+    "ast_hash": "e307bb8b569865172f3d8bc54099c682",
+    "semantic_hash": ""
+  },
+  "docs/technical-design/design-analysis-processor.md": {
+    "mtime": 1785109347.964824,
+    "ast_hash": "9d351233fb10bde6452abbc420df3349",
+    "semantic_hash": ""
+  },
+  "docs/technical-design/gdextension-interface-notes.md": {
+    "mtime": 1785109347.9649143,
+    "ast_hash": "dbd302664db32ca044d95a41e6a4397a",
+    "semantic_hash": ""
+  },
+  "docs/technical-design/signal-design.md": {
+    "mtime": 1785109347.9649951,
+    "ast_hash": "d48de7b8a340ac190c5f63dde760dc9e",
+    "semantic_hash": ""
+  },
+  "godot-version/README.md": {
+    "mtime": 1785109347.9650788,
+    "ast_hash": "d5988dc57b8984a190a21b27d40c11d2",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/ffm/scripts/v4_5_1/godot_includes.txt": {
+    "mtime": 1785109348.020058,
+    "ast_hash": "297663669482f2b6dfdaa4ad2caace5b",
+    "semantic_hash": ""
+  },
+  "jvm-ffm/ffm/scripts/v4_6_1/godot_includes.txt": {
+    "mtime": 1785109348.020141,
+    "ast_hash": "accabf6bd5787992ccf11fdec617d85b",
+    "semantic_hash": ""
+  },
+  "mkdocs.yml": {
+    "mtime": 1785109348.035876,
+    "ast_hash": "1d405a9dfb4020f78f7289e07b11bc48",
+    "semantic_hash": ""
+  },
+  "kotlin-native/sample/icon.svg": {
+    "mtime": 1785109348.034216,
+    "ast_hash": "a16f2eed1b4496c4abf03d329708ba09",
+    "semantic_hash": ""
+  },
+  "mi-juego-prueba/icon.svg": {
+    "mtime": 1785109348.0351346,
+    "ast_hash": "a16f2eed1b4496c4abf03d329708ba09",
+    "semantic_hash": ""
+  },
+  "kotlin-native/binding/src/nativeMain/kotlin/io/github/kingg22/godot/ResourceLoading.kt": {
+    "mtime": 1785163113.5364313,
+    "ast_hash": "7f5bf61cc634a156180e6449a46c1d0e",
+    "semantic_hash": ""
+  }
+}
