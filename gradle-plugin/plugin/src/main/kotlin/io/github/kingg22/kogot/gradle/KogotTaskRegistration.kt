@@ -54,8 +54,8 @@ internal fun registerEntryPointTask(project: Project, extension: KogotExtension,
         ?.srcDir(genTask.map { it.outputDir })
 }
 
-internal fun registerCopyTask(project: Project, extension: KogotExtension, target: KotlinNativeTarget) {
-    sharedLibraries(target).forEach { binary ->
+private fun registerCopyTask(project: Project, extension: KogotExtension, target: KotlinNativeTarget) =
+    sharedLibraries(target).map { binary ->
         val buildTypeName = binary.buildType.name.lowercase()
         project.tasks.register(
             KogotConventions.copyBinaryTaskName(target.name, buildTypeName),
@@ -73,6 +73,20 @@ internal fun registerCopyTask(project: Project, extension: KogotExtension, targe
             )
             task.dependsOn(binary.linkTaskProvider)
         }
+    }
+
+/**
+ * Registers a `copyKogotBinary<Target><BuildType>` task per shared-lib binary, plus a single
+ * `copyKogotBinaries` aggregator over all of them. The aggregator exists so consumers (namely the
+ * kogot Settings plugin's `kogotExport`, see gradle-plugin/settings-plugin) can depend on one fixed
+ * task name instead of needing to know the resolved target/build-type combinations themselves.
+ */
+internal fun registerCopyTasks(project: Project, extension: KogotExtension, targets: List<KotlinNativeTarget>) {
+    val copyTasks = targets.flatMap { registerCopyTask(project, extension, it) }
+    project.tasks.register(KogotConventions.COPY_ALL_TASK_NAME) { task ->
+        task.group = KogotConventions.TASK_GROUP
+        task.description = "Copies every target/build-type GDExtension binary into the Godot project"
+        task.dependsOn(copyTasks)
     }
 }
 

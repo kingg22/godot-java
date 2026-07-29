@@ -29,8 +29,8 @@ abstract class KogotPlugin : Plugin<Project> {
                     if (extension.generateEntryPoint.get()) {
                         registerEntryPointTask(project, extension, target)
                     }
-                    registerCopyTask(project, extension, target)
                 }
+                registerCopyTasks(project, extension, nativeTargets)
 
                 if (extension.generateGdextensionFile.get()) {
                     registerGdextensionTask(project, extension, nativeTargets)

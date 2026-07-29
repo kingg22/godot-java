@@ -24,11 +24,17 @@ class KogotExportSpec(val modulePath: String) {
     /** Path segment appended to [modulePath] for the companion project, e.g. `:app:export`. */
     var exportProjectName: String = "export"
 
-    /** Konan target preset names to declare on the companion project, e.g. "linuxX64", "macosArm64". */
-    var targets: List<String> = emptyList()
+    /**
+     * Konan target presets to declare on the companion project.
+     * Required — not auto-detected from the main module's own declared targets, see
+     * [KogotSettingsPlugin]'s doc for why. Doesn't need to match the main module's target list
+     * exactly (e.g. the main module can also build `mingwX64` for local development while only
+     * Linux/macOS are exported here).
+     */
+    var targets: List<NativeTargetPreset> = emptyList()
 
-    /** Build types to export, any of "debug"/"release" (case-insensitive). */
-    var buildTypes: List<String> = listOf("debug")
+    /** Build types to export. */
+    var buildTypes: List<KogotBuildType> = listOf(KogotBuildType.DEBUG)
 
     /** Directory (relative to the settings root) the companion project's build output is generated into. */
     var exportProjectDir: (rootDir: File) -> File = { rootDir ->

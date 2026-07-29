@@ -13,6 +13,8 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(gradleApi())
 
+    implementation(libs.kotlinpoet)
+
     testImplementation(libs.junit)
 }
 

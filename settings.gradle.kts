@@ -10,6 +10,8 @@
 // Its primary purpose is to define the subprojects.
 // It is also used for some aspects of project-wide configuration, like managing plugins, dependencies, etc.
 // https://docs.gradle.org/current/userguide/settings_file_basics.html
+import io.github.kingg22.kogot.gradle.settings.NativeTargetPreset
+
 pluginManagement {
     // Include 'plugins build' to define convention plugins.
     includeBuild("build-logic")
@@ -96,7 +98,8 @@ include("mi-juego-prueba:kotlin_native_game")
 // module itself stays a plain (fast) compile. Run `kogotExport` to build + link the GDExtension.
 kogot {
     export(":mi-juego-prueba:kotlin_native_game") {
-        targets = listOf("linuxX64", "macosArm64")
+        // The main module also declares mingwX64 for local dev; only Linux/macOS are exported here.
+        targets = listOf(NativeTargetPreset.LINUX_X64, NativeTargetPreset.MACOS_ARM64)
         godotProjectDir = file("mi-juego-prueba")
         libraryBaseName = "godot_kotlin_sample"
         entrySymbol = "godot_kotlin_init"

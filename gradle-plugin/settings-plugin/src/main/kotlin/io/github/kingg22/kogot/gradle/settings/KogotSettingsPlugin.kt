@@ -3,11 +3,11 @@ package io.github.kingg22.kogot.gradle.settings
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
-import java.io.File
 
 const val SETTINGS_EXTENSION_NAME = "kogot"
 private const val KOGOT_EXPORT_TASK_NAME = "kogotExport"
 private const val ASSEMBLE_TASK_NAME = "assemble"
+private const val COPY_ALL_TASK_NAME = "copyKogotBinaries"
 private const val GDEXTENSION_TASK_NAME = "generateKogotGdextension"
 
 /**
@@ -22,6 +22,15 @@ private const val GDEXTENSION_TASK_NAME = "generateKogotGdextension"
  * [generateExportBuildScript] for why it's generated text rather than typed KGP DSL configuration).
  * This keeps the game module itself a single, plain KMP module — the split-module dance, and the
  * fact it ever existed, is fully owned by the plugin.
+ *
+ * [KogotExportSpec.targets] is required (not auto-detected from the main module's own declared
+ * targets): doing so would need the companion project's build script generated only after the main
+ * module finishes configuring, which needs `Project.evaluationDependsOn` forced across a
+ * configuration-on-demand boundary — confirmed unreliable in practice (it can report success while
+ * Kotlin Gradle Plugin's staged internal lifecycle hasn't actually finished registering tasks like
+ * `assemble` on the forced-evaluated project). Both [includeExportProject] and
+ * [registerExportAggregatorTask] run eagerly, entirely within `settingsEvaluated`/`beforeProject`, to
+ * stay clear of that whole class of problem.
  */
 abstract class KogotSettingsPlugin : Plugin<Settings> {
     override fun apply(settings: Settings) {
@@ -31,16 +40,13 @@ abstract class KogotSettingsPlugin : Plugin<Settings> {
             extension.exports.forEach { spec -> includeExportProject(settings, spec) }
         }
 
-        // Registered on the *main* module's beforeProject, not the export project's: with
-        // configuration-on-demand, the export project is only ever configured when something
-        // depends on it. Requiring "run the export project's config first" would make the task
-        // registration itself the thing that never triggers.
         settings.gradle.beforeProject { project ->
-            val spec = extension.exports.find { it.modulePath == project.path }
-            if (spec != null) registerExportAggregatorTask(project, spec)
+            val spec = extension.exports.find { it.modulePath == project.path } ?: return@beforeProject
+            registerExportAggregatorTask(project, spec)
         }
     }
 
+    /** Includes the companion project and writes its generated build.gradle.kts, both eagerly. */
     private fun includeExportProject(settings: Settings, spec: KogotExportSpec) {
         val exportPath = "${spec.modulePath}:${spec.exportProjectName}"
         settings.include(exportPath)
@@ -51,12 +57,8 @@ abstract class KogotSettingsPlugin : Plugin<Settings> {
         projectDir.mkdirs()
         settings.project(exportPath).projectDir = projectDir
 
-        File(projectDir, "build.gradle.kts").writeText(generateExportBuildScript(spec))
+        generateExportBuildScript(spec).writeTo(projectDir)
     }
-
-    /** Mirrors KogotConventions.copyBinaryTaskName in the :plugin module (not a shared dependency, see module doc). */
-    private fun copyBinaryTaskName(targetName: String, buildType: String) =
-        "copyKogotBinary${targetName.replaceFirstChar(Char::uppercase)}${buildType.replaceFirstChar(Char::uppercase)}"
 
     /** Registers `kogotExport` on the main module (the one users actually run tasks from) as a thin proxy. */
     private fun registerExportAggregatorTask(mainProject: Project, spec: KogotExportSpec) {
@@ -66,18 +68,14 @@ abstract class KogotSettingsPlugin : Plugin<Settings> {
             task.description = "Builds and exports the GDExtension binaries via the $exportPath companion project"
             // Task path strings, not TaskProviders: resolved lazily at task-graph time, so they
             // don't require the export project to already be configured right now (it usually
-            // isn't yet — configuration-on-demand only configures it once something depends on it,
+            // isn't — configuration-on-demand only configures it once something depends on it,
             // which is exactly this).
             task.dependsOn("$exportPath:$ASSEMBLE_TASK_NAME")
             // Neither the copy-into-godotProjectDir tasks nor generateKogotGdextension are wired
             // into assemble (they're not build outputs, they're deployment/manifest steps) — both
             // need to be listed explicitly, and the .gdextension's [libraries] paths assume the
             // copy already happened.
-            spec.targets.forEach { targetName ->
-                spec.buildTypes.forEach { buildType ->
-                    task.dependsOn("$exportPath:${copyBinaryTaskName(targetName, buildType)}")
-                }
-            }
+            task.dependsOn("$exportPath:$COPY_ALL_TASK_NAME")
             if (spec.generateGdextensionFile != false) {
                 task.dependsOn("$exportPath:$GDEXTENSION_TASK_NAME")
             }

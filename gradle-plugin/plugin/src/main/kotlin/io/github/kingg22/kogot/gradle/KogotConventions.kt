@@ -33,7 +33,7 @@ object KogotConventions {
     const val DEFAULT_KOGOT_GROUP = "io.github.kingg22.kogot"
     const val DEFAULT_GODOT_VERSION = "4.7.1"
     const val DEFAULT_ENTRY_SYMBOL = "godot_kotlin_init"
-    const val DEFAULT_ENTRY_POINT_PACKAGE = "io.github.kingg22.kogot.generated"
+    const val DEFAULT_ENTRY_POINT_PACKAGE = "generated"
 
     /** Base package of kogot's own Kotlin/Native runtime, used to qualify imports in generated code. */
     const val DEFAULT_RUNTIME_PACKAGE = "io.github.kingg22.godot.internal"
@@ -70,8 +70,7 @@ object KogotConventions {
     const val GDEXTENSION_TASK_NAME = "generateKogotGdextension"
     const val RUN_GODOT_TASK_NAME = "runGodot"
     const val TEST_GODOT_TASK_NAME = "testGodot"
-    const val KOGOT_EXPORT_TASK_NAME = "kogotExport"
-    const val ASSEMBLE_TASK_NAME = "assemble"
+    const val COPY_ALL_TASK_NAME = "copyKogotBinaries"
 
     // --- generated-path templates ----------------------------------------------------------------
     fun entryPointOutputDir(targetName: String) = "generated/kogot/entrypoint/$targetName"

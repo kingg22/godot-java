@@ -1,85 +1,97 @@
 package io.github.kingg22.kogot.gradle.settings
 
-/** Escapes a value for embedding in a Kotlin string literal inside the generated build script. */
-private fun String.toKotlinStringLiteral(): String = "\"${replace("\\", "\\\\").replace("\"", "\\\"")}\""
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.buildCodeBlock
+import com.squareup.kotlinpoet.joinToCode
 
-private fun targetBlock(presetName: String, buildTypesLiteral: String, baseNameLiteral: String): String =
-    """
-    |    $presetName {
-    |        binaries {
-    |            sharedLib(buildTypes = $buildTypesLiteral) {
-    |                baseName = $baseNameLiteral
-    |            }
-    |        }
-    |    }
-    """.trimMargin()
+private fun targetBinariesBlock(
+    preset: NativeTargetPreset,
+    buildTypes: List<KogotBuildType>,
+    baseName: String,
+): CodeBlock = buildCodeBlock {
+    beginControlFlow(preset.dslName)
+        .beginControlFlow("binaries")
+        .beginControlFlow(
+            "sharedLib(buildTypes = listOf(%L))",
+            buildTypes.joinToCode(", ") {
+                CodeBlock.of(
+                    "%T.%L",
+                    ClassName("org.jetbrains.kotlin.gradle.plugin.mpp", "NativeBuildType"),
+                    it.dslName,
+                )
+            },
+        )
+        .addStatement("baseName = %S", baseName)
+        .endControlFlow()
+        .endControlFlow()
+    endControlFlow()
+}
 
 /**
  * Generates the `build.gradle.kts` text for [spec]'s companion export project. See
  * [KogotExportSpec]'s doc for why this is plain text generation instead of typed KGP DSL
  * configuration.
  *
- * Mirrors the hand-written pattern this replaces (compare the pre-#25
- * `mi-juego-prueba/kotlin_native_game/exported/build.gradle.kts`): same conventions plugins, same
- * `io.github.kingg22.kogot` project plugin, same `binaries.sharedLib()` DSL — just filled in from
- * [spec] instead of hand-maintained per game module.
+ * Built with KotlinPoet's [FileSpec.scriptBuilder] (script mode: `plugins { }`/`kotlin { }` calls
+ * at file scope, no wrapping type) rather than hand-rolled string interpolation, so every value from
+ * [spec] — which ultimately comes from a user's `settings.gradle.kts` and could be an arbitrary
+ * string — is escaped correctly via `%S` instead of relying on a hand-written escaper, and imports
+ * are collected and sorted by KotlinPoet instead of hand-placed.
+ *
+ * Deliberately does NOT apply this repo's own `buildlogic.kotlin-multiplatform-conventions` /
+ * `buildlogic.kotlin-styles-conventions` build-logic plugins (compare the pre-#25
+ * `mi-juego-prueba/kotlin_native_game/exported/build.gradle.kts`, which did): those are internal to
+ * the kogot monorepo's own version catalog and aren't available to a third-party consumer of the
+ * published `io.github.kingg22.kogot` plugin. The companion project only ever contains generated
+ * code, so it doesn't need this repo's style/strictness conventions either. Applies the Kotlin
+ * Multiplatform plugin by bare ID with no version — like any companion/included project, it
+ * resolves to whatever KGP version the main game module already applies elsewhere in the same build.
  */
-internal fun generateExportBuildScript(spec: KogotExportSpec): String {
-    require(spec.targets.isNotEmpty()) {
+internal fun generateExportBuildScript(spec: KogotExportSpec): FileSpec {
+    val targets = spec.targets
+    require(targets.isNotEmpty()) {
         "kogot: export(\"${spec.modulePath}\") { } declares no targets — set KogotExportSpec.targets"
-    }
-    spec.buildTypes.forEach {
-        require(it.lowercase() in setOf("debug", "release")) {
-            "kogot: unknown build type '$it' in export spec for ${spec.modulePath}, expected debug/release"
-        }
     }
 
     val libraryBaseName = spec.libraryBaseName ?: spec.modulePath.trimStart(':').substringAfterLast(':')
-    val buildTypesLiteral = "listOf(${
-        spec.buildTypes.joinToString(", ") { "NativeBuildType.${it.uppercase()}" }
-    })"
-    val baseNameLiteral = libraryBaseName.toKotlinStringLiteral()
 
-    val kogotExtensionLines = buildList {
-        add("    autoApplyKsp.set(false)")
-        add("    autoAddDependencies.set(false)")
-        add("    generateEntryPoint.set(true)")
-        spec.entrySymbol?.let { add("    entrySymbol.set(${it.toKotlinStringLiteral()})") }
-        spec.godotVersion?.let { add("    godotVersion.set(${it.toKotlinStringLiteral()})") }
-        spec.godotProjectDir?.let { add("    godotProjectDir.set(file(${it.absolutePath.toKotlinStringLiteral()}))") }
-        add("    libraryBaseName.set($baseNameLiteral)")
-        spec.generatedBindingsPackage?.let { add("    generatedBindingsPackage.set(${it.toKotlinStringLiteral()})") }
-        spec.generatedBindingsClassName?.let { add("    generatedBindingsClassName.set(${it.toKotlinStringLiteral()})") }
-        spec.generateGdextensionFile?.let { add("    generateGdextensionFile.set($it)") }
-    }
+    return FileSpec.scriptBuilder("build.gradle").apply {
+        addFileComment("Generated by the kogot Gradle settings plugin for '%L'. DO NOT EDIT!", spec.modulePath)
 
-    val targetBlocks = spec.targets.joinToString("\n\n") { targetBlock(it, buildTypesLiteral, baseNameLiteral) }
+        beginControlFlow("plugins")
+            .addStatement("id(%S)", "org.jetbrains.kotlin.multiplatform")
+            .addStatement("id(%S)", "io.github.kingg22.kogot")
+            .endControlFlow()
 
-    return """
-        |// Generated by the kogot Gradle settings plugin for '${spec.modulePath}'. DO NOT EDIT!
-        |import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-        |import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
-        |
-        |plugins {
-        |    alias(libs.plugins.kotlin.multiplatform.conventions)
-        |    alias(libs.plugins.kotlin.styles.conventions)
-        |    id("io.github.kingg22.kogot")
-        |}
-        |
-        |kogot {
-        |${kogotExtensionLines.joinToString("\n")}
-        |}
-        |
-        |kotlin {
-        |    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        |    dependencies {
-        |        implementation(project(${spec.modulePath.toKotlinStringLiteral()}))
-        |    }
-        |
-        |    applyDefaultHierarchyTemplate()
-        |
-        |$targetBlocks
-        |}
-        |
-    """.trimMargin()
+        beginControlFlow("kogot")
+            .addStatement("autoApplyKsp.set(false)")
+            .addStatement("autoAddDependencies.set(false)")
+            .addStatement("generateEntryPoint.set(true)")
+            .apply { spec.entrySymbol?.let { addStatement("entrySymbol.set(%S)", it) } }
+            .apply { spec.godotVersion?.let { addStatement("godotVersion.set(%S)", it) } }
+            .apply { spec.godotProjectDir?.let { addStatement("godotProjectDir.set(file(%S))", it.absolutePath) } }
+            .addStatement("libraryBaseName.set(%S)", libraryBaseName)
+            .apply { spec.generatedBindingsPackage?.let { addStatement("generatedBindingsPackage.set(%S)", it) } }
+            .apply { spec.generatedBindingsClassName?.let { addStatement("generatedBindingsClassName.set(%S)", it) } }
+            .apply { spec.generateGdextensionFile?.let { addStatement("generateGdextensionFile.set(%L)", it) } }
+        endControlFlow()
+
+        beginControlFlow("kotlin")
+            .addStatement(
+                "@OptIn(%T::class)",
+                ClassName("org.jetbrains.kotlin.gradle", "ExperimentalKotlinGradlePluginApi"),
+            )
+            .beginControlFlow("dependencies")
+            .addStatement("implementation(project(%S))", spec.modulePath)
+            .endControlFlow()
+            .addStatement("applyDefaultHierarchyTemplate()")
+            .apply {
+                targets.forEach { preset ->
+                    addCode(targetBinariesBlock(preset, spec.buildTypes, libraryBaseName))
+                }
+            }
+        endControlFlow()
+    }.build()
 }
