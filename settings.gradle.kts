@@ -93,9 +93,6 @@ include(
 // Sample game for SpriteBench
 include("mi-juego-prueba:kotlin_native_game")
 
-// Auto-managed GDExtension export companion project (issue #25): keeps this a single game module —
-// no hand-maintained "exported" sibling, no binaries.sharedLib() here, so `assemble` on the game
-// module itself stays a plain (fast) compile. Run `kogotExport` to build + link the GDExtension.
 kogot {
     export(":mi-juego-prueba:kotlin_native_game") {
         // The main module also declares mingwX64 for local dev; only Linux/macOS are exported here.
@@ -103,11 +100,6 @@ kogot {
         godotProjectDir = file("mi-juego-prueba")
         libraryBaseName = "godot_kotlin_sample"
         entrySymbol = "godot_kotlin_init"
-        // This game's KSP setup hand-generates a per-target `generated.GeneratedBindingsCommon`
-        // (expect/actual), not the plugin's default `generated.GeneratedBindings`.
-        generatedBindingsClassName = "GeneratedBindingsCommon"
-        // generateGdextensionFile defaults to true: the .gdextension manifest is fully generated
-        // by `kogotExport`, never hand-maintained (see KogotExtension.generateGdextensionFile).
     }
 }
 
