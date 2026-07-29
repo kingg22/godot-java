@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":mi-juego-prueba:kotlin_native_game:exported:assemble" />
+          <option value=":mi-juego-prueba:kotlin_native_game:kogotExport" />
         </list>
       </option>
       <option name="vmOptions" />

@@ -1,7 +1,5 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Godot v4.6.1" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="./mi-juego-prueba/project.godot" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$ProjectFileDir$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="godot-java-extension" TARGET_NAME="godot-java-extension" CONFIG_NAME="Debug" RUN_PATH="$USER_HOME$/RiderProjects/godot/bin/godot.linuxbsd.editor.dev.x86_64">
-    <method v="2">
-      <option name="RunConfigurationTask" enabled="false" run_configuration_name="game exported assemble" run_configuration_type="GradleRunConfiguration" />
-    </method>
+    <method v="2" />
   </configuration>
 </component>
