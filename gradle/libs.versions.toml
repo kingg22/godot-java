@@ -45,6 +45,13 @@ kotlinpoet = "2.3.0"
 ksp-plugin = "2.3.10"
 ksp-api = "2.3.10"
 
+# https://plugins.gradle.org/docs/publish-plugin
+# https://plugins.gradle.org/plugin/com.gradle.plugin-publish
+gradle-plugin-publish = "2.1.1"
+
+# https://github.com/junit-team/junit4/releases
+junit = "4.13.2"
+
 # https://github.com/uber/NullAway/releases
 nullaway = "0.13.8"
 
@@ -88,10 +95,13 @@ slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 
 # Processor
 ksp-api = { group = "com.google.devtools.ksp", name = "symbol-processing-api", version.ref = "ksp-api" }
+# Applied on a consumer's behalf by gradle-plugin, must be on that plugin's own classpath.
+ksp-gradle-plugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp-plugin" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler-processing", version.ref = "androidx-room-compiler" }
 # Processor test
 androidx-room-compiler-testing = { group = "androidx.room", name = "room-compiler-processing-testing", version.ref = "androidx-room-compiler" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "google-truth" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 # build-logic
 apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "apache-commons-compress" }
@@ -129,6 +139,7 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-plugin" }
 error-prone = { id = "net.ltgt.errorprone", version.ref = "errorprone-gradle" }
 nullaway = { id = "net.ltgt.nullaway", version.ref = "nullaway-gradle" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
 
 # buildlogic convention plugins
 kotlin-jvm-common-conventions = { id = "buildlogic.kotlin-jvm-common-conventions" }

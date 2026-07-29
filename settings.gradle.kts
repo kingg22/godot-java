@@ -13,6 +13,8 @@
 pluginManagement {
     // Include 'plugins build' to define convention plugins.
     includeBuild("build-logic")
+    // Include the kogot Gradle plugin (issue #25) so in-repo modules can dogfood it.
+    includeBuild("gradle-plugin")
 
     repositories {
         google {
