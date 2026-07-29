@@ -34,6 +34,8 @@ pluginManagement {
 plugins {
     // Use the Foojay Toolchains plugin to automatically download JDKs required by subprojects.
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    // Auto-manages the GDExtension export companion project for kogot game modules (issue #25).
+    id("io.github.kingg22.kogot.settings")
 }
 
 @Suppress("UnstableApiUsage")
@@ -87,8 +89,24 @@ include(
 )
 
 // Sample game for SpriteBench
-include("mi-juego-prueba:kotlin_native_game:source")
-include("mi-juego-prueba:kotlin_native_game:exported")
+include("mi-juego-prueba:kotlin_native_game")
+
+// Auto-managed GDExtension export companion project (issue #25): keeps this a single game module —
+// no hand-maintained "exported" sibling, no binaries.sharedLib() here, so `assemble` on the game
+// module itself stays a plain (fast) compile. Run `kogotExport` to build + link the GDExtension.
+kogot {
+    export(":mi-juego-prueba:kotlin_native_game") {
+        targets = listOf("linuxX64", "macosArm64")
+        godotProjectDir = file("mi-juego-prueba")
+        libraryBaseName = "godot_kotlin_sample"
+        entrySymbol = "godot_kotlin_init"
+        // This game's KSP setup hand-generates a per-target `generated.GeneratedBindingsCommon`
+        // (expect/actual), not the plugin's default `generated.GeneratedBindings`.
+        generatedBindingsClassName = "GeneratedBindingsCommon"
+        // generateGdextensionFile defaults to true: the .gdextension manifest is fully generated
+        // by `kogotExport`, never hand-maintained (see KogotExtension.generateGdextensionFile).
+    }
+}
 
 // processor
 include("processor")

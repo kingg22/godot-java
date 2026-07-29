@@ -27,3 +27,4 @@ dependencyResolutionManagement {
 rootProject.name = "kogot-gradle-plugin"
 
 include(":plugin")
+include(":settings-plugin")

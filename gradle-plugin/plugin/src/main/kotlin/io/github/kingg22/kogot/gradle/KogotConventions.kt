@@ -70,6 +70,8 @@ object KogotConventions {
     const val GDEXTENSION_TASK_NAME = "generateKogotGdextension"
     const val RUN_GODOT_TASK_NAME = "runGodot"
     const val TEST_GODOT_TASK_NAME = "testGodot"
+    const val KOGOT_EXPORT_TASK_NAME = "kogotExport"
+    const val ASSEMBLE_TASK_NAME = "assemble"
 
     // --- generated-path templates ----------------------------------------------------------------
     fun entryPointOutputDir(targetName: String) = "generated/kogot/entrypoint/$targetName"

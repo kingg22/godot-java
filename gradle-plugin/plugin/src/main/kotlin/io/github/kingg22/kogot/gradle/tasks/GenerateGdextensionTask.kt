@@ -4,6 +4,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
@@ -19,6 +20,7 @@ import org.gradle.api.tasks.TaskAction
  * - `[icons]`: `ClassName = "path/to/icon.svg"`.
  * - `[dependencies]`: `platform.target = { "source_path" : "subdirectory" }` nested dictionaries.
  */
+@CacheableTask
 abstract class GenerateGdextensionTask : DefaultTask() {
     init {
         description = "Generates the .gdextension manifest for this GDExtension"

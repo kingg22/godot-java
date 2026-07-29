@@ -14,6 +14,12 @@ dependencies {
     implementation(gradleApi())
 
     // Applied on the consumer's behalf, so must be on the plugin's own classpath.
+    // NOTE: this is a *project* plugin module only (see :settings-plugin for the Settings-level
+    // plugin). Do not add a Settings-plugin registration to this module: bundling kotlin-gradle-plugin
+    // as `implementation` here is required for KogotPlugin to work, but the same dependency on a
+    // Settings plugin's classpath poisons `plugins { id("org.jetbrains.kotlin.jvm") version X }`
+    // resolution build-wide (confirmed empirically: Gradle reports the plugin "already on the
+    // classpath with an unknown version" even when the versions are identical).
     implementation(libs.kotlin.gradle.plugin)
     implementation(libs.ksp.gradle.plugin)
 
