@@ -7,10 +7,6 @@ plugins {
 }
 
 kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll("-Xexpect-actual-classes")
-    }
-
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     dependencies {
         api(projects.kotlinNative.api)
