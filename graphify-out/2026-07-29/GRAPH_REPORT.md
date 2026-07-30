@@ -1,16 +1,16 @@
-# Graph Report - kogot  (2026-07-29)
+# Graph Report - kogot  (2026-07-28)
 
 ## Corpus Check
-- 388 files · ~10,974,681 words
+- 377 files · ~10,968,868 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2700 nodes · 3317 edges · 472 communities (234 shown, 238 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 135 edges (avg confidence: 0.8)
+- 2614 nodes · 3201 edges · 474 communities (235 shown, 239 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 131 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8c4ae248`
+- Built from commit: `80e6410e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -249,7 +249,6 @@
 - type
 - type
 - asList
-- exported/build.gradle.kts
 - godotKotlinInit
 - rules.md
 - experimental_types_4.6.1.md
@@ -271,7 +270,6 @@
 - gdextension_jextract_includes.sh
 - generation/kotlin/Constants.kt
 - analysis/build.gradle.kts
-- source/build.gradle.kts
 - kogot-documentation
 - code:bash (./gradlew clean assemble)
 - code:bash (java -jar codegen-cli-knative.jar \)
@@ -406,8 +404,12 @@
 - registerSignalsForCustomSignalClass
 - Generic virtual method dispatch (issue #20)
 - getInstanceBinding
+- TestOne
 - Provider
 - KotlinMultiplatformConventionsPlugin
+- SimpleTypeResolver
+- Interface
+- DiagnosticRenderer
 - TypeInfo.kt
 - ExportMethod.kt
 - GodotVirtualMethod.kt
@@ -425,10 +427,10 @@
 10. `KDocFormatterTest` - 22 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `signalFix()` --calls--> `Signal`  [INFERRED]
+  mi-juego-prueba/kotlin_native_game/source/src/nativeMain/kotlin/SpriteBench.kt → codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/EngineClass.kt
 - `delegateCall()` --calls--> `addStatement()`  [INFERRED]
   codegen/api/kotlin-native/src/main/kotlin/io/github/kingg22/godot/codegen/extensionapi/impl/knative/generators/TypeOverloadGenerator.kt → processor/src/main/kotlin/io/github/kingg22/kogot/processor/generators/kotlin/Shared.kt
-- `generateExportBuildScript()` --calls--> `addStatement()`  [INFERRED]
-  gradle-plugin/settings-plugin/src/main/kotlin/io/github/kingg22/kogot/gradle/settings/ExportBuildScriptGenerator.kt → processor/src/main/kotlin/io/github/kingg22/kogot/processor/generators/kotlin/Shared.kt
 - `CombinationSpec` --implements--> `Named`  [EXTRACTED]
   build-logic/src/main/kotlin/io/github/kingg22/buildlogic/godot/conventions/GodotCodegenExtension.kt → codegen/api/common/src/main/kotlin/io/github/kingg22/godot/codegen/models/extensionapi/Named.kt
 - `commonConfiguration()` --references--> `Provider`  [EXTRACTED]
@@ -439,7 +441,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (472 total, 238 thin omitted)
+## Communities (474 total, 239 thin omitted)
 
 ### Community 0 - "GodotVersion"
 Cohesion: 0.05
@@ -458,12 +460,16 @@ Cohesion: 0.29
 Nodes (5): EnumMask, T, of(), or(), toEnumMask()
 
 ### Community 6 - "GodotBindingGenerator"
-Cohesion: 0.09
-Nodes (22): generateExportBuildScript(), CodeBlock, FileSpec, targetBinariesBlock(), KogotExportSpec, KogotSettingsExtension, KogotSettingsPlugin, Plugin (+14 more)
+Cohesion: 0.33
+Nodes (5): GeneratorKind, API, CALLABLE, RUNTIME, SIGNAL
 
 ### Community 9 - "Property Export Annotations"
 Cohesion: 0.05
 Nodes (37): Class Annotations, Excluded Annotations, @Export, @ExportCategory, @ExportColorNoAlpha, @ExportCustom, @ExportDir, @ExportEnum (+29 more)
+
+### Community 11 - "ApiFilters"
+Cohesion: 0.13
+Nodes (5): CliktCommand, CodegenCommand, main(), ApiFilters, Builder
 
 ### Community 13 - "GodotBridge.java"
 Cohesion: 0.07
@@ -487,7 +493,7 @@ Nodes (35): JNIEnv, GDExtensionBool, GDExtensionClassLibraryPtr, GDExtensionInit
 
 ### Community 21 - "BindingInterop.kt"
 Cohesion: 0.08
-Nodes (32): CArrayPointer, CPointerVarOf, GDExtensionBoolVar, GDExtensionConstTypePtr, GDExtensionConstTypePtrVar, GDExtensionConstVariantPtrVar, GDExtensionTypePtr, GDExtensionTypePtrVar (+24 more)
+Nodes (34): CArrayPointer, CPointerVarOf, GDExtensionBoolVar, GDExtensionConstTypePtr, GDExtensionConstTypePtrVar, GDExtensionConstVariantPtrVar, GDExtensionTypePtr, GDExtensionTypePtrVar (+26 more)
 
 ### Community 23 - "builtin/Utils.kt"
 Cohesion: 0.27
@@ -506,12 +512,12 @@ Cohesion: 0.11
 Nodes (18): 1) GDExtension init, 2) ClassDB bridge (Java), 3) Script instance bridge (Java), 4) ScriptLanguage (GDExtension), API pública: estrategia recomendada, Componentes mínimos, Contexto, Datos del proyecto actual (+10 more)
 
 ### Community 27 - ".buildTestContext"
-Cohesion: 0.12
-Nodes (10): TypeName, SimpleTypeResolver, Interface, ValueType, RuntimeFFIConvenienceGen, ClassName, TypeName, ParsedType (+2 more)
+Cohesion: 0.21
+Nodes (6): ValueType, RuntimeFFIConvenienceGen, ClassName, TypeName, ParsedType, RuntimeTypeResolver
 
 ### Community 28 - "PackageRegistry"
-Cohesion: 0.26
-Nodes (3): JavaFfmPackageRegistry, ClassName, PackageRegistry
+Cohesion: 0.23
+Nodes (4): JavaFfmPackageRegistry, ClassName, PackageRegistry, MemberName
 
 ### Community 29 - "Revisión de Startup/Initialization GDExtension (Godot Java)"
 Cohesion: 0.12
@@ -530,8 +536,8 @@ Cohesion: 0.14
 Nodes (12): Builder, ExperimentalInfo, ExperimentalTypesRegistry, GodotElementType, CLASS, CONSTANT, ENUM, METHOD (+4 more)
 
 ### Community 35 - "LoggerExt.kt"
-Cohesion: 0.18
-Nodes (3): currentClassLogger(), fileLogger(), logger()
+Cohesion: 0.14
+Nodes (7): currentClassLogger(), fileLogger(), logger(), warning(), gradlew script, die(), warn()
 
 ### Community 36 - "GodotFFI"
 Cohesion: 0.28
@@ -594,8 +600,8 @@ Cohesion: 0.22
 Nodes (5): ClassName, NativePackageRegistry, register(), renameQualified(), resolveCoreSubpackage()
 
 ### Community 65 - "BindingInitializationCallbacks"
-Cohesion: 0.05
-Nodes (28): GDExtensionClassInstancePtr, GDExtensionInitializationLevel, GDExtensionVariantOperator, GDExtensionVariantType, toGDE(), getInstanceBinding(), instantiate(), GDExtensionObjectPtr (+20 more)
+Cohesion: 0.21
+Nodes (4): GDExtensionInitializationLevel, BindingInitializationCallbacks, COpaquePointer, GeneratedBindingsCommon
 
 ### Community 66 - "FFMUtils"
 Cohesion: 0.11
@@ -642,23 +648,23 @@ Cohesion: 0.21
 Nodes (7): CodeGenerator, KSClassDeclaration, KSFile, KSPLogger, DiagnosticLocation, KogotProcessor, Resolver
 
 ### Community 81 - "AbstractCodegenRunner"
-Cohesion: 0.19
-Nodes (6): CodegenConfig, AbstractCodegenRunner, FileSpec, KotlinNativeRuntimeRunner, FileSpec, RuntimeFFIGenerator
+Cohesion: 0.31
+Nodes (3): CodegenConfig, AbstractCodegenRunner, FileSpec
 
 ### Community 82 - "BridgeContext"
 Cohesion: 0.15
 Nodes (5): BridgeContext, Arena, MemorySegment, Override, onSceneDeinit()
 
 ### Community 84 - "DiagnosticMessage"
-Cohesion: 0.18
-Nodes (7): DiagnosticMessage, Severity, ERROR, INFO, WARNING, warning(), DiagnosticRenderer
+Cohesion: 0.19
+Nodes (9): Category, DiagnosticCode, DiagnosticMessage, error(), Severity, ERROR, INFO, WARNING (+1 more)
 
 ### Community 89 - "GodotBindingGenerator"
-Cohesion: 0.21
-Nodes (11): error(), GeneratedFile, GenerationResult, GodotBindingGenerator, godotVirtualTrampolineName(), ClassName, CodeBlock, FunSpec (+3 more)
+Cohesion: 0.22
+Nodes (10): GeneratedFile, GenerationResult, GodotBindingGenerator, godotVirtualTrampolineName(), ClassName, CodeBlock, FunSpec, PropertySpec (+2 more)
 
 ### Community 90 - "CodegenOptions"
-Cohesion: 0.19
+Cohesion: 0.21
 Nodes (6): KotlinNativeBackend, Backend, KotlinNativeApiRunner, FileSpec, GDExtensionInterface, CodegenOptions
 
 ### Community 91 - "BindingProcAddressHolder.kt"
@@ -710,20 +716,20 @@ Cohesion: 0.22
 Nodes (8): AccessorKind, DELEGATED, INDEXED, LOCAL, LOCAL_DELEGATED, MISSING, ResolvedAccessor, ResolvedProperty
 
 ### Community 113 - "CodegenRunner"
-Cohesion: 0.12
-Nodes (11): GeneratorBackend, JAVA_FFM, KOTLIN_NATIVE, GeneratorKind, API, CALLABLE, RUNTIME, SIGNAL (+3 more)
+Cohesion: 0.18
+Nodes (6): GeneratorBackend, JAVA_FFM, KOTLIN_NATIVE, CodegenRegistry, CodegenRunner, CodegenRunnerProvider
 
 ### Community 115 - "castToInternal"
 Cohesion: 0.60
 Nodes (5): Convert, castTo(), castToInternal(), castToOrNull(), GDExtensionObjectPtr
 
 ### Community 116 - "properties"
-Cohesion: 0.29
-Nodes (7): type, properties, type, type, arguments, legacy_type_name, name
+Cohesion: 0.20
+Nodes (12): items, type, items, type, additionalProperties, properties, type, type (+4 more)
 
 ### Community 117 - "ValidationResultImpl"
-Cohesion: 0.50
-Nodes (3): KotlinJvmCommonConventionsPlugin, Plugin, Project
+Cohesion: 0.25
+Nodes (4): commonConfiguration(), KotlinJvmCommonConventionsPlugin, Plugin, Project
 
 ### Community 118 - "DokkaConventionsPlugin"
 Cohesion: 0.40
@@ -926,8 +932,8 @@ Cohesion: 0.54
 Nodes (7): GDExtensionClassMethodCall, Variant, MethodArgument, registerMethod(), registerMethodGetter(), registerMethodSetter(), MethodFlags
 
 ### Community 200 - "required"
-Cohesion: 0.22
-Nodes (10): items, items, type, additionalProperties, required, arguments, description, kind (+2 more)
+Cohesion: 0.25
+Nodes (8): allOf, required, unevaluatedProperties, arguments, description, kind, name, items
 
 ### Community 202 - "enum"
 Cohesion: 0.25
@@ -990,8 +996,8 @@ Cohesion: 0.32
 Nodes (3): DefaultVariantTypeResolver, ClassName, VariantTypeResolver
 
 ### Community 238 - "type"
-Cohesion: 0.20
-Nodes (10): items, type, allOf, type, unevaluatedProperties, _copyright, see, items (+2 more)
+Cohesion: 0.29
+Nodes (7): items, type, type, _copyright, see, items, type
 
 ### Community 239 - "type"
 Cohesion: 0.29
@@ -1001,13 +1007,9 @@ Nodes (7): items, type, type, _copyright, see, items, type
 Cohesion: 0.20
 Nodes (6): AnnotationInfo, getToolAnnotation(), getExportMethodAnnotation(), getRpcAnnotation(), getExportAnnotation(), getRegisterSignalAnnotation()
 
-### Community 241 - "exported/build.gradle.kts"
-Cohesion: 0.13
-Nodes (22): Family, KogotExtension, DirectoryProperty, ListProperty, MapProperty, Property, RegularFileProperty, KogotPlugin (+14 more)
-
 ### Community 242 - "godotKotlinInit"
-Cohesion: 0.27
-Nodes (8): GodotExecTask, DirectoryProperty, Exec, ListProperty, Property, RegularFileProperty, RunGodotTask, TestGodotTask
+Cohesion: 0.29
+Nodes (6): godotKotlinInit(), CPointer, GDExtensionBool, GDExtensionClassLibraryPtr, GDExtensionInitialization, GDExtensionInterfaceGetProcAddress
 
 ### Community 245 - "type"
 Cohesion: 0.29
@@ -1025,6 +1027,10 @@ Nodes (7): items, type, type, _copyright, see, items, type
 Cohesion: 0.29
 Nodes (7): items, type, type, _copyright, see, items, type
 
+### Community 250 - ".execute"
+Cohesion: 0.33
+Nodes (3): KotlinNativeRuntimeRunner, FileSpec, RuntimeFFIGenerator
+
 ### Community 251 - "track.sh"
 Cohesion: 0.60
 Nodes (4): error(), info(), resolve_workdir(), track.sh script
@@ -1037,61 +1043,61 @@ Nodes (4): godotVersionRoot(), GDExtensionInterface, loadExtensionApi(), loadExt
 Cohesion: 0.40
 Nodes (4): Variant, registerProperty(), PropertyHint, PropertyUsageFlags
 
-### Community 319 - "source/build.gradle.kts"
-Cohesion: 0.25
-Nodes (6): GenerateEntryPointTask, DefaultTask, DirectoryProperty, FileSpec, Property, MemberName
-
 ### Community 454 - "BuildConfiguration"
-Cohesion: 0.18
-Nodes (10): ResolvedBuiltinAlignTest, checkAndNormalizeTypeName(), BuildConfiguration, DOUBLE_32, DOUBLE_64, FLOAT_32, FLOAT_64, defaultFor() (+2 more)
+Cohesion: 0.24
+Nodes (9): checkAndNormalizeTypeName(), BuildConfiguration, DOUBLE_32, DOUBLE_64, FLOAT_32, FLOAT_64, defaultFor(), fromJsonName() (+1 more)
 
 ### Community 455 - "godotKotlinInit"
-Cohesion: 0.29
-Nodes (5): GenerateGdextensionTask, DefaultTask, MapProperty, Property, RegularFileProperty
-
-### Community 456 - ".buildTestContext"
-Cohesion: 0.50
-Nodes (3): CliktCommand, CodegenCommand, main()
+Cohesion: 0.24
+Nodes (9): deinitialize(), godotKotlinInit(), initialize(), COpaquePointer, CPointer, GDExtensionBool, GDExtensionClassLibraryPtr, GDExtensionInitialization (+1 more)
 
 ### Community 457 - "GDExtensionVariantType"
-Cohesion: 0.83
-Nodes (3): gradlew script, die(), warn()
+Cohesion: 0.25
+Nodes (3): GDExtensionVariantOperator, GDExtensionVariantType, toGDE()
 
 ### Community 458 - "registerSignalsForCustomSignalClass"
-Cohesion: 0.83
-Nodes (3): gradlew script, die(), warn()
+Cohesion: 0.29
+Nodes (5): CustomSignalClass, StringName, registerCustomSignalClass(), registerSignalsForCustomSignalClass(), Node
 
 ### Community 459 - "Generic virtual method dispatch (issue #20)"
 Cohesion: 0.33
 Nodes (5): Design, Generic virtual method dispatch (issue #20), Problem, Type-support matrix, Where things live
+
+### Community 460 - "getInstanceBinding"
+Cohesion: 0.40
+Nodes (5): GDExtensionClassInstancePtr, getInstanceBinding(), instantiate(), GDExtensionObjectPtr, T
+
+### Community 461 - "TestOne"
+Cohesion: 0.40
+Nodes (3): Node2D, Vector2, TestOne
 
 ### Community 462 - "Provider"
 Cohesion: 0.33
 Nodes (4): Provider, SymbolProcessor, SymbolProcessorEnvironment, SymbolProcessorProvider
 
 ### Community 463 - "KotlinMultiplatformConventionsPlugin"
-Cohesion: 0.25
-Nodes (4): commonConfiguration(), KotlinMultiplatformConventionsPlugin, Plugin, Project
+Cohesion: 0.50
+Nodes (3): KotlinMultiplatformConventionsPlugin, Plugin, Project
 
 ## Knowledge Gaps
-- **830 isolated node(s):** `KOTLIN_NATIVE`, `JAVA_FFM`, `API`, `RUNTIME`, `CALLABLE` (+825 more)
+- **820 isolated node(s):** `KOTLIN_NATIVE`, `JAVA_FFM`, `API`, `RUNTIME`, `CALLABLE` (+815 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **238 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **239 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `addStatement()` connect `SignalParamFactoryTest` to `GodotBindingGenerator`, `TypeOverloadGenerator.kt`, `GodotBindingGenerator`?**
-  _High betweenness centrality (0.065) - this node is a cross-community bridge._
 - **Why does `delegateCall()` connect `TypeOverloadGenerator.kt` to `SignalParamFactoryTest`?**
-  _High betweenness centrality (0.062) - this node is a cross-community bridge._
-- **Why does `Context` connect `Context` to `GodotVersion`, `PackageRegistry`, `BuildConfiguration`?**
-  _High betweenness centrality (0.057) - this node is a cross-community bridge._
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
+- **Why does `addStatement()` connect `SignalParamFactoryTest` to `GodotBindingGenerator`, `TypeOverloadGenerator.kt`?**
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
+- **Why does `ClassInfo` connect `GodotBindingGenerator` to `KogotProcessor`, `toClassInfo`, `model/ClassInfo.kt`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
 - **What connects `KOTLIN_NATIVE`, `JAVA_FFM`, `API` to the rest of the system?**
-  _830 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _820 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `GodotVersion` be split into smaller, more focused modules?**
   _Cohesion score 0.05137844611528822 - nodes in this community are weakly interconnected._
 - **Should `TypeOverloadGenerator.kt` be split into smaller, more focused modules?**
   _Cohesion score 0.08700564971751412 - nodes in this community are weakly interconnected._
-- **Should `GodotBindingGenerator` be split into smaller, more focused modules?**
-  _Cohesion score 0.08602150537634409 - nodes in this community are weakly interconnected._
+- **Should `Property Export Annotations` be split into smaller, more focused modules?**
+  _Cohesion score 0.05263157894736842 - nodes in this community are weakly interconnected._

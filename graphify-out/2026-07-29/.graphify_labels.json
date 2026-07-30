@@ -470,5 +470,7 @@
   "468": "ExportMethod.kt",
   "469": "GodotVirtualMethod.kt",
   "470": "NativeEngineVirtualCallsGenerator.kt",
-  "471": "GeneratedBindingsCommon.linuxX64.kt"
+  "471": "GeneratedBindingsCommon.linuxX64.kt",
+  "472": "GeneratedBindingsCommon.macosArm64.kt",
+  "473": "GeneratedBindingsCommon.mingwX64.kt"
 }
