@@ -17,7 +17,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.sha }}
+    # github.sha on a pull_request event is the ephemeral merge commit, not the branch's real head
+    # commit, so keying on it alone doesn't dedupe a push + its own PR's synchronize event, which
+    # both fire for the same commit. pull_request.head.sha is that real commit and matches what
+    # github.sha is on the corresponding push event, so this collapses both into one group.
+    group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
     cancel-in-progress: true
 
 jobs:
