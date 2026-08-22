@@ -48,8 +48,8 @@ object KogotConventions {
     const val DEFAULT_GENERATED_BINDINGS_CLASS_NAME = "GeneratedBindings"
 
     // --- kogot's own published artifact names, resolved under kogotGroup:kogotVersion --------
-    const val ARTIFACT_ANNOTATIONS = "annotations"
-    const val ARTIFACT_PROCESSOR = "processor"
+    const val ARTIFACT_ANNOTATIONS = "kogot-annotations"
+    const val ARTIFACT_PROCESSOR = "kogot-processor"
 
     // --- third-party / Gradle identifiers ------------------------------------------------------
     const val KSP_PLUGIN_ID = "com.google.devtools.ksp"
