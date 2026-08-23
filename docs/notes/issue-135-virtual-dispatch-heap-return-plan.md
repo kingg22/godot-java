@@ -17,3 +17,17 @@ This is already documented as a known, deliberate gap in `docs/technical-design/
 Extend `VirtualCallImplGen.isReturnSupported` + `buildReturnWrite` to placement-construct heap-backed builtin returns directly into the `ret: GDExtensionTypePtr` Godot provides, starting with `String` and `PackedStringArray` (needed for #42's required methods), extending to `Dictionary`/`Variant` if tractable in the same pass. `void*` (`_instance_create`, `_debug_get_stack_level_instance`, ...) is a separate, narrower case — a raw opaque pointer write, not a builtin placement-construct — evaluated separately.
 
 This is general codegen infrastructure affecting any of the 106 engine classes with virtual methods in this shape, not specific to #42.
+
+## Outcome
+
+Implemented generically for **all** heap-backed builtins with a copy constructor (not just String/PackedStringArray) — the mechanism turned out not to need per-type special-casing:
+
+- `Variant` returns reuse the existing `VariantBinding.newCopyRaw` path directly.
+- Every other builtin (`String`, `PackedStringArray`, `Dictionary`, `StringName`, ...) placement-constructs into `ret` via `VariantBinding.getPtrConstructorRaw(variantType, copyCtorIndex)` — the exact same mechanism every generated builtin wrapper's own `constructor(from: T)` already uses (confirmed by reading the generated `PackedStringArray.kt`). The copy-constructor index is resolved from `ctx.model.builtins` (the constructor whose single argument type matches the builtin itself), not a hand-picked/assumed index — avoids the class of bug #127 found in the forward ptrcall path.
+- The fptr is cached once per (file, builtin return type) as a file-scoped `private val ... by lazy`, mirroring `BuiltinClassImplGen.buildTopLevelFptrProperties`, not re-looked-up per call.
+- One real bug caught during implementation: a `String`-returning virtual's overridable stub is named `_xAsGdStr(): GodotString` — the plain `_x(): String` name (the one `safeIdentifier(method.name)` actually resolves to and calls) is an `inline` convenience that already unwraps to Kotlin's own `String`, with no `.rawPtr`. Bridged via `GodotString(result).use { ... }` before copy-construction.
+- One dead-code bug caught and fixed before landing: `ctx.isBuiltin(...)` also matches primitive Godot type names (`"bool"`, `"int"`, ...), which would've generated unused `boolCopyCtorFptr`/`intCopyCtorFptr` properties for return types already handled by an earlier branch — excluded via the same CVar/`BOOLEAN` check `buildReturnWrite`'s `when` already uses.
+
+`void*` returns (`_instance_create`, `_debug_get_stack_level_instance`, ...) remain unsupported, as scoped — out of reach of this mechanism (not a builtin placement-construct, no copy constructor to look up) and not needed to unblock #42's Fase 2.
+
+Verified: regenerated the full Kotlin/Native API and ran `compileKotlinMacosArm64` across all ~106 engine classes with virtual methods (not just the 4 blocking #42) — succeeds. Existing `codegen/api/kotlin-native` and `codegen/api/common` unit tests still pass.
