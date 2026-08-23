@@ -298,7 +298,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
             .build()
 
         return PropertySpec
-            .builder(trampolineName, GDExtensionClassMethodCall, KModifier.PRIVATE)
+            .builder(trampolineName, GDExtensionClassMethodCall, KModifier.PUBLIC)
             .initializer(initializer)
             .build()
     }
@@ -346,7 +346,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
             .build()
 
         return PropertySpec
-            .builder(trampolineName, GDExtensionClassMethodCall, KModifier.PRIVATE)
+            .builder(trampolineName, GDExtensionClassMethodCall, KModifier.PUBLIC)
             .initializer(initializer)
             .build()
     }
@@ -441,7 +441,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
             .build()
 
         return PropertySpec
-            .builder(trampolineName, GDExtensionClassMethodCall, KModifier.PRIVATE)
+            .builder(trampolineName, GDExtensionClassMethodCall, KModifier.PUBLIC)
             .initializer(initializer)
             .build()
     }
@@ -592,13 +592,14 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
                 .add("mapOf(\n")
                 .withIndent {
                     addressable.forEach { (filePath, classInfo) ->
-                        addStatement(
-                            "%S to %T(%S, %S),",
-                            filePath,
-                            entryType,
-                            classInfo.shortName,
-                            classInfo.getParentClassShortName() ?: "Object",
-                        )
+                        addStatement("%S to %T(", filePath, entryType)
+                        withIndent {
+                            addStatement("%S,", classInfo.shortName)
+                            addStatement("%S,", classInfo.getParentClassShortName() ?: "Object")
+                            add(buildScriptPropertiesArg(classInfo))
+                            add(buildScriptMethodsArg(classInfo))
+                        }
+                        addStatement("),")
                     }
                 }
                 .add(")")
@@ -624,6 +625,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
         val file = FileSpec
             .builder(packageName, className)
             .applyCommonConfig()
+            .optInForeignNative()
             .addType(type)
             .build()
 
@@ -635,5 +637,66 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
             content = content.toString(),
             sourceClassNames = classes.map { it.qualifiedName },
         )
+    }
+
+    /**
+     * Builds the `properties = listOf(...)` argument of a `KotlinScriptRegistry.Entry(...)` call,
+     * referencing the same `_godot_get_<name>`/`_godot_set_<name>` trampolines `<Class>_Binding` already
+     * generates for ClassDB registration — not a second, duplicated dispatch mechanism (issue #42).
+     */
+    private fun buildScriptPropertiesArg(classInfo: ClassInfo): CodeBlock {
+        val exportProperties = classInfo.properties.filter { it.hasExport() }
+        if (exportProperties.isEmpty()) return CodeBlock.of("properties = emptyList(),\n")
+
+        val bindingType = ClassName(classInfo.packageName, "${classInfo.shortName}_Binding")
+        val builder = CodeBlock.builder().add("properties = listOf(\n")
+        builder.withIndent {
+            exportProperties.forEach { (name, type, isMutable) ->
+                val variantType = typeResolver.resolve(type.qualifiedName)
+                add(
+                    "%T(%S, %T.%L, %T.%N, ",
+                    KOTLIN_SCRIPT_PROPERTY_DESCRIPTOR,
+                    name,
+                    VARIANT_TYPE_CLASS_NAME,
+                    variantType,
+                    bindingType,
+                    "_godot_get_$name",
+                )
+                if (isMutable) {
+                    add("%T.%N),\n", bindingType, "_godot_set_$name")
+                } else {
+                    add("null),\n")
+                }
+            }
+        }
+        builder.add("),\n")
+        return builder.build()
+    }
+
+    /**
+     * Builds the `methods = listOf(...)` argument of a `KotlinScriptRegistry.Entry(...)` call,
+     * referencing the same `_godot_call_<name>` trampoline `<Class>_Binding` already generates for
+     * ClassDB registration — not a second, duplicated dispatch mechanism (issue #42).
+     */
+    private fun buildScriptMethodsArg(classInfo: ClassInfo): CodeBlock {
+        val exportedMethods = classInfo.getExportedMethods()
+        if (exportedMethods.isEmpty()) return CodeBlock.of("methods = emptyList(),\n")
+
+        val bindingType = ClassName(classInfo.packageName, "${classInfo.shortName}_Binding")
+        val builder = CodeBlock.builder().add("methods = listOf(\n")
+        builder.withIndent {
+            exportedMethods.forEach { function ->
+                addStatement(
+                    "%T(%S, %L, %T.%N),",
+                    KOTLIN_SCRIPT_METHOD_DESCRIPTOR,
+                    function.name,
+                    function.parameters.size,
+                    bindingType,
+                    "_godot_call_${function.name}",
+                )
+            }
+        }
+        builder.add("),\n")
+        return builder.build()
     }
 }

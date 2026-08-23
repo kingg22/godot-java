@@ -2,6 +2,10 @@ package io.github.kingg22.kogot.processor.generators.kotlin
 
 import io.github.kingg22.kogot.processor.model.AnnotationInfo
 import io.github.kingg22.kogot.processor.model.ClassInfo
+import io.github.kingg22.kogot.processor.model.FunctionInfo
+import io.github.kingg22.kogot.processor.model.GodotPrimitives
+import io.github.kingg22.kogot.processor.model.ParameterInfo
+import io.github.kingg22.kogot.processor.model.PropertyInfo
 import io.github.kingg22.kogot.processor.model.TypeInfo
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -14,7 +18,19 @@ import org.junit.jupiter.api.Test
 class GodotBindingGeneratorScriptRegistryTest {
     private val generator = GodotBindingGenerator()
 
-    private fun godotClass(qualifiedName: String, filePath: String): ClassInfo = ClassInfo(
+    private val exportAnnotation =
+        AnnotationInfo(qualifiedName = "io.github.kingg22.godot.api.annotations.Export", shortName = "Export")
+    private val exportMethodAnnotation = AnnotationInfo(
+        qualifiedName = "io.github.kingg22.godot.api.annotations.ExportMethod",
+        shortName = "ExportMethod",
+    )
+
+    private fun godotClass(
+        qualifiedName: String,
+        filePath: String,
+        properties: List<PropertyInfo> = emptyList(),
+        functions: List<FunctionInfo> = emptyList(),
+    ): ClassInfo = ClassInfo(
         qualifiedName = qualifiedName,
         shortName = qualifiedName.substringAfterLast('.'),
         packageName = qualifiedName.substringBeforeLast('.'),
@@ -22,6 +38,8 @@ class GodotBindingGeneratorScriptRegistryTest {
         annotations = listOf(
             AnnotationInfo(qualifiedName = "io.github.kingg22.godot.api.annotations.Godot", shortName = "Godot"),
         ),
+        properties = properties,
+        functions = functions,
         filePath = filePath,
     )
 
@@ -34,7 +52,11 @@ class GodotBindingGeneratorScriptRegistryTest {
 
         val content = result.registryContent()
         assertTrue(content.contains("\"/project/src/Player.kt\" to"))
-        assertTrue(content.contains("KotlinScriptRegistry.Entry(\"Player\", \"Node\")"))
+        assertTrue(content.contains("KotlinScriptRegistry.Entry("))
+        assertTrue(content.contains("\"Player\","))
+        assertTrue(content.contains("\"Node\","))
+        assertTrue(content.contains("properties = emptyList(),"))
+        assertTrue(content.contains("methods = emptyList(),"))
     }
 
     @Test
@@ -59,8 +81,55 @@ class GodotBindingGeneratorScriptRegistryTest {
         val content = generator.generate(classes).registryContent()
 
         assertTrue(content.contains("\"/project/src/Foo.kt\" to"))
-        assertTrue(content.contains("KotlinScriptRegistry.Entry(\"Foo\", \"Node\")"))
+        assertTrue(content.contains("\"Foo\","))
         assertTrue(content.contains("\"/project/src/Bar.kt\" to"))
-        assertTrue(content.contains("KotlinScriptRegistry.Entry(\"Bar\", \"Node\")"))
+        assertTrue(content.contains("\"Bar\","))
+    }
+
+    @Test
+    fun `when a class has exported members, then the entry references its binding trampolines`() {
+        val intType = TypeInfo(qualifiedName = GodotPrimitives.INT, shortName = "Int")
+        val classInfo = godotClass(
+            "io.github.kingg22.game.Player",
+            "/project/src/Player.kt",
+            properties = listOf(
+                PropertyInfo(
+                    name = "health",
+                    type = intType,
+                    isMutable = true,
+                    annotations = listOf(exportAnnotation),
+                ),
+                PropertyInfo(
+                    name = "readOnlyStat",
+                    type = intType,
+                    isMutable = false,
+                    annotations = listOf(exportAnnotation),
+                ),
+            ),
+            functions = listOf(
+                FunctionInfo(
+                    name = "heal",
+                    returnType = null,
+                    parameters = listOf(ParameterInfo(name = "amount", type = intType)),
+                    annotations = listOf(exportMethodAnnotation),
+                ),
+            ),
+        )
+
+        val content = generator.generate(listOf(classInfo)).registryContent()
+
+        assertTrue(
+            content.contains(
+                "ScriptPropertyDescriptor(\"health\", Variant.Type.INT, " +
+                    "Player_Binding._godot_get_health, Player_Binding._godot_set_health)",
+            ),
+        )
+        assertTrue(
+            content.contains(
+                "ScriptPropertyDescriptor(\"readOnlyStat\", Variant.Type.INT, " +
+                    "Player_Binding._godot_get_readOnlyStat, null)",
+            ),
+        )
+        assertTrue(content.contains("ScriptMethodDescriptor(\"heal\", 1, Player_Binding._godot_call_heal)"))
     }
 }

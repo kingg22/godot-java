@@ -16,8 +16,18 @@ public object KotlinScriptRegistry {
     /** The file extension `.kt` files are recognized under as a Godot script resource (issue #42). */
     public const val KOTLIN_SCRIPT_EXTENSION: String = "kt"
 
-    /** An addressable `@Godot` class for a script file, and the Godot parent class it registers under. */
-    public data class Entry(val className: String, val baseClassName: String)
+    /**
+     * An addressable `@Godot` class for a script file: the Godot parent class it registers under, plus
+     * its `@Export` properties/methods — reusing the same `<Class>_Binding` trampolines ClassDB
+     * registration already generated, so [KotlinScriptInstance] can answer script-instance
+     * `get`/`set`/`call` requests without a second, duplicated dispatch mechanism.
+     */
+    public data class Entry(
+        val className: String,
+        val baseClassName: String,
+        val properties: List<ScriptPropertyDescriptor> = emptyList(),
+        val methods: List<ScriptMethodDescriptor> = emptyList(),
+    )
 
     private val entries = mutableMapOf<String, Entry>()
 
