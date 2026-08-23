@@ -74,7 +74,12 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
             returnType.startsWith("enum::") ||
             returnType.startsWith("bitfield::") ||
             ctx.isEngineClass(returnType) ||
-            (ctx.isBuiltin(returnType) && copyConstructorIndex(returnType) != null)
+            (ctx.isBuiltin(returnType) && copyConstructorIndex(returnType) != null) ||
+            // typedarray::X (typeResolver.resolve() already maps this to GodotArray<X>, confirmed in
+            // KotlinNativeTypeResolver.resolvePlain) is backed by a plain Godot "Array" at the ABI level —
+            // see heapBackedBuiltinName's doc for why its own copy constructor is enough, no per-element-type
+            // constructor to look up.
+            (returnType.startsWith("typedarray::") && copyConstructorIndex(heapBackedBuiltinName(returnType)) != null)
     }
 
     /**
@@ -91,6 +96,23 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
             ?.index
             ?.takeIf { it >= 0 }
     }
+
+    /**
+     * The builtin whose copy constructor/`GDEXTENSION_VARIANT_TYPE_*` actually backs [returnType]'s
+     * native storage, for [copyConstructorIndex]/[variantTypeConst]/[copyCtorFptrPropertyName] lookups.
+     *
+     * `typedarray::X` (e.g. `typedarray::Dictionary`, `typedarray::StringName`) is, at the GDExtension
+     * ABI level, still exactly a Godot `Array` — there is no separate "typed Array" builtin or
+     * constructor in `ctx.model.builtins` to look up per element type. Godot's own `Array` copy
+     * constructor (`Array::Array(const Array&)` -> `_ref`) is a ref-counted share of the source's
+     * `ArrayPrivate*`, which carries the source's typed state along with it — so the exact same
+     * "Array" copy-constructor fptr this file already generates for plain `Array` returns also
+     * correctly preserves typing for `typedarray::*` returns, with no extra `set_typed`-equivalent
+     * call needed here. Mirrors the forward ptrcall generator (`Shared.kt`'s `buildReturnAlloc`),
+     * which likewise treats `typedarray::*` identically to a plain builtin return once resolved.
+     */
+    private fun heapBackedBuiltinName(returnType: String): String =
+        if (returnType.startsWith("typedarray::")) "Array" else returnType
 
     /** Property name for the trampoline, e.g. `_physics_process` -> `physicsProcess`. */
     fun trampolineName(method: EngineClass.ClassMethod): String = safeIdentifier(method.name.removePrefix("_"))
@@ -291,14 +313,17 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
                 implPackageRegistry.classNameForOrDefault("VariantBinding"),
             )
 
-            ctx.isBuiltin(returnType) -> {
+            ctx.isBuiltin(returnType) || returnType.startsWith("typedarray::") -> {
                 // buildTrampoline calls the `<name>AsGdStr` sibling whenever returnType == "String", so
                 // `result` is already the GodotString-typed wrapper here — no bridging needed for any builtin.
+                // typedarray::X results are backed by a plain Array at the ABI level (see
+                // heapBackedBuiltinName) — its copy constructor already preserves whatever typed state
+                // `result` carries, so it shares the same fptr as plain Array returns.
                 val allocConstTypePtrArrayMember = implPackageRegistry.memberNameForOrDefault("allocConstTypePtrArray")
                 beginControlFlow("%M", memScoped)
                 addStatement(
                     "%N.%M(ret, %M(result.rawPtr))",
-                    copyCtorFptrPropertyName(returnType),
+                    copyCtorFptrPropertyName(heapBackedBuiltinName(returnType)),
                     cinteropInvoke,
                     allocConstTypePtrArrayMember,
                 )
@@ -324,15 +349,18 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
     fun heapBackedReturnTypes(methods: List<EngineClass.ClassMethod>): List<String> = methods
         .mapNotNull { it.returnValue }
         .filter { rv ->
+            val returnType = rv.type
+            // typedarray::X always needs the (shared) "Array" copy-ctor fptr — no CVar/BOOLEAN case
+            // applies to it, unlike the ctx.isBuiltin types below.
+            if (returnType.startsWith("typedarray::")) return@filter true
             // `ctx.isBuiltin` also matches primitive Godot type names ("bool", "int", "float", ...) —
             // those are already handled by the CVar/BOOLEAN branches in buildReturnWrite's `when`, so
             // exclude them here too or they'd get an unused fptr property generated for nothing.
-            val returnType = rv.type
             if (returnType == "Variant" || !ctx.isBuiltin(returnType)) return@filter false
             val kotlinType = typeResolver.resolve(rv)
             primitiveKotlinToCVar(kotlinType) == null && kotlinType != BOOLEAN
         }
-        .map { it.type }
+        .map { heapBackedBuiltinName(it.type) }
         .distinct()
 
     /**
