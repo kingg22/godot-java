@@ -106,6 +106,7 @@ public object KotlinScriptRegistration {
                         "_get_instance_base_type" as Any -> ScriptExtensionVirtualCalls.getInstanceBaseType
                         "_get_language" as Any -> ScriptExtensionVirtualCalls.getLanguage
                         "_reload" as Any -> ScriptExtensionVirtualCalls.reload
+                        "_instance_create" as Any -> ScriptExtensionVirtualCalls.instanceCreate
                         else -> null
                     }
                 }
