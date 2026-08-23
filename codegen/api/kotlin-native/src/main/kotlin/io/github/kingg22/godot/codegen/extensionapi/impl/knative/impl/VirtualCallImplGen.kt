@@ -94,12 +94,20 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
     fun buildTrampoline(method: EngineClass.ClassMethod, engineClassName: ClassName): PropertySpec {
         val callVirtualType = implPackageRegistry.classNameForOrDefault("GDExtensionClassCallVirtual")
         val getInstanceMember = implPackageRegistry.memberNameForOrDefault("getInstance", isExtension = true)
-        val kotlinMethodName = safeIdentifier(method.name)
 
         val rv = method.returnValue
         val returnType = rv?.type
         val hasReturn = returnType != null && returnType != "void"
         val resolvedReturn = if (hasReturn) typeResolver.resolve(rv) else null
+
+        // When a method's return type is String, codegen (TypeOverloadGenerator.GodotStringMapping) renames
+        // the GodotString-typed original to `<name>AsGdStr` and repurposes the plain name for an all-Kotlin
+        // convenience wrapper (Kotlin String return, Kotlin String params). appendArgRead below always
+        // builds GodotString-typed args, so calling the plain name here — as this used to — mismatches its
+        // (Kotlin String) parameters whenever the method also takes a String argument. Call the AsGdStr
+        // sibling instead: GodotString-typed throughout, matching appendArgRead, and its return is already
+        // GodotString (no bridging needed in buildReturnWrite).
+        val kotlinMethodName = safeIdentifier(method.name).let { if (returnType == "String") "${it}AsGdStr" else it }
 
         val argsParamName = if (method.arguments.isEmpty()) "_" else "args"
         val retParamName = if (hasReturn) "ret" else "_"
@@ -268,33 +276,16 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
             )
 
             ctx.isBuiltin(returnType) -> {
+                // buildTrampoline calls the `<name>AsGdStr` sibling whenever returnType == "String", so
+                // `result` is already the GodotString-typed wrapper here — no bridging needed for any builtin.
                 val allocConstTypePtrArrayMember = implPackageRegistry.memberNameForOrDefault("allocConstTypePtrArray")
-                val fptrName = copyCtorFptrPropertyName(returnType)
                 beginControlFlow("%M", memScoped)
-                if (returnType == "String") {
-                    // A String-returning virtual's `open fun` stub is named `_xAsGdStr(): GodotString` (its
-                    // GodotString-returning, TODO-throwing sibling); `method.name` resolves to the *inline*
-                    // convenience `_x(): String` instead, which unwraps to Kotlin's own String, not GodotString
-                    // — bridge it back before taking .rawPtr.
-                    beginControlFlow(
-                        "%T(result).use·{·godotStringResult·->",
-                        ctx.classNameForOrDefault("String", "GodotString"),
-                    )
-                    addStatement(
-                        "%N.%M(ret, %M(godotStringResult.rawPtr))",
-                        fptrName,
-                        cinteropInvoke,
-                        allocConstTypePtrArrayMember,
-                    )
-                    endControlFlow()
-                } else {
-                    addStatement(
-                        "%N.%M(ret, %M(result.rawPtr))",
-                        fptrName,
-                        cinteropInvoke,
-                        allocConstTypePtrArrayMember,
-                    )
-                }
+                addStatement(
+                    "%N.%M(ret, %M(result.rawPtr))",
+                    copyCtorFptrPropertyName(returnType),
+                    cinteropInvoke,
+                    allocConstTypePtrArrayMember,
+                )
                 endControlFlow()
             }
 
