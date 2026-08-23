@@ -63,6 +63,11 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
         if (returnType == "void") return true
         if (ctx.isNativeStructure(returnType)) return false
         if (returnType == "Variant") return true
+        // extension_api.json only ever uses the plain "void*" string as a return type (unlike argument
+        // types, which also see "const void*") — confirmed against v4_7_1's 3 void*-returning virtuals
+        // (ScriptExtension._instance_create/_placeholder_instance_create,
+        // ScriptLanguageExtension._debug_get_stack_level_instance), so no "const " stripping needed here.
+        if (returnType == "void*") return true
         val kotlinType = typeResolver.resolve(rv)
         return primitiveKotlinToCVar(kotlinType) != null ||
             kotlinType == BOOLEAN ||
@@ -264,6 +269,17 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
 
             ctx.isEngineClass(returnType) -> addStatement(
                 "ret?.%M<%T>()?.%M?.%M = result.rawPtr",
+                cinteropReinterpret,
+                C_OPAQUE_POINTER_VAR,
+                cinteropPointed,
+                cinteropValue,
+            )
+
+            // typeResolver.resolve() maps "void*" directly to COpaquePointer (KotlinNativeTypeResolver
+            // .resolvePointer), so `result` is already the raw pointer value here — same write as the
+            // engine-class branch above, just without unwrapping a `.rawPtr` property first.
+            returnType == "void*" -> addStatement(
+                "ret?.%M<%T>()?.%M?.%M = result",
                 cinteropReinterpret,
                 C_OPAQUE_POINTER_VAR,
                 cinteropPointed,

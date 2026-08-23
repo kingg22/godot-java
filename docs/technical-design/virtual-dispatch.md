@@ -36,7 +36,7 @@ uniformly across all 106 classes — no per-class hand-listing, only per-*type-c
 | Direction | Supported | Deferred / unsupported |
 |---|---|---|
 | Argument | CVar primitives, `bool`, `enum::`/`bitfield::`, engine-class/singleton object refs (nullable per `arg.isNullable`, matching `NativeMethodGenerator`), all opaque builtins (String, StringName, RID, Vector2/3, Dictionary, Variant, Transform3D, ...) wrapped by reference (no ownership) | `void*` (~19 methods, no verified pointer-indirection semantics for the read direction — risk is a native segfault, not a compile error, so skipped rather than guessed); native-structure-typed args |
-| Return | `void`, CVar primitives, `bool`, `enum::`/`bitfield::`, engine-class (written via `.rawPtr`) | Heap-backed builtin returns (String/Array/Dictionary/Callable/Signal/NodePath/Packed*Array) — no `newCopyRaw`-equivalent placement-construct primitive exists yet for these; `VariantBinding.newCopyRaw` is the only one in the codebase |
+| Return | `void`, CVar primitives, `bool`, `enum::`/`bitfield::`, engine-class (written via `.rawPtr`), `Variant` (via `VariantBinding.newCopyRaw`), every other heap-backed builtin with a copy constructor — String/Array/Dictionary/Packed\*Array/... (placement-constructed via `VariantBinding.getPtrConstructorRaw`, see #135), `void*` (written directly — `typeResolver` already resolves it to `COpaquePointer`, see #137) | Native-structure-typed returns |
 
 A method is only annotated/dispatchable when **every** argument AND the return type are supported.
 Partial support (e.g. skip one bad arg, keep the rest) was rejected — it would silently produce a

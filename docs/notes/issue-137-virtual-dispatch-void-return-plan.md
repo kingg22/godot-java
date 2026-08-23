@@ -53,4 +53,58 @@ engine.
 
 ## Outcome
 
-(filled in after implementation + verification)
+Implemented as scoped, no surprises:
+
+- `isReturnSupported`: added `if (returnType == "void*") return true` right after the `Variant` check,
+  before the `typeResolver.resolve()` call (unneeded for this branch).
+- `buildReturnWrite`: added a `returnType == "void*"` branch right after the `ctx.isEngineClass`
+  branch, writing `ret?.reinterpret<COpaquePointerVar>()?.pointed?.value = result` — confirmed by
+  reading the generated `ScriptExtensionVirtualCalls.kt` output that `result` (from
+  `typeResolver.resolve()` resolving `void*` to `COpaquePointer`) needs no `.rawPtr` unwrap, unlike the
+  engine-class branch it's modeled on.
+- No changes needed to `buildTrampoline`/`appendArgRead`: `ScriptExtension._instance_create`'s single
+  `Object`-typed argument was already supported via the existing `ctx.isEngineClass(arg.type)` branch.
+
+### Verification (mirroring #135's corrected methodology — real exit codes, no exit-code-masking pipes)
+
+- `:codegen:api:kotlin-native:compileKotlin` — `BUILD SUCCESSFUL`, exit 0.
+- `:codegen:api:kotlin-native:test` + `:codegen:api:common:test` — `BUILD SUCCESSFUL`, exit 0.
+- `:kotlin-native:api:generated:generateGodotKotlinNativeApi` — regenerated the API; confirmed by
+  reading the output directly (this worktree had no prior generated output to diff against, so
+  verified by content inspection instead of a before/after diff):
+  - `ScriptExtensionVirtualCalls.kt` now has `instanceCreate` and `placeholderInstanceCreate`
+    `GDExtensionClassCallVirtual` properties (previously would not exist at all).
+  - `ScriptExtension.kt`'s `_instanceCreate`/`_placeholderInstanceCreate` now carry
+    `@GodotVirtualMethod("_instance_create")` / `@GodotVirtualMethod("_placeholder_instance_create")`.
+  - `ScriptLanguageExtensionVirtualCalls.kt` now has `debugGetStackLevelInstance`, and
+    `ScriptLanguageExtension.kt`'s `_debugGetStackLevelInstance` carries
+    `@GodotVirtualMethod("_debug_get_stack_level_instance")`.
+  - Generated trampoline body for `instanceCreate` (confirms the write is exactly as designed):
+    ```kotlin
+    public val instanceCreate: GDExtensionClassCallVirtual =
+            staticCFunction { instancePtr, args, ret ->
+        val instance = instancePtr.getInstance<ScriptExtension>()
+        val arg0Ptr = requireNotNull(args?.`get`(0)).reinterpret<COpaquePointerVar>().pointed.`value`
+        val arg0 = GodotObject(requireNotNull(arg0Ptr) { "Argument 0 (Object) was null" })
+        val result = instance._instanceCreate(arg0)
+        ret?.reinterpret<COpaquePointerVar>()?.pointed?.`value` = result
+    }
+    ```
+- `:kotlin-native:api:generated:compileKotlinMacosArm64` — `BUILD SUCCESSFUL`, exit 0 (28s).
+- `:kotlin-native:api:generated:compileKotlinLinuxX64` — `BUILD SUCCESSFUL`, exit 0 (28s).
+- `:kotlin-native:api:generated:compileKotlinMingwX64` — `BUILD SUCCESSFUL`, exit 0 (26s).
+- Ran each task individually/scoped, never a single all-in-one `./gradlew assemble` (per #135's finding
+  that it OOMs on this machine from resource contention across concurrently-compiling targets).
+- `./gradlew spotlessApply` reformatted the touched file (no actual diff — it was already compliant)
+  and, as a known repo quirk, also pulled in an unrelated reformat of
+  `processor/src/main/kotlin/io/github/kingg22/kogot/processor/KogotProcessor.kt`; reverted that file
+  with `git checkout --` to keep the diff scoped to this fix.
+
+### What is NOT verified
+
+Actual runtime behavior inside the Godot editor/engine is not verified by any of the above — only that
+the trampoline now exists in generated source and that the generated code compiles across all three
+Kotlin/Native targets. Whether Godot's `get_virtual_func` actually resolves and calls this trampoline
+correctly at runtime, and whether the raw `COpaquePointer` round-trips correctly through Godot's own
+`void*` handling on the C++ side, remains to be confirmed once #42's `KotlinScript._instanceCreate`
+override is exercised end-to-end in the editor.
