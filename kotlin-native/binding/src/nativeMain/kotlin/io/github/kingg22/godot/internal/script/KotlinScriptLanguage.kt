@@ -1,6 +1,7 @@
 package io.github.kingg22.godot.internal.script
 
 import io.github.kingg22.godot.api.GodotError
+import io.github.kingg22.godot.api.builtin.GodotArray
 import io.github.kingg22.godot.api.builtin.GodotString
 import io.github.kingg22.godot.api.builtin.PackedStringArray
 import io.github.kingg22.godot.api.builtin.StringName
@@ -178,6 +179,16 @@ public class KotlinScriptLanguage(nativePtr: COpaquePointer) : ScriptLanguageExt
     override fun _handlesGlobalClassType(type: GodotString): Boolean = false
 
     override fun _getGlobalClassName(path: GodotString): VariantDictionary = VariantDictionary()
+
+    // Unblocked by issue #139 / PR #140 (typedarray::* virtual-return codegen support) — same
+    // AOT/no-parser rationale as the rest of this block.
+    override fun _getBuiltInTemplates(`object`: StringName): GodotArray<VariantDictionary> = GodotArray()
+
+    override fun _debugGetCurrentStackInfo(): GodotArray<VariantDictionary> = GodotArray()
+
+    override fun _getPublicFunctions(): GodotArray<VariantDictionary> = GodotArray()
+
+    override fun _getPublicAnnotations(): GodotArray<VariantDictionary> = GodotArray()
 
     private fun newEmptyKotlinScript(): KotlinScript {
         val scriptPtr = createInstanceFunc("ScriptExtension", "KotlinScript", false, ::KotlinScript)

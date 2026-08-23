@@ -3,6 +3,7 @@
 package io.github.kingg22.godot.internal.script
 
 import io.github.kingg22.godot.api.GodotError
+import io.github.kingg22.godot.api.builtin.GodotArray
 import io.github.kingg22.godot.api.builtin.GodotString
 import io.github.kingg22.godot.api.builtin.StringName
 import io.github.kingg22.godot.api.builtin.Variant
@@ -112,6 +113,18 @@ public class KotlinScript(
     override fun _isPlaceholderFallbackEnabled(): Boolean = true
 
     override fun _getRpcConfig(): Variant = Variant()
+
+    // Unblocked by issue #139 / PR #140 (typedarray::* virtual-return codegen support) — same
+    // AOT/no-reflection rationale as `_getMethodInfo`/`_getConstants` above.
+    override fun _getDocumentation(): GodotArray<VariantDictionary> = GodotArray()
+
+    override fun _getScriptSignalList(): GodotArray<VariantDictionary> = GodotArray()
+
+    override fun _getScriptMethodList(): GodotArray<VariantDictionary> = GodotArray()
+
+    override fun _getScriptPropertyList(): GodotArray<VariantDictionary> = GodotArray()
+
+    override fun _getMembers(): GodotArray<StringName> = GodotArray()
 }
 
 private val placeholderInstanceSentinel: COpaquePointer by lazy { nativeHeap.alloc<ByteVar>().ptr }

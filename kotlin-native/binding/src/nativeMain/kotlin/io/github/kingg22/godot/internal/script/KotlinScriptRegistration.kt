@@ -168,6 +168,15 @@ public object KotlinScriptRegistration {
 
                         "_get_global_class_name" as Any -> ScriptLanguageExtensionVirtualCalls.getGlobalClassName
 
+                        "_get_built_in_templates" as Any -> ScriptLanguageExtensionVirtualCalls.getBuiltInTemplates
+
+                        "_debug_get_current_stack_info" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.debugGetCurrentStackInfo
+
+                        "_get_public_functions" as Any -> ScriptLanguageExtensionVirtualCalls.getPublicFunctions
+
+                        "_get_public_annotations" as Any -> ScriptLanguageExtensionVirtualCalls.getPublicAnnotations
+
                         else -> null
                     }
                 }
@@ -216,6 +225,11 @@ public object KotlinScriptRegistration {
                         "_is_placeholder_fallback_enabled" as Any ->
                             ScriptExtensionVirtualCalls.isPlaceholderFallbackEnabled
                         "_get_rpc_config" as Any -> ScriptExtensionVirtualCalls.getRpcConfig
+                        "_get_documentation" as Any -> ScriptExtensionVirtualCalls.getDocumentation
+                        "_get_script_signal_list" as Any -> ScriptExtensionVirtualCalls.getScriptSignalList
+                        "_get_script_method_list" as Any -> ScriptExtensionVirtualCalls.getScriptMethodList
+                        "_get_script_property_list" as Any -> ScriptExtensionVirtualCalls.getScriptPropertyList
+                        "_get_members" as Any -> ScriptExtensionVirtualCalls.getMembers
                         else -> null
                     }
                 }
