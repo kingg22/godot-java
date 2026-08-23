@@ -1,6 +1,8 @@
 package io.github.kingg22.godot.internal.script
 
+import io.github.kingg22.godot.api.core.GodotObject
 import io.github.kingg22.godot.internal.binding.InternalBinding
+import kotlinx.cinterop.COpaquePointer
 
 /**
  * Runtime-populated map from a `.kt` source file path to the already-compiled `@Godot` class it
@@ -17,14 +19,17 @@ public object KotlinScriptRegistry {
     public const val KOTLIN_SCRIPT_EXTENSION: String = "kt"
 
     /**
-     * An addressable `@Godot` class for a script file: the Godot parent class it registers under, plus
-     * its `@Export` properties/methods — reusing the same `<Class>_Binding` trampolines ClassDB
-     * registration already generated, so [KotlinScriptInstance] can answer script-instance
+     * An addressable `@Godot` class for a script file: the Godot parent class it registers under, a
+     * factory constructing an instance around an existing native pointer (the same constructor
+     * `<Class>_Binding.register()` already uses as its `createInstanceFunc` factory), plus its
+     * `@Export` properties/methods — reusing the same `<Class>_Binding` trampolines ClassDB
+     * registration already generated, so `createKotlinScriptInstance` can answer script-instance
      * `get`/`set`/`call` requests without a second, duplicated dispatch mechanism.
      */
     public data class Entry(
         val className: String,
         val baseClassName: String,
+        val factory: (COpaquePointer) -> GodotObject,
         val properties: List<ScriptPropertyDescriptor> = emptyList(),
         val methods: List<ScriptMethodDescriptor> = emptyList(),
     )

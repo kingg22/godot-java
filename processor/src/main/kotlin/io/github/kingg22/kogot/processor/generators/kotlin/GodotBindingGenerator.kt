@@ -596,6 +596,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
                         withIndent {
                             addStatement("%S,", classInfo.shortName)
                             addStatement("%S,", classInfo.getParentClassShortName() ?: "Object")
+                            addStatement("factory = ::%T,", ClassName.bestGuess(classInfo.qualifiedName))
                             add(buildScriptPropertiesArg(classInfo))
                             add(buildScriptMethodsArg(classInfo))
                         }
