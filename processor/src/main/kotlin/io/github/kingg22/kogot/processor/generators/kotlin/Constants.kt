@@ -92,3 +92,7 @@ val TO_ENUM_MASK = MemberName(GODOT_PKG, "toEnumMask")
 val GET_INSTANCE_PTR = MemberName(GODOT_INTERNAL_BINDING_PKG, "getInstance", true)
 val VARIANT_BINDING = ClassName(GODOT_INTERNAL_BINDING_PKG, "VariantBinding")
 val CallErrorWritePtr = MemberName(GODOT_INTERNAL_BINDING_PKG, "write", true)
+
+private const val GODOT_INTERNAL_SCRIPT_PKG = "$GODOT_PKG.internal.script"
+val KOTLIN_SCRIPT_REGISTRY = ClassName(GODOT_INTERNAL_SCRIPT_PKG, "KotlinScriptRegistry")
+val KOTLIN_SCRIPT_REGISTRATION = ClassName(GODOT_INTERNAL_SCRIPT_PKG, "KotlinScriptRegistration")

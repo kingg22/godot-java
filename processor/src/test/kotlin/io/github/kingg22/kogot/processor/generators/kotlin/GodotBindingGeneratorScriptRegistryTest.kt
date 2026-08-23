@@ -32,7 +32,9 @@ class GodotBindingGeneratorScriptRegistryTest {
     fun `when a file declares exactly one Godot class, then it is addressable in the registry`() {
         val result = generator.generate(listOf(godotClass("io.github.kingg22.game.Player", "/project/src/Player.kt")))
 
-        assertTrue(result.registryContent().contains("\"/project/src/Player.kt\" to \"Player\""))
+        val content = result.registryContent()
+        assertTrue(content.contains("\"/project/src/Player.kt\" to"))
+        assertTrue(content.contains("ScriptFileEntry(\"Player\", \"Node\")"))
     }
 
     @Test
@@ -56,7 +58,9 @@ class GodotBindingGeneratorScriptRegistryTest {
 
         val content = generator.generate(classes).registryContent()
 
-        assertTrue(content.contains("\"/project/src/Foo.kt\" to \"Foo\""))
-        assertTrue(content.contains("\"/project/src/Bar.kt\" to \"Bar\""))
+        assertTrue(content.contains("\"/project/src/Foo.kt\" to"))
+        assertTrue(content.contains("ScriptFileEntry(\"Foo\", \"Node\")"))
+        assertTrue(content.contains("\"/project/src/Bar.kt\" to"))
+        assertTrue(content.contains("ScriptFileEntry(\"Bar\", \"Node\")"))
     }
 }
