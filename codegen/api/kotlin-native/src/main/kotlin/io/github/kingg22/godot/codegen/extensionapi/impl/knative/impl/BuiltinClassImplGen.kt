@@ -40,8 +40,13 @@ private val STORAGE_BACKED_BUILTINS = setOf(
     "PackedVector4Array",
 )
 
-/** Explicit map of Godot class name → GDEXTENSION_VARIANT_TYPE_* constant. */
-private fun variantTypeConst(godotName: String?): String? = when (godotName) {
+/**
+ * Explicit map of Godot class name → GDEXTENSION_VARIANT_TYPE_* constant.
+ *
+ * `internal` (not `private`) so [VirtualCallImplGen] can reuse it to placement-construct heap-backed
+ * builtin returns from virtual calls, instead of duplicating this table.
+ */
+internal fun variantTypeConst(godotName: String?): String? = when (godotName) {
     "nil", "null", null -> "GDEXTENSION_VARIANT_TYPE_NIL"
     "bool" -> "GDEXTENSION_VARIANT_TYPE_BOOL"
     "int" -> "GDEXTENSION_VARIANT_TYPE_INT"

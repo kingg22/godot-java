@@ -28,6 +28,8 @@ class NativeEngineVirtualCallsGenerator(private val body: VirtualCallImplGen) {
             .addProperties(supported.map { body.buildTrampoline(it, engineClassName) })
             .build()
 
-        return createFile(typeSpec, objectName, packageName)
+        return createFile(typeSpec, objectName, packageName) {
+            body.heapBackedReturnTypes(supported).forEach { addProperty(body.buildCopyCtorFptrProperty(it)) }
+        }
     }
 }

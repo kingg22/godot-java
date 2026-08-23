@@ -3,11 +3,14 @@ package io.github.kingg22.godot.codegen.extensionapi.impl.knative.impl
 import com.squareup.kotlinpoet.BOOLEAN
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.buildCodeBlock
+import com.squareup.kotlinpoet.withIndent
 import io.github.kingg22.godot.codegen.extensionapi.Context
 import io.github.kingg22.godot.codegen.extensionapi.TypeResolver
+import io.github.kingg22.godot.codegen.impl.buildLazyBlock
 import io.github.kingg22.godot.codegen.impl.safeIdentifier
 import io.github.kingg22.godot.codegen.models.extensionapi.EngineClass
 import io.github.kingg22.godot.codegen.models.extensionapi.MethodArg
@@ -16,10 +19,12 @@ import io.github.kingg22.godot.codegen.types.C_OPAQUE_POINTER_VAR
 import io.github.kingg22.godot.codegen.types.K_REQUIRE_NOT_NULL
 import io.github.kingg22.godot.codegen.types.LONG_VAR
 import io.github.kingg22.godot.codegen.types.cinteropGet
+import io.github.kingg22.godot.codegen.types.cinteropInvoke
 import io.github.kingg22.godot.codegen.types.cinteropPointed
 import io.github.kingg22.godot.codegen.types.cinteropReinterpret
 import io.github.kingg22.godot.codegen.types.cinteropStaticCFunction
 import io.github.kingg22.godot.codegen.types.cinteropValue
+import io.github.kingg22.godot.codegen.types.memScoped
 
 /**
  * Builds `GDExtensionClassCallVirtual` trampolines: the reverse of [EngineMethodImplGen]'s ptrcall
@@ -57,12 +62,29 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
         val returnType = rv?.type ?: return true
         if (returnType == "void") return true
         if (ctx.isNativeStructure(returnType)) return false
+        if (returnType == "Variant") return true
         val kotlinType = typeResolver.resolve(rv)
         return primitiveKotlinToCVar(kotlinType) != null ||
             kotlinType == BOOLEAN ||
             returnType.startsWith("enum::") ||
             returnType.startsWith("bitfield::") ||
-            ctx.isEngineClass(returnType)
+            ctx.isEngineClass(returnType) ||
+            (ctx.isBuiltin(returnType) && copyConstructorIndex(returnType) != null)
+    }
+
+    /**
+     * Index of the builtin's own copy constructor (the one taking a single argument of its own type),
+     * resolved from the same [ctx].model.builtins data every generated builtin wrapper's `constructor(from:
+     * T)` already uses — not a hand-picked index. `null` if the type has none (so the return type is left
+     * unsupported rather than guessed at).
+     */
+    context(ctx: Context)
+    private fun copyConstructorIndex(builtinTypeName: String): Int? {
+        val builtin = ctx.model.builtins.firstOrNull { it.name == builtinTypeName } ?: return null
+        return builtin.constructors
+            .firstOrNull { it.arguments.size == 1 && it.arguments[0].type == builtinTypeName }
+            ?.index
+            ?.takeIf { it >= 0 }
     }
 
     /** Property name for the trampoline, e.g. `_physics_process` -> `physicsProcess`. */
@@ -240,7 +262,100 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
                 cinteropValue,
             )
 
+            returnType == "Variant" -> addStatement(
+                "%T.newCopyRaw(ret, result.rawPtr)",
+                implPackageRegistry.classNameForOrDefault("VariantBinding"),
+            )
+
+            ctx.isBuiltin(returnType) -> {
+                val allocConstTypePtrArrayMember = implPackageRegistry.memberNameForOrDefault("allocConstTypePtrArray")
+                val fptrName = copyCtorFptrPropertyName(returnType)
+                beginControlFlow("%M", memScoped)
+                if (returnType == "String") {
+                    // A String-returning virtual's `open fun` stub is named `_xAsGdStr(): GodotString` (its
+                    // GodotString-returning, TODO-throwing sibling); `method.name` resolves to the *inline*
+                    // convenience `_x(): String` instead, which unwraps to Kotlin's own String, not GodotString
+                    // — bridge it back before taking .rawPtr.
+                    beginControlFlow(
+                        "%T(result).use·{·godotStringResult·->",
+                        ctx.classNameForOrDefault("String", "GodotString"),
+                    )
+                    addStatement(
+                        "%N.%M(ret, %M(godotStringResult.rawPtr))",
+                        fptrName,
+                        cinteropInvoke,
+                        allocConstTypePtrArrayMember,
+                    )
+                    endControlFlow()
+                } else {
+                    addStatement(
+                        "%N.%M(ret, %M(result.rawPtr))",
+                        fptrName,
+                        cinteropInvoke,
+                        allocConstTypePtrArrayMember,
+                    )
+                }
+                endControlFlow()
+            }
+
             else -> error("Unsupported virtual call return type: $returnType (resolved: $kotlinType)")
         }
+    }
+
+    // ── Heap-backed builtin return support ──────────────────────────────────
+
+    /** Deterministic name for the file-scoped copy-constructor fptr shared by every trampoline in the
+     * file that returns [builtinTypeName] — one lookup per type per file, not per method. */
+    fun copyCtorFptrPropertyName(builtinTypeName: String): String =
+        "${safeIdentifier(builtinTypeName.replaceFirstChar(Char::lowercaseChar))}CopyCtorFptr"
+
+    /**
+     * Distinct heap-backed builtin return types among [methods] that need a shared copy-constructor
+     * fptr property emitted at file scope (see [buildCopyCtorFptrProperty]).
+     */
+    context(ctx: Context)
+    fun heapBackedReturnTypes(methods: List<EngineClass.ClassMethod>): List<String> = methods
+        .mapNotNull { it.returnValue }
+        .filter { rv ->
+            // `ctx.isBuiltin` also matches primitive Godot type names ("bool", "int", "float", ...) —
+            // those are already handled by the CVar/BOOLEAN branches in buildReturnWrite's `when`, so
+            // exclude them here too or they'd get an unused fptr property generated for nothing.
+            val returnType = rv.type
+            if (returnType == "Variant" || !ctx.isBuiltin(returnType)) return@filter false
+            val kotlinType = typeResolver.resolve(rv)
+            primitiveKotlinToCVar(kotlinType) == null && kotlinType != BOOLEAN
+        }
+        .map { it.type }
+        .distinct()
+
+    /**
+     * Top-level `private val` lazy property caching the copy-constructor fptr for [builtinTypeName],
+     * looked up via `VariantBinding.getPtrConstructorRaw` exactly like every generated builtin wrapper's
+     * own `constructor(from: T)` already does (see `BuiltinClassImplGen.buildTopLevelFptrProperties`) —
+     * just targeting an externally-given `ret` pointer instead of freshly allocated storage.
+     */
+    context(ctx: Context)
+    fun buildCopyCtorFptrProperty(builtinTypeName: String): PropertySpec {
+        val index = copyConstructorIndex(builtinTypeName)
+            ?: error("No copy constructor found for builtin type '$builtinTypeName'")
+        val variantType = variantTypeConst(builtinTypeName)
+            ?: error("Unknown variant type: $builtinTypeName")
+        val variantBinding = implPackageRegistry.classNameForOrDefault("VariantBinding")
+
+        return PropertySpec
+            .builder(
+                copyCtorFptrPropertyName(builtinTypeName),
+                implPackageRegistry.classNameForOrDefault("GDExtensionPtrConstructor"),
+                KModifier.PRIVATE,
+            )
+            .delegate(
+                buildLazyBlock {
+                    addStatement("%T.getPtrConstructorRaw(%N, %L)", variantBinding, variantType, index)
+                    withIndent {
+                        addStatement("?: error(%S)", "Missing copy constructor for builtin '$builtinTypeName'")
+                    }
+                },
+            )
+            .build()
     }
 }
