@@ -25,8 +25,6 @@ dependencies {
 
     // Used to generate the @CName entry point instead of hand-built strings.
     implementation(libs.kotlinpoet)
-
-    testImplementation(libs.junit)
 }
 
 kotlin {
@@ -42,9 +40,43 @@ java {
     }
 }
 
+// JVM Test Suites (https://docs.gradle.org/current/userguide/jvm_test_suite_plugin.html): the
+// Gradle-recommended way to declare test source sets. "test" holds unit + MockK-based mock tests
+// (ProjectBuilder, no full Gradle invocation); "functionalTest" holds TestKit (GradleRunner) tests
+// that apply the plugin in a real, separate Gradle build. Mirrors Gradle's own sample for testing
+// plugins: https://docs.gradle.org/current/samples/sample_testing_gradle_plugins.html
+@Suppress("UnstableApiUsage")
+testing {
+    suites {
+        getByName<JvmTestSuite>("test") {
+            useJUnitJupiter(libs.versions.junit5.get())
+            dependencies {
+                implementation(libs.mockk)
+            }
+        }
+
+        register<JvmTestSuite>("functionalTest") {
+            useJUnitJupiter(libs.versions.junit5.get())
+            dependencies {
+                implementation(project())
+                implementation(gradleTestKit())
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(tasks.named("test"))
+                    }
+                }
+            }
+        }
+    }
+}
+
 gradlePlugin {
     website.set(property("WEBSITE").toString())
     vcsUrl.set(property("VCS_URL").toString())
+    testSourceSets.add(sourceSets["functionalTest"])
 
     plugins {
         create(property("ID").toString()) {
@@ -56,6 +88,10 @@ gradlePlugin {
             tags.set(listOf("godot", "gdextension", "kotlin-native", "kogot"))
         }
     }
+}
+
+tasks.named("check") {
+    dependsOn(testing.suites.named("functionalTest"))
 }
 
 tasks.register("setupPluginUploadFromEnvironment") {

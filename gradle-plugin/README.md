@@ -82,3 +82,17 @@ cd gradle-plugin
 ./gradlew build
 ./gradlew publishToMavenLocal   # to consume from a local kogot-based project
 ```
+
+Both `plugin` and `settings-plugin` declare two [JVM test suites](https://docs.gradle.org/current/userguide/jvm_test_suite_plugin.html), the Gradle-recommended way to organize plugin tests (see [Gradle's own sample](https://docs.gradle.org/current/samples/sample_testing_gradle_plugins.html)):
+
+| Suite | Run with | What it covers |
+|---|---|---|
+| `test` | `./gradlew test` | Unit tests (JUnit 5, mostly against [`ProjectBuilder`](https://docs.gradle.org/current/javadoc/org/gradle/testfixtures/ProjectBuilder.html)-built projects) and MockK-based mock tests that isolate logic which would otherwise need a real Kotlin/Native target (e.g. `KogotPlugin.wireDependencies`'s KSP-configuration wiring). |
+| `functionalTest` | `./gradlew functionalTest` (also wired into `check`) | [TestKit](https://docs.gradle.org/current/userguide/test_kit.html) (`GradleRunner`) tests that apply the plugin in a real, separate Gradle build. Plugins are applied by bare id with no version: `gradlePlugin.testSourceSets` makes `withPluginClasspath()` inject each module's own runtime classpath (Kotlin Gradle Plugin, KSP Gradle plugin, KotlinPoet, this plugin's classes), so plugin resolution needs no network access. |
+
+Neither suite ever declares a real Kotlin/Native target (`linuxX64()`, etc.) - doing so would need a downloaded Konan toolchain just to run a fast test. `KogotPluginTest`/`KogotPluginFunctionalTest` cover the plugin's behavior with zero declared targets (which is enough to exercise every branch except the per-target KSP wiring, covered separately with mocks by `KogotPluginWireDependenciesTest`), and `KogotSettingsPluginFunctionalTest` relies on `org.gradle.configureondemand=true` so listing tasks on the *main* module never configures (and toolchain-downloads for) the generated `:app:export` companion project.
+
+```bash
+./gradlew test              # unit + mock tests only, fast
+./gradlew check             # test + functionalTest + validatePlugins
+```

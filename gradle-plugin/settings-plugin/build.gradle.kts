@@ -14,8 +14,6 @@ dependencies {
     implementation(gradleApi())
 
     implementation(libs.kotlinpoet)
-
-    testImplementation(libs.junit)
 }
 
 kotlin {
@@ -31,9 +29,39 @@ java {
     }
 }
 
+// See :plugin's build.gradle.kts for why these two suites exist and what each is for.
+@Suppress("UnstableApiUsage")
+testing {
+    suites {
+        getByName<JvmTestSuite>("test") {
+            useJUnitJupiter(libs.versions.junit5.get())
+            dependencies {
+                implementation(libs.mockk)
+            }
+        }
+
+        register<JvmTestSuite>("functionalTest") {
+            useJUnitJupiter(libs.versions.junit5.get())
+            dependencies {
+                implementation(project())
+                implementation(gradleTestKit())
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(tasks.named("test"))
+                    }
+                }
+            }
+        }
+    }
+}
+
 gradlePlugin {
     website.set(property("WEBSITE").toString())
     vcsUrl.set(property("VCS_URL").toString())
+    testSourceSets.add(sourceSets["functionalTest"])
 
     plugins {
         create("${property("ID")}.settings") {
@@ -47,4 +75,8 @@ gradlePlugin {
             tags.set(listOf("godot", "gdextension", "kotlin-native", "kogot"))
         }
     }
+}
+
+tasks.named("check") {
+    dependsOn(testing.suites.named("functionalTest"))
 }

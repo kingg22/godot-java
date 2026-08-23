@@ -51,6 +51,14 @@ gradle-plugin-publish = "2.1.1"
 
 # https://github.com/junit-team/junit4/releases
 junit = "4.13.2"
+# https://github.com/junit-team/junit5/releases
+# Named "junit5", not "junit-jupiter", to avoid colliding with the "junit" (JUnit 4) catalog
+# accessor: a nested "junit.jupiter" accessor would otherwise force "junit" itself behind
+# ".asProvider()".
+junit5 = "5.14.3"
+
+# https://github.com/mockk/mockk/releases
+mockk = "1.14.11"
 
 # https://github.com/uber/NullAway/releases
 nullaway = "0.13.8"
@@ -102,6 +110,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler-proces
 androidx-room-compiler-testing = { group = "androidx.room", name = "room-compiler-processing-testing", version.ref = "androidx-room-compiler" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "google-truth" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
 # build-logic
 apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "apache-commons-compress" }

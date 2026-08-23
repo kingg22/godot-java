@@ -41,7 +41,9 @@ abstract class KogotPlugin : Plugin<Project> {
         }
     }
 
-    private fun wireDependencies(
+    // internal (not private): lets the "test" source set unit/mock-test this in isolation, same
+    // convention as KogotTaskRegistration.kt's internal top-level functions.
+    internal fun wireDependencies(
         project: Project,
         extension: KogotExtension,
         kotlin: KotlinMultiplatformExtension,
