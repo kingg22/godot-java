@@ -4,6 +4,7 @@ import io.github.kingg22.godot.api.GodotError
 import io.github.kingg22.godot.api.builtin.GodotString
 import io.github.kingg22.godot.api.builtin.StringName
 import io.github.kingg22.godot.api.builtin.toStringName
+import io.github.kingg22.godot.api.core.GodotObject
 import io.github.kingg22.godot.api.core.ScriptLanguage
 import io.github.kingg22.godot.api.core.refcounted.ScriptExtension
 import io.github.kingg22.godot.internal.binding.InternalBinding
@@ -18,8 +19,10 @@ import kotlinx.cinterop.COpaquePointer
  * right after construction, since Godot's `create_instance_func` contract only allows a bare
  * `(nativePtr)` constructor.
  *
- * Attaching the script's behavior to a live scene object ([_instanceCreate]) is implemented separately
- * (see #42 Fase 3); until then it keeps the inherited default (unimplemented) behavior.
+ * [_instanceCreate] delegates to `createKotlinScriptInstance` (Fase 3b). It is not yet reachable at
+ * runtime: `ScriptExtension._instanceCreate`'s `void*` return type is unsupported by the current
+ * virtual-dispatch codegen (same category of gap PR #136 fixed for heap-backed builtins, but scoped
+ * `void*` out of), so Godot has no trampoline to call this override through yet — tracked separately.
  */
 @InternalBinding
 public class KotlinScript(
@@ -48,4 +51,8 @@ public class KotlinScript(
     override fun _getLanguage(): ScriptLanguage = KotlinScriptRegistration.language
 
     override fun _reload(keepState: Boolean): GodotError = GodotError.OK
+
+    override fun _instanceCreate(forObject: GodotObject): COpaquePointer =
+        createKotlinScriptInstance(this, forObject)
+            ?: error("Failed to create a Kotlin script instance for $forObject (script path: $scriptPath)")
 }
