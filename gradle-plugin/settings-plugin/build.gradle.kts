@@ -1,3 +1,4 @@
+import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -56,6 +57,34 @@ testing {
             }
         }
     }
+}
+
+// The generated export companion build.gradle.kts applies io.github.kingg22.kogot (from :plugin),
+// not just io.github.kingg22.kogot.settings - gradlePlugin.testSourceSets only injects *this*
+// module's own runtime classpath, so a functional test that actually configures that companion
+// project (rather than just asserting on its generated text) needs a combined classpath. Built with
+// a second PluginUnderTestMetadata task instance (see https://docs.gradle.org/current/userguide/test_kit.html),
+// the same task type gradlePlugin.testSourceSets wires up automatically, but pointed at a classpath
+// that also includes :plugin.
+val functionalTestExtraPluginClasspath = configurations.create("functionalTestExtraPluginClasspath")
+
+dependencies {
+    functionalTestExtraPluginClasspath(project(":plugin"))
+}
+
+val combinedFunctionalTestPluginClasspath = tasks.register<PluginUnderTestMetadata>(
+    "combinedFunctionalTestPluginClasspath",
+) {
+    pluginClasspath.from(sourceSets.main.get().runtimeClasspath, functionalTestExtraPluginClasspath)
+    outputDirectory.set(layout.buildDirectory.dir("combinedFunctionalTestPluginClasspath"))
+}
+
+tasks.named<Test>("functionalTest") {
+    dependsOn(combinedFunctionalTestPluginClasspath)
+    systemProperty(
+        "combinedPluginClasspathDir",
+        combinedFunctionalTestPluginClasspath.get().outputDirectory.get().asFile.absolutePath,
+    )
 }
 
 gradlePlugin {
