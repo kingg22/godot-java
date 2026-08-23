@@ -536,9 +536,9 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
                             )
                         }
                         addStatement(
-                            "%T.registry.forEach { (path, entry) -> %T.register(path, entry.className, entry.baseClassName) }",
-                            ClassName(packageName, "ScriptFileRegistry"),
+                            "%T.registerAll(%T.registry)",
                             KOTLIN_SCRIPT_REGISTRY,
+                            ClassName(packageName, "ScriptFileRegistry"),
                         )
                         addStatement("%T.registerKotlinScriptLanguageSupport()", KOTLIN_SCRIPT_REGISTRATION)
                     }
@@ -575,7 +575,6 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
     private fun generateScriptRegistryFile(classes: List<ClassInfo>): GeneratedFile {
         val packageName = classes.first().packageName + ".generated"
         val className = "ScriptFileRegistry"
-        val entryClassName = "ScriptFileEntry"
 
         val addressable = classes
             .filter { it.filePath.isNotBlank() }
@@ -584,7 +583,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
             .mapValues { (_, sameFile) -> sameFile.single() }
             .toSortedMap()
 
-        val entryType = ClassName(packageName, entryClassName)
+        val entryType = KOTLIN_SCRIPT_REGISTRY_ENTRY
 
         val mapInitializer = if (addressable.isEmpty()) {
             CodeBlock.of("emptyMap()")
@@ -606,20 +605,6 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
                 .build()
         }
 
-        val entryType0 = TypeSpec
-            .classBuilder(entryClassName)
-            .addModifiers(KModifier.DATA)
-            .addKdoc("The addressable `@Godot` class for a script file, and the Godot parent class it registers under.")
-            .primaryConstructor(
-                FunSpec.constructorBuilder()
-                    .addParameter("className", STRING)
-                    .addParameter("baseClassName", STRING)
-                    .build(),
-            )
-            .addProperty(PropertySpec.builder("className", STRING).initializer("className").build())
-            .addProperty(PropertySpec.builder("baseClassName", STRING).initializer("baseClassName").build())
-            .build()
-
         val type = TypeSpec
             .objectBuilder(className)
             .addAnnotation(InternalBindingClassName)
@@ -639,7 +624,6 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
         val file = FileSpec
             .builder(packageName, className)
             .applyCommonConfig()
-            .addType(entryType0)
             .addType(type)
             .build()
 

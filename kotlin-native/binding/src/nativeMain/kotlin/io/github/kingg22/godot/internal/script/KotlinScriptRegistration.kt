@@ -4,6 +4,7 @@ import io.github.kingg22.godot.api.core.ScriptLanguageExtensionVirtualCalls
 import io.github.kingg22.godot.api.core.refcounted.ResourceFormatLoaderVirtualCalls
 import io.github.kingg22.godot.api.core.refcounted.ResourceFormatSaverVirtualCalls
 import io.github.kingg22.godot.api.core.refcounted.ScriptExtensionVirtualCalls
+import io.github.kingg22.godot.api.internal.checkGodotError
 import io.github.kingg22.godot.api.singleton.Engine
 import io.github.kingg22.godot.api.singleton.ResourceLoader
 import io.github.kingg22.godot.api.singleton.ResourceSaver
@@ -50,18 +51,32 @@ public object KotlinScriptRegistration {
                 resolveVirtualCall(funcNamePtr) { funcName ->
                     when (funcName) {
                         "_get_name" as Any -> ScriptLanguageExtensionVirtualCalls.getName
+
                         "_init" as Any -> ScriptLanguageExtensionVirtualCalls.init
+
                         "_get_type" as Any -> ScriptLanguageExtensionVirtualCalls.getType
+
                         "_get_extension" as Any -> ScriptLanguageExtensionVirtualCalls.getExtension
+
                         "_finish" as Any -> ScriptLanguageExtensionVirtualCalls.finish
+
                         "_get_reserved_words" as Any -> ScriptLanguageExtensionVirtualCalls.getReservedWords
+
                         "_get_comment_delimiters" as Any -> ScriptLanguageExtensionVirtualCalls.getCommentDelimiters
+
                         "_get_string_delimiters" as Any -> ScriptLanguageExtensionVirtualCalls.getStringDelimiters
+
                         "_has_named_classes" as Any -> ScriptLanguageExtensionVirtualCalls.hasNamedClasses
+
                         "_validate" as Any -> ScriptLanguageExtensionVirtualCalls.validate
-                        "_get_recognized_extensions" as Any -> ScriptLanguageExtensionVirtualCalls.getRecognizedExtensions
+
+                        "_get_recognized_extensions" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.getRecognizedExtensions
+
                         "_supports_builtin_mode" as Any -> ScriptLanguageExtensionVirtualCalls.supportsBuiltinMode
+
                         "_create_script" as Any -> ScriptLanguageExtensionVirtualCalls.createScript
+
                         else -> null
                     }
                 }
@@ -144,17 +159,32 @@ public object KotlinScriptRegistration {
             },
         )
 
-        val languagePtr = createInstanceFunc("ScriptLanguageExtension", "KotlinScriptLanguage", false, ::KotlinScriptLanguage)
-            ?: error("Failed to create the KotlinScriptLanguage singleton")
+        val languagePtr = createInstanceFunc(
+            "ScriptLanguageExtension",
+            "KotlinScriptLanguage",
+            false,
+            ::KotlinScriptLanguage,
+        ) ?: error("Failed to create the KotlinScriptLanguage singleton")
         language = KotlinScriptLanguage(languagePtr)
-        val _ = Engine.instance.registerScriptLanguage(language)
+        checkGodotError(
+            "Kotlin Script Language registration to engine",
+            Engine.instance.registerScriptLanguage(language),
+        )
 
-        val loaderPtr = createInstanceFunc("ResourceFormatLoader", "KotlinResourceFormatLoader", false, ::KotlinResourceFormatLoader)
-            ?: error("Failed to create the KotlinResourceFormatLoader singleton")
+        val loaderPtr = createInstanceFunc(
+            "ResourceFormatLoader",
+            "KotlinResourceFormatLoader",
+            false,
+            ::KotlinResourceFormatLoader,
+        ) ?: error("Failed to create the KotlinResourceFormatLoader singleton")
         ResourceLoader.instance.addResourceFormatLoader(KotlinResourceFormatLoader(loaderPtr))
 
-        val saverPtr = createInstanceFunc("ResourceFormatSaver", "KotlinResourceFormatSaver", false, ::KotlinResourceFormatSaver)
-            ?: error("Failed to create the KotlinResourceFormatSaver singleton")
+        val saverPtr = createInstanceFunc(
+            "ResourceFormatSaver",
+            "KotlinResourceFormatSaver",
+            false,
+            ::KotlinResourceFormatSaver,
+        ) ?: error("Failed to create the KotlinResourceFormatSaver singleton")
         ResourceSaver.instance.addResourceFormatSaver(KotlinResourceFormatSaver(saverPtr))
     }
 }

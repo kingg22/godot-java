@@ -9,6 +9,7 @@ import io.github.kingg22.godot.api.core.GodotObject
 import io.github.kingg22.godot.api.core.ScriptLanguageExtension
 import io.github.kingg22.godot.internal.binding.InternalBinding
 import io.github.kingg22.godot.internal.binding.createInstanceFunc
+import io.github.kingg22.godot.internal.script.KotlinScriptRegistry.KOTLIN_SCRIPT_EXTENSION
 import kotlinx.cinterop.COpaquePointer
 
 /**
@@ -75,6 +76,6 @@ private val KOTLIN_RESERVED_WORDS = arrayOf(
 
 private fun packedStringArrayOf(vararg values: String): PackedStringArray {
     val array = PackedStringArray()
-    values.forEach { val _ = array.pushBack(it.toGodotString()) }
+    values.forEach { val _ = array.pushBack(it) }
     return array
 }

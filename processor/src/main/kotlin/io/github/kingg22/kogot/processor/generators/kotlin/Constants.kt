@@ -95,4 +95,5 @@ val CallErrorWritePtr = MemberName(GODOT_INTERNAL_BINDING_PKG, "write", true)
 
 private const val GODOT_INTERNAL_SCRIPT_PKG = "$GODOT_PKG.internal.script"
 val KOTLIN_SCRIPT_REGISTRY = ClassName(GODOT_INTERNAL_SCRIPT_PKG, "KotlinScriptRegistry")
+val KOTLIN_SCRIPT_REGISTRY_ENTRY = KOTLIN_SCRIPT_REGISTRY.nestedClass("Entry")
 val KOTLIN_SCRIPT_REGISTRATION = ClassName(GODOT_INTERNAL_SCRIPT_PKG, "KotlinScriptRegistration")

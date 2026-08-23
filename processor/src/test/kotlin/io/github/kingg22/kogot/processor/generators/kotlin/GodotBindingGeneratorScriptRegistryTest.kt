@@ -34,7 +34,7 @@ class GodotBindingGeneratorScriptRegistryTest {
 
         val content = result.registryContent()
         assertTrue(content.contains("\"/project/src/Player.kt\" to"))
-        assertTrue(content.contains("ScriptFileEntry(\"Player\", \"Node\")"))
+        assertTrue(content.contains("KotlinScriptRegistry.Entry(\"Player\", \"Node\")"))
     }
 
     @Test
@@ -59,8 +59,8 @@ class GodotBindingGeneratorScriptRegistryTest {
         val content = generator.generate(classes).registryContent()
 
         assertTrue(content.contains("\"/project/src/Foo.kt\" to"))
-        assertTrue(content.contains("ScriptFileEntry(\"Foo\", \"Node\")"))
+        assertTrue(content.contains("KotlinScriptRegistry.Entry(\"Foo\", \"Node\")"))
         assertTrue(content.contains("\"/project/src/Bar.kt\" to"))
-        assertTrue(content.contains("ScriptFileEntry(\"Bar\", \"Node\")"))
+        assertTrue(content.contains("KotlinScriptRegistry.Entry(\"Bar\", \"Node\")"))
     }
 }

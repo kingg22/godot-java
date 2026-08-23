@@ -22,10 +22,12 @@ import kotlinx.cinterop.COpaquePointer
  * (see #42 Fase 3); until then it keeps the inherited default (unimplemented) behavior.
  */
 @InternalBinding
-public class KotlinScript(nativePtr: COpaquePointer) : ScriptExtension(nativePtr) {
-    public var scriptPath: String = ""
-    public var targetClassName: String = ""
-    public var targetBaseClassName: String = "Object"
+public class KotlinScript(
+    nativePtr: COpaquePointer,
+    public val scriptPath: String = "",
+    private val targetClassName: String = "",
+    private val targetBaseClassName: String = "",
+) : ScriptExtension(nativePtr) {
 
     override fun _canInstantiate(): Boolean = targetClassName.isNotEmpty()
 
