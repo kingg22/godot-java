@@ -31,7 +31,10 @@ private class ScriptInstanceState(
     val script: KotlinScript,
     val owner: GodotObject,
     val targetPtr: COpaquePointer,
-)
+) {
+    /** Set right after allocation (see [createKotlinScriptInstance]); freed by `free_func`. */
+    lateinit var info: CPointer<GDExtensionScriptInstanceInfo3>
+}
 
 /** Interned so a repeated property/method/class name doesn't allocate a new native `StringName` per call. */
 private val internedNames = mutableMapOf<String, StringName>()
@@ -75,8 +78,12 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
                     argsArray[0] = pValue
                     val errorPtr = alloc<GDExtensionCallError>().ptr
                     setter.invoke(null, s.targetPtr, argsArray.reinterpret(), 1L, null, errorPtr)
+                    if (errorPtr.pointed.error == GDExtensionCallErrorType.GDEXTENSION_CALL_OK) {
+                        GDExtensionBool.TRUE
+                    } else {
+                        GDExtensionBool.FALSE
+                    }
                 }
-                GDExtensionBool.TRUE
             }
         }
 
@@ -244,11 +251,14 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
         free_func = staticCFunction { pInstance ->
             if (pInstance != null) {
                 val ref = pInstance.asStableRef<ScriptInstanceState>()
-                ref.get().targetPtr.asStableRef<Any>().dispose()
+                val freedState = ref.get()
+                freedState.targetPtr.asStableRef<Any>().dispose()
+                nativeHeap.free(freedState.info)
                 ref.dispose()
             }
         }
     }
+    state.info = info.ptr
 
     return ScriptBinding.instanceCreate3Raw(info.ptr, selfPtr)
 }

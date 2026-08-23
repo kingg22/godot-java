@@ -573,7 +573,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
      * with zero or 2+ are silently excluded (not an error) since there's no unambiguous class to pick.
      */
     private fun generateScriptRegistryFile(classes: List<ClassInfo>): GeneratedFile {
-        val packageName = classes.first().packageName + ".generated"
+        val packageName = classes.firstOrNull()?.packageName?.plus(".generated") ?: "io.github.kingg22.godot.generated"
         val className = "ScriptFileRegistry"
 
         val addressable = classes

@@ -1,16 +1,26 @@
 package io.github.kingg22.godot.internal.script
 
+import io.github.kingg22.godot.api.GodotError
 import io.github.kingg22.godot.api.builtin.GodotString
 import io.github.kingg22.godot.api.builtin.PackedStringArray
+import io.github.kingg22.godot.api.builtin.StringName
+import io.github.kingg22.godot.api.builtin.Variant
+import io.github.kingg22.godot.api.builtin.VariantArray
 import io.github.kingg22.godot.api.builtin.VariantDictionary
 import io.github.kingg22.godot.api.builtin.toGodotString
 import io.github.kingg22.godot.api.builtin.toVariant
 import io.github.kingg22.godot.api.core.GodotObject
 import io.github.kingg22.godot.api.core.ScriptLanguageExtension
+import io.github.kingg22.godot.api.core.refcounted.Script
+import io.github.kingg22.godot.api.singleton.ProjectSettings
 import io.github.kingg22.godot.internal.binding.InternalBinding
 import io.github.kingg22.godot.internal.binding.createInstanceFunc
 import io.github.kingg22.godot.internal.script.KotlinScriptRegistry.KOTLIN_SCRIPT_EXTENSION
+import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.COpaquePointer
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.nativeHeap
+import kotlinx.cinterop.ptr
 
 /**
  * Registers Kotlin as a Godot scripting language so `.kt` files with an addressable `@Godot` class
@@ -55,18 +65,128 @@ public class KotlinScriptLanguage(nativePtr: COpaquePointer) : ScriptLanguageExt
         // in the compile-time registry (populated from the KSP-generated `ScriptFileRegistry`) is the
         // only validation available.
         val result = VariantDictionary()
-        result["valid".toVariant()] = KotlinScriptRegistry.contains(path.toKString()).toVariant()
+        result["valid".toVariant()] = KotlinScriptRegistry.contains(ProjectSettings.instance.globalizePath(path.toKString())).toVariant()
         return result
     }
 
     override fun _getRecognizedExtensions(): PackedStringArray = packedStringArrayOf(KOTLIN_SCRIPT_EXTENSION)
 
-    override fun _createScript(): GodotObject {
+    override fun _createScript(): GodotObject = newEmptyKotlinScript()
+
+    // ── Remaining required virtuals (issue #42) ────────────────────────────
+    // Kotlin/Native is AOT-compiled: there is no in-editor parser, debugger, profiler, or code-generation
+    // facility to back any of these with real behavior — each returns the safe "unsupported"/empty
+    // default the engine falls back to for a language without that capability. Godot's
+    // `GDVIRTUAL_REQUIRED_CALL` macro still demands every one of these be overridden (confirmed via
+    // real-editor testing: leaving any of them unwired logs "Required virtual method ... must be
+    // overridden" on every editor start), so all are wired even though most are no-ops here.
+
+    override fun _isControlFlowKeyword(keyword: GodotString): Boolean = false
+
+    override fun _makeTemplate(template: GodotString, className: GodotString, baseClassName: GodotString): Script =
+        newEmptyKotlinScript()
+
+    override fun _isUsingTemplates(): Boolean = false
+
+    override fun _validatePathAsGdStr(path: GodotString): GodotString = GodotString()
+
+    override fun _supportsDocumentation(): Boolean = false
+
+    override fun _canInheritFromFile(): Boolean = false
+
+    override fun _findFunction(function: GodotString, code: GodotString): Int = -1
+
+    override fun _makeFunctionAsGdStr(
+        className: GodotString,
+        functionName: GodotString,
+        functionArgs: PackedStringArray,
+    ): GodotString = GodotString()
+
+    override fun _canMakeFunction(): Boolean = false
+
+    override fun _openInExternalEditor(script: Script, line: Int, column: Int): GodotError = GodotError.UNAVAILABLE
+
+    override fun _overridesExternalEditor(): Boolean = false
+
+    override fun _completeCode(code: GodotString, path: GodotString, owner: GodotObject): VariantDictionary =
+        VariantDictionary()
+
+    override fun _lookupCode(
+        code: GodotString,
+        symbol: GodotString,
+        path: GodotString,
+        owner: GodotObject,
+    ): VariantDictionary = VariantDictionary()
+
+    override fun _autoIndentCodeAsGdStr(code: GodotString, fromLine: Int, toLine: Int): GodotString = code
+
+    override fun _addGlobalConstant(name: StringName, value: Variant) {}
+
+    override fun _addNamedGlobalConstant(name: StringName, value: Variant) {}
+
+    override fun _removeNamedGlobalConstant(name: StringName) {}
+
+    override fun _threadEnter() {}
+
+    override fun _threadExit() {}
+
+    override fun _debugGetErrorAsGdStr(): GodotString = GodotString()
+
+    override fun _debugGetStackLevelCount(): Int = 0
+
+    override fun _debugGetStackLevelLine(level: Int): Int = 0
+
+    override fun _debugGetStackLevelFunctionAsGdStr(level: Int): GodotString = GodotString()
+
+    override fun _debugGetStackLevelSourceAsGdStr(level: Int): GodotString = GodotString()
+
+    override fun _debugGetStackLevelLocals(level: Int, maxSubitems: Int, maxDepth: Int): VariantDictionary =
+        VariantDictionary()
+
+    override fun _debugGetStackLevelMembers(level: Int, maxSubitems: Int, maxDepth: Int): VariantDictionary =
+        VariantDictionary()
+
+    // Non-null by contract (Original type `void*`); there is no interpreter stack to point into, so this
+    // hands back a stable, never-dereferenced sentinel allocated once (not per call).
+    override fun _debugGetStackLevelInstance(level: Int): COpaquePointer = debugStackLevelInstanceSentinel
+
+    override fun _debugGetGlobals(maxSubitems: Int, maxDepth: Int): VariantDictionary = VariantDictionary()
+
+    override fun _debugParseStackLevelExpressionAsGdStr(
+        level: Int,
+        expression: GodotString,
+        maxSubitems: Int,
+        maxDepth: Int,
+    ): GodotString = GodotString()
+
+    override fun _reloadAllScripts() {}
+
+    override fun _reloadScripts(scripts: VariantArray, softReload: Boolean) {}
+
+    override fun _reloadToolScript(script: Script, softReload: Boolean) {}
+
+    override fun _getPublicConstants(): VariantDictionary = VariantDictionary()
+
+    override fun _profilingStart() {}
+
+    override fun _profilingStop() {}
+
+    override fun _profilingSetSaveNativeCalls(enable: Boolean) {}
+
+    override fun _frame() {}
+
+    override fun _handlesGlobalClassType(type: GodotString): Boolean = false
+
+    override fun _getGlobalClassName(path: GodotString): VariantDictionary = VariantDictionary()
+
+    private fun newEmptyKotlinScript(): KotlinScript {
         val scriptPtr = createInstanceFunc("ScriptExtension", "KotlinScript", false, ::KotlinScript)
             ?: error("Failed to create a KotlinScript instance")
         return KotlinScript(scriptPtr)
     }
 }
+
+private val debugStackLevelInstanceSentinel: COpaquePointer by lazy { nativeHeap.alloc<ByteVar>().ptr }
 
 private val KOTLIN_RESERVED_WORDS = arrayOf(
     "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if", "in", "interface",

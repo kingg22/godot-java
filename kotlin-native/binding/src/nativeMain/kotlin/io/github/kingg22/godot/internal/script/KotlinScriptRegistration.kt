@@ -77,6 +77,97 @@ public object KotlinScriptRegistration {
 
                         "_create_script" as Any -> ScriptLanguageExtensionVirtualCalls.createScript
 
+                        "_is_control_flow_keyword" as Any -> ScriptLanguageExtensionVirtualCalls.isControlFlowKeyword
+
+                        "_make_template" as Any -> ScriptLanguageExtensionVirtualCalls.makeTemplate
+
+                        "_is_using_templates" as Any -> ScriptLanguageExtensionVirtualCalls.isUsingTemplates
+
+                        "_validate_path" as Any -> ScriptLanguageExtensionVirtualCalls.validatePath
+
+                        "_supports_documentation" as Any -> ScriptLanguageExtensionVirtualCalls.supportsDocumentation
+
+                        "_can_inherit_from_file" as Any -> ScriptLanguageExtensionVirtualCalls.canInheritFromFile
+
+                        "_find_function" as Any -> ScriptLanguageExtensionVirtualCalls.findFunction
+
+                        "_make_function" as Any -> ScriptLanguageExtensionVirtualCalls.makeFunction
+
+                        "_can_make_function" as Any -> ScriptLanguageExtensionVirtualCalls.canMakeFunction
+
+                        "_open_in_external_editor" as Any -> ScriptLanguageExtensionVirtualCalls.openInExternalEditor
+
+                        "_overrides_external_editor" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.overridesExternalEditor
+
+                        "_complete_code" as Any -> ScriptLanguageExtensionVirtualCalls.completeCode
+
+                        "_lookup_code" as Any -> ScriptLanguageExtensionVirtualCalls.lookupCode
+
+                        "_auto_indent_code" as Any -> ScriptLanguageExtensionVirtualCalls.autoIndentCode
+
+                        "_add_global_constant" as Any -> ScriptLanguageExtensionVirtualCalls.addGlobalConstant
+
+                        "_add_named_global_constant" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.addNamedGlobalConstant
+
+                        "_remove_named_global_constant" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.removeNamedGlobalConstant
+
+                        "_thread_enter" as Any -> ScriptLanguageExtensionVirtualCalls.threadEnter
+
+                        "_thread_exit" as Any -> ScriptLanguageExtensionVirtualCalls.threadExit
+
+                        "_debug_get_error" as Any -> ScriptLanguageExtensionVirtualCalls.debugGetError
+
+                        "_debug_get_stack_level_count" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.debugGetStackLevelCount
+
+                        "_debug_get_stack_level_line" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.debugGetStackLevelLine
+
+                        "_debug_get_stack_level_function" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.debugGetStackLevelFunction
+
+                        "_debug_get_stack_level_source" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.debugGetStackLevelSource
+
+                        "_debug_get_stack_level_locals" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.debugGetStackLevelLocals
+
+                        "_debug_get_stack_level_members" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.debugGetStackLevelMembers
+
+                        "_debug_get_stack_level_instance" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.debugGetStackLevelInstance
+
+                        "_debug_get_globals" as Any -> ScriptLanguageExtensionVirtualCalls.debugGetGlobals
+
+                        "_debug_parse_stack_level_expression" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.debugParseStackLevelExpression
+
+                        "_reload_all_scripts" as Any -> ScriptLanguageExtensionVirtualCalls.reloadAllScripts
+
+                        "_reload_scripts" as Any -> ScriptLanguageExtensionVirtualCalls.reloadScripts
+
+                        "_reload_tool_script" as Any -> ScriptLanguageExtensionVirtualCalls.reloadToolScript
+
+                        "_get_public_constants" as Any -> ScriptLanguageExtensionVirtualCalls.getPublicConstants
+
+                        "_profiling_start" as Any -> ScriptLanguageExtensionVirtualCalls.profilingStart
+
+                        "_profiling_stop" as Any -> ScriptLanguageExtensionVirtualCalls.profilingStop
+
+                        "_profiling_set_save_native_calls" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.profilingSetSaveNativeCalls
+
+                        "_frame" as Any -> ScriptLanguageExtensionVirtualCalls.frame
+
+                        "_handles_global_class_type" as Any ->
+                            ScriptLanguageExtensionVirtualCalls.handlesGlobalClassType
+
+                        "_get_global_class_name" as Any -> ScriptLanguageExtensionVirtualCalls.getGlobalClassName
+
                         else -> null
                     }
                 }
@@ -107,6 +198,24 @@ public object KotlinScriptRegistration {
                         "_get_language" as Any -> ScriptExtensionVirtualCalls.getLanguage
                         "_reload" as Any -> ScriptExtensionVirtualCalls.reload
                         "_instance_create" as Any -> ScriptExtensionVirtualCalls.instanceCreate
+                        "_editor_can_reload_from_file" as Any -> ScriptExtensionVirtualCalls.editorCanReloadFromFile
+                        "_get_base_script" as Any -> ScriptExtensionVirtualCalls.getBaseScript
+                        "_get_global_name" as Any -> ScriptExtensionVirtualCalls.getGlobalName
+                        "_inherits_script" as Any -> ScriptExtensionVirtualCalls.inheritsScript
+                        "_placeholder_instance_create" as Any -> ScriptExtensionVirtualCalls.placeholderInstanceCreate
+                        "_get_doc_class_name" as Any -> ScriptExtensionVirtualCalls.getDocClassName
+                        "_has_method" as Any -> ScriptExtensionVirtualCalls.hasMethod
+                        "_has_static_method" as Any -> ScriptExtensionVirtualCalls.hasStaticMethod
+                        "_get_method_info" as Any -> ScriptExtensionVirtualCalls.getMethodInfo
+                        "_has_script_signal" as Any -> ScriptExtensionVirtualCalls.hasScriptSignal
+                        "_has_property_default_value" as Any -> ScriptExtensionVirtualCalls.hasPropertyDefaultValue
+                        "_get_property_default_value" as Any -> ScriptExtensionVirtualCalls.getPropertyDefaultValue
+                        "_update_exports" as Any -> ScriptExtensionVirtualCalls.updateExports
+                        "_get_member_line" as Any -> ScriptExtensionVirtualCalls.getMemberLine
+                        "_get_constants" as Any -> ScriptExtensionVirtualCalls.getConstants
+                        "_is_placeholder_fallback_enabled" as Any ->
+                            ScriptExtensionVirtualCalls.isPlaceholderFallbackEnabled
+                        "_get_rpc_config" as Any -> ScriptExtensionVirtualCalls.getRpcConfig
                         else -> null
                     }
                 }
