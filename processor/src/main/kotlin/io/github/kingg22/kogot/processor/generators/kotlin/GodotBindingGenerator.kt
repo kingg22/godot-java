@@ -6,7 +6,10 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MAP
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STRING
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.withIndent
 import io.github.kingg22.kogot.processor.diagnostics.DiagnosticCode
@@ -84,6 +87,7 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
         }
 
         files.add(generateCallbacksFile(godotClasses))
+        files.add(generateScriptRegistryFile(godotClasses))
 
         return GenerationResult(files, diagnostics)
     }
@@ -532,6 +536,72 @@ class GodotBindingGenerator(private val typeResolver: VariantTypeResolver = Defa
                             )
                         }
                     }
+                    .build(),
+            )
+            .build()
+
+        val file = FileSpec
+            .builder(packageName, className)
+            .applyCommonConfig()
+            .addType(type)
+            .build()
+
+        val content = StringBuilder()
+        file.writeTo(content)
+
+        return GeneratedFile(
+            relativePath = "${packageName.replace('.', '/')}/$className.kt",
+            content = content.toString(),
+            sourceClassNames = classes.map { it.qualifiedName },
+        )
+    }
+
+    /**
+     * Generates `ScriptFileRegistry`: a compile-time map from source file path to the single `@Godot`
+     * class declared in that file, used to resolve a `.kt` script resource in the editor to its
+     * already-compiled ClassDB class (see issue #42 — Kotlin as a Godot script language).
+     *
+     * Unlike GDScript's one-class-per-file model, a Kotlin file may declare zero, one, or several
+     * top-level `@Godot` classes. Only files with **exactly one** are addressable as a script: files
+     * with zero or 2+ are silently excluded (not an error) since there's no unambiguous class to pick.
+     */
+    private fun generateScriptRegistryFile(classes: List<ClassInfo>): GeneratedFile {
+        val packageName = classes.first().packageName + ".generated"
+        val className = "ScriptFileRegistry"
+
+        val addressable = classes
+            .filter { it.filePath.isNotBlank() }
+            .groupBy { it.filePath }
+            .filterValues { it.size == 1 }
+            .mapValues { (_, sameFile) -> sameFile.single().shortName }
+            .toSortedMap()
+
+        val mapInitializer = if (addressable.isEmpty()) {
+            CodeBlock.of("emptyMap()")
+        } else {
+            CodeBlock.builder()
+                .add("mapOf(\n")
+                .withIndent {
+                    addressable.forEach { (filePath, shortName) ->
+                        addStatement("%S to %S,", filePath, shortName)
+                    }
+                }
+                .add(")")
+                .build()
+        }
+
+        val type = TypeSpec
+            .objectBuilder(className)
+            .addAnnotation(InternalBindingClassName)
+            .addKdoc(
+                "Maps each source file to the single `@Godot` class it declares, for resolving `.kt` " +
+                    "script resources (issue #42). Files with zero or 2+ `@Godot` classes are not " +
+                    "addressable as a script and are excluded.",
+            )
+            .addProperty(
+                PropertySpec
+                    .builder("registry", MAP.parameterizedBy(STRING, STRING))
+                    .initializer(mapInitializer)
                     .build(),
             )
             .build()
