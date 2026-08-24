@@ -18,7 +18,6 @@ import io.github.kingg22.godot.api.core.ScriptLanguage
 import io.github.kingg22.godot.api.core.refcounted.Script
 import io.github.kingg22.godot.api.core.refcounted.ScriptExtension
 import io.github.kingg22.godot.internal.binding.InternalBinding
-import io.github.kingg22.godot.internal.binding.createInstanceFunc
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.alloc
@@ -89,12 +88,14 @@ public class KotlinScript(
 
     override fun _editorCanReloadFromFile(): Boolean = false
 
-    // Non-null by contract, but a Kotlin `@Godot` class inherits from its native ClassDB parent, never
-    // from another Script resource — there is no real base script to report. Godot's own inheritance-walk
-    // callers check `is_valid()` (this shared instance reports `_isValid() == false`), not null, so one
-    // reused sentinel is enough; allocating a fresh native object per call here would leak one on every
-    // Inspector/editor refresh, since this is queried far more routinely than `_createScript()`.
-    override fun _getBaseScript(): Script = emptyBaseScript
+    // A Kotlin `@Godot` class inherits its native ClassDB parent, never another Script resource — there is
+    // no real base script to report. Nullable since #143/PR #144: returning a non-null sentinel here
+    // (this used to hand back a shared reused instance) makes `Ref<Script>::is_valid()` — a bare
+    // null-pointer check, NOT a call to this script's own `_isValid()` — permanently true, so
+    // `EditorData::get_script_icon`'s `while (base_scr.is_valid()) { ...; base_scr = base_scr->
+    // get_base_script(); }` (editor/editor_data.cpp:1213-1239, no cycle detection) never terminates.
+    // Confirmed via a self-built Godot 4.7.1 dev binary under lldb: a real SIGSEGV inside that loop.
+    override fun _getBaseScript(): Script? = null
 
     override fun _getGlobalName(): StringName = StringName()
 
@@ -193,9 +194,3 @@ public class KotlinScript(
 }
 
 private val placeholderInstanceSentinel: COpaquePointer by lazy { nativeHeap.alloc<ByteVar>().ptr }
-
-private val emptyBaseScript: KotlinScript by lazy {
-    val scriptPtr = createInstanceFunc("ScriptExtension", "KotlinScript", false, ::KotlinScript)
-        ?: error("Failed to create the shared empty-base-script KotlinScript instance")
-    KotlinScript(scriptPtr)
-}
