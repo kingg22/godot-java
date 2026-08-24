@@ -61,9 +61,14 @@ public class KotlinScript(
 
     override fun _reload(keepState: Boolean): GodotError = GodotError.OK
 
-    override fun _instanceCreate(forObject: GodotObject): COpaquePointer =
-        createKotlinScriptInstance(this, forObject)
-            ?: error("Failed to create a Kotlin script instance for $forObject (script path: $scriptPath)")
+    // `forObject` is nullable (issue #141 / PR #142): fall back to the never-dereferenced sentinel rather
+    // than crashing if Godot ever calls this without an object — `error()` stays reserved for a genuine
+    // registry miss on a real, non-null object, which indicates an actual bug worth surfacing loudly.
+    override fun _instanceCreate(forObject: GodotObject?): COpaquePointer =
+        forObject?.let {
+            createKotlinScriptInstance(this, it)
+                ?: error("Failed to create a Kotlin script instance for $it (script path: $scriptPath)")
+        } ?: placeholderInstanceSentinel
 
     // ── Remaining required virtuals (issue #42) ────────────────────────────
     // Same rationale as `KotlinScriptLanguage`: Kotlin/Native is AOT-compiled, so most of these have no
@@ -81,13 +86,14 @@ public class KotlinScript(
 
     override fun _getGlobalName(): StringName = StringName()
 
-    override fun _inheritsScript(script: Script): Boolean = false
+    override fun _inheritsScript(script: Script?): Boolean = false
 
     // True placeholder support (Inspector properties without running the class in-editor) is issue #125;
     // until then this reuses the real instance proxy so the editor at least gets a working object instead
-    // of nothing, falling back to a never-dereferenced sentinel only if the registry lookup itself fails.
-    override fun _placeholderInstanceCreate(forObject: GodotObject): COpaquePointer =
-        createKotlinScriptInstance(this, forObject) ?: placeholderInstanceSentinel
+    // of nothing, falling back to a never-dereferenced sentinel if the registry lookup fails or `forObject`
+    // is null (issue #141 / PR #142 — the latter is now possible per the generated signature).
+    override fun _placeholderInstanceCreate(forObject: GodotObject?): COpaquePointer =
+        forObject?.let { createKotlinScriptInstance(this, it) } ?: placeholderInstanceSentinel
 
     override fun _getDocClassName(): StringName = StringName()
 

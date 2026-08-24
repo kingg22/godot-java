@@ -100,18 +100,14 @@ public object KotlinScriptRegistration {
                         "_overrides_external_editor" as Any ->
                             ScriptLanguageExtensionVirtualCalls.overridesExternalEditor
 
-                        // "_complete_code" and "_lookup_code" are NOT wired: their `owner: GodotObject`
-                        // argument (index 2/3) has no default value in extension_api.json, so codegen
-                        // treats it as non-null — but Godot passes a real null pointer there when editing
-                        // a script that isn't currently attached to any live scene object (the common
-                        // case: editing straight from the FileSystem dock). The generated trampoline's
-                        // `requireNotNull(...)` then throws inside a `staticCFunction` C callback, which
-                        // Kotlin/Native cannot let escape the FFI boundary — it aborts the whole process
-                        // (SIGABRT) instead of failing gracefully. Confirmed via real-editor testing.
-                        // Leaving these unwired trades a crash for the same safe "Required virtual method
-                        // must be overridden" log every other still-blocked method already produces.
-                        // Needs a codegen fix recognizing that virtual-dispatch engine-class arguments can
-                        // be null even without JSON default-value metadata saying so — tracked separately.
+                        // Unblocked by issue #141 / PR #142 (virtual-dispatch engine-class arguments are
+                        // now null-safe regardless of extension_api.json default-value metadata) — see
+                        // KotlinScriptLanguage._completeCode/_lookupCode for the crash this previously
+                        // caused (owner: GodotObject is null whenever the script being edited isn't
+                        // attached to any live scene object, the ordinary FileSystem-dock-editing case).
+                        "_complete_code" as Any -> ScriptLanguageExtensionVirtualCalls.completeCode
+
+                        "_lookup_code" as Any -> ScriptLanguageExtensionVirtualCalls.lookupCode
 
                         "_auto_indent_code" as Any -> ScriptLanguageExtensionVirtualCalls.autoIndentCode
 

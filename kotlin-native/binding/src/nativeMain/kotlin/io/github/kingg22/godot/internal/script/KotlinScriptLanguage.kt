@@ -105,18 +105,20 @@ public class KotlinScriptLanguage(nativePtr: COpaquePointer) : ScriptLanguageExt
 
     override fun _canMakeFunction(): Boolean = false
 
-    override fun _openInExternalEditor(script: Script, line: Int, column: Int): GodotError = GodotError.UNAVAILABLE
+    override fun _openInExternalEditor(script: Script?, line: Int, column: Int): GodotError = GodotError.UNAVAILABLE
 
     override fun _overridesExternalEditor(): Boolean = false
 
-    override fun _completeCode(code: GodotString, path: GodotString, owner: GodotObject): VariantDictionary =
+    // `owner` is nullable (issue #141 / PR #142): Godot passes null whenever the script being edited
+    // isn't attached to any live scene object — the ordinary case editing from the FileSystem dock.
+    override fun _completeCode(code: GodotString, path: GodotString, owner: GodotObject?): VariantDictionary =
         VariantDictionary()
 
     override fun _lookupCode(
         code: GodotString,
         symbol: GodotString,
         path: GodotString,
-        owner: GodotObject,
+        owner: GodotObject?,
     ): VariantDictionary = VariantDictionary()
 
     override fun _autoIndentCodeAsGdStr(code: GodotString, fromLine: Int, toLine: Int): GodotString = code
@@ -164,7 +166,7 @@ public class KotlinScriptLanguage(nativePtr: COpaquePointer) : ScriptLanguageExt
 
     override fun _reloadScripts(scripts: VariantArray, softReload: Boolean) {}
 
-    override fun _reloadToolScript(script: Script, softReload: Boolean) {}
+    override fun _reloadToolScript(script: Script?, softReload: Boolean) {}
 
     override fun _getPublicConstants(): VariantDictionary = VariantDictionary()
 

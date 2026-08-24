@@ -25,17 +25,17 @@ import kotlinx.cinterop.COpaquePointer
  */
 @InternalBinding
 public class KotlinResourceFormatSaver(nativePtr: COpaquePointer) : ResourceFormatSaver(nativePtr) {
-    override fun _getRecognizedExtensions(resource: Resource): PackedStringArray {
+    override fun _getRecognizedExtensions(resource: Resource?): PackedStringArray {
         val array = PackedStringArray()
-        if (resource.isClass(KOTLIN_SCRIPT_CLASS_NAME)) {
+        if (resource?.isClass(KOTLIN_SCRIPT_CLASS_NAME) == true) {
             val _ = array.pushBack(KOTLIN_SCRIPT_EXTENSION.toGodotString())
         }
         return array
     }
 
-    override fun _recognize(resource: Resource): Boolean = resource.isClass(KOTLIN_SCRIPT_CLASS_NAME)
+    override fun _recognize(resource: Resource?): Boolean = resource?.isClass(KOTLIN_SCRIPT_CLASS_NAME) == true
 
-    override fun _save(resource: Resource, path: GodotString, flags: UInt): GodotError = GodotError.FAILED
+    override fun _save(resource: Resource?, path: GodotString, flags: UInt): GodotError = GodotError.FAILED
 }
 
 private val KOTLIN_SCRIPT_CLASS_NAME = "KotlinScript".toStringName()
