@@ -35,12 +35,37 @@ uniformly across all 106 classes — no per-class hand-listing, only per-*type-c
 
 | Direction | Supported | Deferred / unsupported |
 |---|---|---|
-| Argument | CVar primitives, `bool`, `enum::`/`bitfield::`, engine-class/singleton object refs (nullable per `arg.isNullable`, matching `NativeMethodGenerator`), all opaque builtins (String, StringName, RID, Vector2/3, Dictionary, Variant, Transform3D, ...) wrapped by reference (no ownership) | `void*` (~19 methods, no verified pointer-indirection semantics for the read direction — risk is a native segfault, not a compile error, so skipped rather than guessed); native-structure-typed args |
+| Argument | CVar primitives, `bool`, `enum::`/`bitfield::`, engine-class/singleton object refs (**always** nullable — see below, not gated by `arg.isNullable`), all opaque builtins (String, StringName, RID, Vector2/3, Dictionary, Variant, Transform3D, ...) wrapped by reference (no ownership, never null — passed by value via ptrcall) | `void*` (~19 methods, no verified pointer-indirection semantics for the read direction — risk is a native segfault, not a compile error, so skipped rather than guessed); native-structure-typed args |
 | Return | `void`, CVar primitives, `bool`, `enum::`/`bitfield::`, engine-class (written via `.rawPtr`), `Variant` (via `VariantBinding.newCopyRaw`), every other heap-backed builtin with a copy constructor — String/Array/Dictionary/Packed\*Array/... (placement-constructed via `VariantBinding.getPtrConstructorRaw`, see #135), `void*` (written directly — `typeResolver` already resolves it to `COpaquePointer`, see #137), `typedarray::*` (shares the plain `Array` copy-constructor fptr — a typed array is still exactly an `Array` at the ABI level, see #139) | Native-structure-typed returns |
 
 A method is only annotated/dispatchable when **every** argument AND the return type are supported.
 Partial support (e.g. skip one bad arg, keep the rest) was rejected — it would silently produce a
 wrong-arity override.
+
+### Engine-class/singleton arguments are always nullable (see issue #141)
+
+`VirtualCallImplGen.appendArgRead` used to gate the null-check on `arg.isNullable` — the same flag
+`NativeMethodGenerator` uses for *forward* (Kotlin-calls-Godot) optional parameters, derived from
+whether `extension_api.json` gives the argument an explicit `default_value: "null"`. That heuristic
+doesn't apply here: `extension_api.json` never sets `default_value` on a virtual method's arguments at
+all (confirmed empirically against v4.7.1 — zero virtual-method arguments have the key), so
+`arg.isNullable` was always `false` for every one of them, and the reverse-dispatch trampoline always
+took the `requireNotNull` path. Godot's C++ side genuinely does pass a null `Object*` on some virtual
+calls regardless — e.g. `ScriptLanguageExtension._complete_code`'s `owner` argument whenever the script
+being edited isn't attached to a live scene object (the ordinary case editing from the FileSystem
+dock). `requireNotNull` throwing a Kotlin exception here is fatal: the exception can't cross the C
+callback boundary `staticCFunction` sets up, so it aborts the whole Godot process instead of failing
+gracefully.
+
+The fix: `appendArgRead` now *always* takes the null-safe `?.let { }` path for engine-class/singleton
+arguments, unconditionally — `arg.isNullable` is no longer consulted for this branch. Since the
+trampoline's local variable is now `Type?`, the `open fun` stub's own parameter also has to accept
+null (`NativeMethodGenerator.buildMethod`'s `forceNullableEngineArgs`, threaded through only for
+`method.isVirtual`) — this is a source-breaking signature change for every existing override of an
+affected virtual (`Type` -> `Type?`). Builtin-typed (opaque, by-reference) virtual arguments are
+unaffected: they're passed by value via Godot's ptrcall convention, which always hands over a valid
+(possibly default/empty) memory location, never a null pointer — confirmed no builtin-typed virtual
+argument in `extension_api.json` is ever marked nullable either, consistent with that ABI guarantee.
 
 Explicitly out of scope: brand-new user-declared virtuals with no engine counterpart (not coherent —
 Godot only ever queries names from its own virtual method table); `getVirtual`'s `hash` parameter

@@ -233,18 +233,15 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
                     cinteropPointed,
                     cinteropValue,
                 )
-                if (arg.isNullable) {
-                    addStatement("val %N = %N?.let·{·%T(it)·}", varName, ptrVar, kotlinType)
-                } else {
-                    addStatement(
-                        "val %N = %T(%M(%N) { %S })",
-                        varName,
-                        kotlinType,
-                        K_REQUIRE_NOT_NULL,
-                        ptrVar,
-                        "Argument $index (${arg.type}) was null",
-                    )
-                }
+                // Unlike a forward (Kotlin-calls-Godot) call, arg.isNullable's JSON-default-value heuristic
+                // says nothing about whether the *engine* can hand this pointer back as null on a virtual
+                // dispatch — it never does for this direction (extension_api.json has no default_value on
+                // virtual-method arguments at all). Godot genuinely does pass null here for some calls (e.g.
+                // ScriptLanguageExtension._complete_code's `owner` when the script isn't attached to a live
+                // scene object), so always take the null-safe path rather than requireNotNull-ing and
+                // crashing the whole process with an uncatchable Kotlin/Native exception across the
+                // staticCFunction boundary.
+                addStatement("val %N = %N?.let·{·%T(it)·}", varName, ptrVar, kotlinType)
             }
 
             ctx.isBuiltin(arg.type) -> addStatement("val %N = %T(%L)", varName, kotlinType, rawArg)

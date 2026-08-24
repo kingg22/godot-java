@@ -45,6 +45,14 @@ class NativeMethodGenerator(
      *                       instead of the default `TODO()` stub. Callers supply this when an
      *                       implementation generator has
      *                       produced a real cinterop body.
+     * @param forceNullableEngineArgs When `true`, every engine-class/singleton-typed parameter is
+     *                       declared nullable regardless of [MethodArg.isNullable]. Used only for
+     *                       virtual method stubs: [MethodArg.isNullable] reflects a JSON default
+     *                       value, a forward-call-only concept — `extension_api.json` never sets one
+     *                       on a virtual method's arguments, yet the engine can and does hand back a
+     *                       genuine null pointer on dispatch (see `VirtualCallImplGen.appendArgRead`).
+     *                       Forward (non-virtual) call sites must keep passing `false` so their
+     *                       nullability stays exactly [MethodArg.isNullable]-derived, unchanged.
      * @param block          Extra customisation applied to the [FunSpec.Builder] after the
      *                       body is set (KDoc additions, annotations, etc.).
      */
@@ -54,6 +62,7 @@ class NativeMethodGenerator(
         className: String,
         codeBody: CodeBlock,
         vararg modifiers: KModifier,
+        forceNullableEngineArgs: Boolean = false,
         block: FunSpec.Builder.() -> Unit = {},
     ): FunSpec {
         withExceptionContext({ "Generating method $className.'${method.name}'" }) {
@@ -107,7 +116,9 @@ class NativeMethodGenerator(
                 require(!isVararg || safeIdentifier(arg.name) != "args") {
                     "Vararg method '$name' has a fixed arg named 'args' — rename it to avoid clash"
                 }
-                builder.addParameter(buildParameter(arg))
+                val forceNullable = forceNullableEngineArgs &&
+                    (context.isEngineClass(arg.type) || context.isSingleton(arg.type))
+                builder.addParameter(buildParameter(arg, forceNullable))
             }
 
             // Trailing vararg only after all fixed args
@@ -139,14 +150,18 @@ class NativeMethodGenerator(
      *
      * Default values from Godot JSON are emitted as `TODO()` —
      * the impl layer replaces them with actual expressions.
+     *
+     * @param forceNullable Forces a nullable type regardless of [MethodArg.isNullable]. See
+     *                       [buildMethod]'s `forceNullableEngineArgs` doc — only ever `true` for
+     *                       virtual method stubs.
      */
     context(context: Context)
-    fun buildParameter(arg: MethodArg): ParameterSpec {
+    fun buildParameter(arg: MethodArg, forceNullable: Boolean = false): ParameterSpec {
         withExceptionContext({
             "Generating parameter '${arg.name}': ${arg.type} (${arg.meta})} = ${arg.defaultValue ?: "--"}"
         }) {
             val rawType = typeResolver.resolve(arg)
-            val type = if (arg.isNullable) rawType.copy(nullable = true) else rawType
+            val type = if (arg.isNullable || forceNullable) rawType.copy(nullable = true) else rawType
             val kotlinName = safeIdentifier(arg.name)
             val paramBuilder = ParameterSpec.builder(kotlinName, type)
 

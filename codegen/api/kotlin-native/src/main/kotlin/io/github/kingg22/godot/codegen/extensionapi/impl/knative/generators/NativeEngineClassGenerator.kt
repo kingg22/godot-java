@@ -69,6 +69,10 @@ class NativeEngineClassGenerator(
                     method = method,
                     className = cls.name,
                     codeBody = body.buildMethodBody(method, cls.name),
+                    // Reverse dispatch (VirtualCallImplGen) always null-checks engine-class/singleton
+                    // args on the way in — the stub's own parameter type has to accept null too, or the
+                    // generated trampoline body won't type-check against it.
+                    forceNullableEngineArgs = method.isVirtual,
                 ) {
                     if (method.isVirtual) {
                         addModifiers(KModifier.OPEN)
