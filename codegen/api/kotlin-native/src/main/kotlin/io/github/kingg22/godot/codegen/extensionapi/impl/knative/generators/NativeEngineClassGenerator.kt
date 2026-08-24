@@ -73,6 +73,12 @@ class NativeEngineClassGenerator(
                     // args on the way in — the stub's own parameter type has to accept null too, or the
                     // generated trampoline body won't type-check against it.
                     forceNullableEngineArgs = method.isVirtual,
+                    // Mirror of the above for the return side: COpaquePointer (behind rawPtr) can't
+                    // itself represent a null address, so an override's only way to hand back "no
+                    // value" for an engine-class/singleton return is a null reference. The trampoline's
+                    // return write (VirtualCallImplGen.buildReturnWrite) already null-checks `result`
+                    // before writing .rawPtr, so declaring the return type nullable is safe and required.
+                    forceNullableEngineReturn = method.isVirtual,
                 ) {
                     if (method.isVirtual) {
                         addModifiers(KModifier.OPEN)

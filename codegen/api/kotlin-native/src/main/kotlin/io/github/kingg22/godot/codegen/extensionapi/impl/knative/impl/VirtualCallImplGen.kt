@@ -286,8 +286,15 @@ class VirtualCallImplGen(private val typeResolver: TypeResolver) {
                 cinteropValue,
             )
 
+            // NativeEngineClassGenerator's virtual-stub call site passes forceNullableEngineReturn =
+            // method.isVirtual, so `result` is Type? here for every engine-class-returning virtual —
+            // COpaquePointer (behind rawPtr) can't itself represent a null address, so a null `result`
+            // has to become a null-safe read (`result?.rawPtr` evaluates to null), not a direct property
+            // access, or a genuinely-null override return would NPE inside the trampoline instead of
+            // correctly reporting "no value" back to Godot. Mirrors appendArgRead's `?.let { }` null
+            // safety on the read side of this same trampoline.
             ctx.isEngineClass(returnType) -> addStatement(
-                "ret?.%M<%T>()?.%M?.%M = result.rawPtr",
+                "ret?.%M<%T>()?.%M?.%M = result?.rawPtr",
                 cinteropReinterpret,
                 C_OPAQUE_POINTER_VAR,
                 cinteropPointed,

@@ -36,7 +36,7 @@ uniformly across all 106 classes — no per-class hand-listing, only per-*type-c
 | Direction | Supported | Deferred / unsupported |
 |---|---|---|
 | Argument | CVar primitives, `bool`, `enum::`/`bitfield::`, engine-class/singleton object refs (**always** nullable — see below, not gated by `arg.isNullable`), all opaque builtins (String, StringName, RID, Vector2/3, Dictionary, Variant, Transform3D, ...) wrapped by reference (no ownership, never null — passed by value via ptrcall) | `void*` (~19 methods, no verified pointer-indirection semantics for the read direction — risk is a native segfault, not a compile error, so skipped rather than guessed); native-structure-typed args |
-| Return | `void`, CVar primitives, `bool`, `enum::`/`bitfield::`, engine-class (written via `.rawPtr`), `Variant` (via `VariantBinding.newCopyRaw`), every other heap-backed builtin with a copy constructor — String/Array/Dictionary/Packed\*Array/... (placement-constructed via `VariantBinding.getPtrConstructorRaw`, see #135), `void*` (written directly — `typeResolver` already resolves it to `COpaquePointer`, see #137), `typedarray::*` (shares the plain `Array` copy-constructor fptr — a typed array is still exactly an `Array` at the ABI level, see #139) | Native-structure-typed returns |
+| Return | `void`, CVar primitives, `bool`, `enum::`/`bitfield::`, engine-class (**always** nullable — see below, not gated by any JSON metadata — written via null-safe `?.rawPtr`), `Variant` (via `VariantBinding.newCopyRaw`), every other heap-backed builtin with a copy constructor — String/Array/Dictionary/Packed\*Array/... (placement-constructed via `VariantBinding.getPtrConstructorRaw`, see #135), `void*` (written directly — `typeResolver` already resolves it to `COpaquePointer`, see #137), `typedarray::*` (shares the plain `Array` copy-constructor fptr — a typed array is still exactly an `Array` at the ABI level, see #139) | Native-structure-typed returns |
 
 A method is only annotated/dispatchable when **every** argument AND the return type are supported.
 Partial support (e.g. skip one bad arg, keep the rest) was rejected — it would silently produce a
@@ -66,6 +66,37 @@ affected virtual (`Type` -> `Type?`). Builtin-typed (opaque, by-reference) virtu
 unaffected: they're passed by value via Godot's ptrcall convention, which always hands over a valid
 (possibly default/empty) memory location, never a null pointer — confirmed no builtin-typed virtual
 argument in `extension_api.json` is ever marked nullable either, consistent with that ABI guarantee.
+
+### Engine-class/singleton returns are always nullable (see issue #143)
+
+`VirtualCallImplGen.buildReturnWrite`'s `ctx.isEngineClass(returnType)` branch used to write
+`result.rawPtr` unconditionally. `COpaquePointer` (the type behind `GodotObject.rawPtr`) cannot itself
+represent a null address — kotlinx.cinterop's `CPointer<T>` is non-null by construction, so a null
+address can only ever surface as a Kotlin `null` reference — yet the generated stub's return type
+(`NativeMethodGenerator.buildMethod`'s `.returns(returnTypeSpec)`) was always declared non-nullable, with
+no return-side equivalent of the argument-side `forceNullable`. No override of one of these virtuals
+could ever hand back "no value" to Godot.
+
+Confirmed as a real, crash-causing gap by real-editor-testing PR #134 (#42): `ScriptExtension
+._get_base_script` is forced to always return a real object, and Godot's own `EditorData
+::get_script_icon` (`editor/editor_data.cpp`) walks the base-script chain via a bare `Ref<T>::is_valid()`
+null check with zero cycle detection — a self-returning sentinel never terminates the loop, eventually
+crashing the editor. Confirmed via lldb that the returned object itself is not corrupted: this is purely
+an inability-to-express-null bug, not a memory-safety one. Scanning `extension_api.json` v4.7.1: 43
+virtual methods across 30 classes return an engine-class type, all sharing this same gap — several
+documented in Godot's own C++ headers as legitimately nullable (`AudioEffect._instantiate`,
+`Mesh._surface_get_material`, `Texture2D._get_image`, ...). The fix applies uniformly to all 43,
+regardless of any JSON metadata — `extension_api.json`'s `is_required: true` on a virtual (e.g.
+`_get_base_script`) means the virtual itself must be implemented, not that its return value can't be
+null.
+
+The fix: `NativeMethodGenerator.buildMethod` gained a `forceNullableEngineReturn` parameter (default
+`false`, threaded through only for `method.isVirtual` at `NativeEngineClassGenerator`'s standalone
+instance-method call site, mirroring `forceNullableEngineArgs`) that declares the return type nullable
+when it resolves to an engine class or singleton. `VirtualCallImplGen.buildReturnWrite`'s engine-class
+branch now writes `result?.rawPtr` instead of `result.rawPtr` — a null-safe read matching
+`appendArgRead`'s `?.let { }` on the argument side of this same trampoline. This is a source-breaking
+signature change for every existing override of one of the 43 affected virtuals (`Type` -> `Type?`).
 
 Explicitly out of scope: brand-new user-declared virtuals with no engine counterpart (not coherent —
 Godot only ever queries names from its own virtual method table); `getVirtual`'s `hash` parameter

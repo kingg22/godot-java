@@ -53,6 +53,16 @@ class NativeMethodGenerator(
      *                       genuine null pointer on dispatch (see `VirtualCallImplGen.appendArgRead`).
      *                       Forward (non-virtual) call sites must keep passing `false` so their
      *                       nullability stays exactly [MethodArg.isNullable]-derived, unchanged.
+     * @param forceNullableEngineReturn When `true` and the method's return type resolves to an
+     *                       engine class or singleton, the return type is declared nullable
+     *                       (`.copy(nullable = true)`). Used only for virtual method stubs: a
+     *                       `COpaquePointer` (the type behind `GodotObject.rawPtr`) cannot itself
+     *                       represent a null address — the only way a Kotlin override can hand back
+     *                       "no value" for one of these virtuals is by returning a `null` reference —
+     *                       yet the generated return type was always declared non-nullable, making
+     *                       that architecturally impossible (see `VirtualCallImplGen.buildReturnWrite`).
+     *                       Forward (non-virtual) call sites must keep passing `false` so their return
+     *                       type stays exactly as resolved, unchanged.
      * @param block          Extra customisation applied to the [FunSpec.Builder] after the
      *                       body is set (KDoc additions, annotations, etc.).
      */
@@ -63,10 +73,11 @@ class NativeMethodGenerator(
         codeBody: CodeBlock,
         vararg modifiers: KModifier,
         forceNullableEngineArgs: Boolean = false,
+        forceNullableEngineReturn: Boolean = false,
         block: FunSpec.Builder.() -> Unit = {},
     ): FunSpec {
         withExceptionContext({ "Generating method $className.'${method.name}'" }) {
-            val (returnTypeSpec, originalType, originalMeta) = when (method) {
+            val (rawReturnTypeSpec, originalType, originalMeta) = when (method) {
                 is BuiltinClass.BuiltinMethod -> Triple(
                     method.returnType?.let { typeResolver.resolve(it) } ?: UNIT,
                     method.returnType,
@@ -84,6 +95,15 @@ class NativeMethodGenerator(
                     method.returnType,
                     null,
                 )
+            }
+
+            val returnTypeSpec = if (forceNullableEngineReturn &&
+                originalType != null &&
+                (context.isEngineClass(originalType) || context.isSingleton(originalType))
+            ) {
+                rawReturnTypeSpec.copy(nullable = true)
+            } else {
+                rawReturnTypeSpec
             }
 
             val name = method.name
