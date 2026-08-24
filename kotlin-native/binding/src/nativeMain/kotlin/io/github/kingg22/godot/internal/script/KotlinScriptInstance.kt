@@ -5,6 +5,7 @@ package io.github.kingg22.godot.internal.script
 import io.github.kingg22.godot.api.MethodFlags
 import io.github.kingg22.godot.api.PropertyHint
 import io.github.kingg22.godot.api.PropertyUsageFlags
+import io.github.kingg22.godot.api.builtin.GodotString
 import io.github.kingg22.godot.api.builtin.StringName
 import io.github.kingg22.godot.api.builtin.internal.toGDE
 import io.github.kingg22.godot.api.builtin.toStringName
@@ -50,6 +51,15 @@ private class ScriptInstanceState(
 /** Interned so a repeated property/method/class name doesn't allocate a new native `StringName` per call. */
 private val internedNames = mutableMapOf<String, StringName>()
 private fun internedName(value: String): StringName = internedNames.getOrPut(value) { value.toStringName() }
+
+/**
+ * `GDExtensionPropertyInfo.hint_string` is a `GDExtensionStringPtr` (a `String`), NOT a `StringName` —
+ * a distinct C++ class with a different binary layout. Passing an [internedName]'s `StringName` pointer
+ * there type-confuses whatever later reads it as a `String` (e.g. the editor Inspector rendering a
+ * property's hint text) into dereferencing memory through the wrong vtable — confirmed via real-editor
+ * testing: SIGSEGV, only after `_instance_create` had already returned successfully.
+ */
+private val emptyHintString: GodotString by lazy { GodotString() }
 
 private fun COpaquePointer?.state(): ScriptInstanceState? = this?.asStableRef<ScriptInstanceState>()?.get()
 
@@ -135,14 +145,13 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
                     null
                 } else {
                     val classNameStr = internedName(s.entry.className)
-                    val emptyHintStr = internedName("")
                     nativeHeap.allocArray<GDExtensionPropertyInfo>(properties.size) { index ->
                         val prop = properties[index]
                         type = prop.type.toGDE()
                         name = internedName(prop.name).rawPtr
                         class_name = classNameStr.rawPtr
                         hint = PropertyHint.NONE.value.toUInt()
-                        hint_string = emptyHintStr.rawPtr
+                        hint_string = emptyHintString.rawPtr
                         usage = PropertyUsageFlags.DEFAULT.value.toUInt()
                     }
                 }
@@ -184,7 +193,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
                         return_value.name = emptyStr.rawPtr
                         return_value.class_name = emptyStr.rawPtr
                         return_value.hint = PropertyHint.NONE.value.toUInt()
-                        return_value.hint_string = emptyStr.rawPtr
+                        return_value.hint_string = emptyHintString.rawPtr
                         return_value.usage = PropertyUsageFlags.DEFAULT.value.toUInt()
                         flags = MethodFlags.NORMAL.value.toUInt()
                         id = 0
