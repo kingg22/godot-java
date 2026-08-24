@@ -30,8 +30,19 @@ private class ScriptInstanceState(
     val entry: KotlinScriptRegistry.Entry,
     val script: KotlinScript,
     val owner: GodotObject,
-    val targetPtr: COpaquePointer,
+    /**
+     * Null when [owner]'s actual native class doesn't match [KotlinScriptRegistry.Entry.baseClassName]
+     * (see [createKotlinScriptInstance]) — [entry.factory] is never called in that case, since it assumes
+     * the pointer really is a [KotlinScriptRegistry.Entry.baseClassName]-shaped object; calling it on a
+     * mismatched one reads/writes through a field layout the object doesn't have (confirmed via
+     * real-editor testing: SIGSEGV). [properties]/[methods] report empty whenever this is null, so every
+     * callback below naturally no-ops without needing to null-check [targetPtr] itself.
+     */
+    val targetPtr: COpaquePointer?,
 ) {
+    val properties get() = if (targetPtr != null) entry.properties else emptyList()
+    val methods get() = if (targetPtr != null) entry.methods else emptyList()
+
     /** Set right after allocation (see [createKotlinScriptInstance]); freed by `free_func`. */
     lateinit var info: CPointer<GDExtensionScriptInstanceInfo3>
 }
@@ -59,8 +70,18 @@ private fun COpaquePointer?.state(): ScriptInstanceState? = this?.asStableRef<Sc
 @InternalBinding
 public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObject): COpaquePointer? {
     val entry = KotlinScriptRegistry[script.scriptPath] ?: return null
-    val target = entry.factory(forObject.rawPtr)
-    val targetPtr = StableRef.create(target).asCPointer()
+    // `entry.factory` assumes `forObject`'s native pointer is really an instance of `entry.baseClassName`
+    // (e.g. Sprite.kt's factory constructs a Sprite2D-shaped wrapper) — Godot's own "Load Script"/Attach
+    // Script UI does not itself reject attaching a script whose declared base type doesn't match the
+    // target node. On a mismatch, `targetPtr` stays null instead of calling the factory (see
+    // ScriptInstanceState's KDoc) — the instance is still created and returned (Godot's `_instance_create`
+    // contract has no way to signal "declined" short of a real pointer), it just answers every
+    // property/method query as empty rather than corrupting memory through the wrong field layout.
+    val targetPtr = if (forObject.isClass(internedName(entry.baseClassName))) {
+        StableRef.create(entry.factory(forObject.rawPtr)).asCPointer()
+    } else {
+        null
+    }
     val state = ScriptInstanceState(entry, script, forObject, targetPtr)
     val selfPtr = StableRef.create(state).asCPointer()
 
@@ -68,7 +89,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
         set_func = staticCFunction { pInstance, pName, pValue ->
             val s = pInstance.state()
             val name = pName?.let { StringName(it).toString() }
-            val descriptor = s?.entry?.properties?.firstOrNull { it.name == name }
+            val descriptor = s?.properties?.firstOrNull { it.name == name }
             val setter = descriptor?.setter
             if (s == null || setter == null) {
                 GDExtensionBool.FALSE
@@ -90,7 +111,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
         get_func = staticCFunction { pInstance, pName, rRet ->
             val s = pInstance.state()
             val name = pName?.let { StringName(it).toString() }
-            val descriptor = s?.entry?.properties?.firstOrNull { it.name == name }
+            val descriptor = s?.properties?.firstOrNull { it.name == name }
             if (s == null || descriptor == null) {
                 GDExtensionBool.FALSE
             } else {
@@ -108,7 +129,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
                 rCount?.pointed?.value = 0u
                 null
             } else {
-                val properties = s.entry.properties
+                val properties = s.properties
                 rCount?.pointed?.value = properties.size.toUInt()
                 if (properties.isEmpty()) {
                     null
@@ -150,7 +171,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
                 rCount?.pointed?.value = 0u
                 null
             } else {
-                val methods = s.entry.methods
+                val methods = s.methods
                 rCount?.pointed?.value = methods.size.toUInt()
                 if (methods.isEmpty()) {
                     null
@@ -183,7 +204,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
         get_property_type_func = staticCFunction { pInstance, pName, rIsValid ->
             val s = pInstance.state()
             val name = pName?.let { StringName(it).toString() }
-            val descriptor = s?.entry?.properties?.firstOrNull { it.name == name }
+            val descriptor = s?.properties?.firstOrNull { it.name == name }
             rIsValid?.pointed?.value = if (descriptor != null) GDExtensionBool.TRUE else GDExtensionBool.FALSE
             descriptor?.type?.toGDE() ?: GDEXTENSION_VARIANT_TYPE_NIL
         }
@@ -193,13 +214,13 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
         has_method_func = staticCFunction { pInstance, pName ->
             val s = pInstance.state()
             val name = pName?.let { StringName(it).toString() }
-            if (s != null && s.entry.methods.any { it.name == name }) GDExtensionBool.TRUE else GDExtensionBool.FALSE
+            if (s != null && s.methods.any { it.name == name }) GDExtensionBool.TRUE else GDExtensionBool.FALSE
         }
 
         get_method_argument_count_func = staticCFunction { pInstance, pName, rIsValid ->
             val s = pInstance.state()
             val name = pName?.let { StringName(it).toString() }
-            val descriptor = s?.entry?.methods?.firstOrNull { it.name == name }
+            val descriptor = s?.methods?.firstOrNull { it.name == name }
             rIsValid?.pointed?.value = if (descriptor != null) GDExtensionBool.TRUE else GDExtensionBool.FALSE
             descriptor?.argumentCount?.toLong() ?: 0L
         }
@@ -207,7 +228,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
         call_func = staticCFunction { pInstance, pMethod, pArgs, pArgumentCount, rReturn, rError ->
             val s = pInstance.state()
             val name = pMethod?.let { StringName(it).toString() }
-            val descriptor = s?.entry?.methods?.firstOrNull { it.name == name }
+            val descriptor = s?.methods?.firstOrNull { it.name == name }
             if (s == null || descriptor == null) {
                 rError?.pointed?.error = GDExtensionCallErrorType.GDEXTENSION_CALL_ERROR_INVALID_METHOD
             } else {
@@ -252,7 +273,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
             if (pInstance != null) {
                 val ref = pInstance.asStableRef<ScriptInstanceState>()
                 val freedState = ref.get()
-                freedState.targetPtr.asStableRef<Any>().dispose()
+                freedState.targetPtr?.asStableRef<Any>()?.dispose()
                 nativeHeap.free(freedState.info)
                 ref.dispose()
             }

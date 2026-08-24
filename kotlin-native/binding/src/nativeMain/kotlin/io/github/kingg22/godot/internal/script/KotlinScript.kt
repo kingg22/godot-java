@@ -61,14 +61,14 @@ public class KotlinScript(
 
     override fun _reload(keepState: Boolean): GodotError = GodotError.OK
 
-    // `forObject` is nullable (issue #141 / PR #142): fall back to the never-dereferenced sentinel rather
-    // than crashing if Godot ever calls this without an object — `error()` stays reserved for a genuine
-    // registry miss on a real, non-null object, which indicates an actual bug worth surfacing loudly.
+    // `forObject` is nullable (issue #141 / PR #142). `createKotlinScriptInstance` can also legitimately
+    // return null for a real, non-null object — e.g. attaching a script to a node whose native class
+    // doesn't match the script's declared base type, which Godot's own "Load Script" UI does not itself
+    // reject (confirmed via real-editor testing: this used to reach the factory and corrupt memory).
+    // Neither case is safe to `error()` on inside this callback (an uncaught Kotlin exception here aborts
+    // the whole process, same failure mode as the #141 crash), so both fall back to the sentinel.
     override fun _instanceCreate(forObject: GodotObject?): COpaquePointer =
-        forObject?.let {
-            createKotlinScriptInstance(this, it)
-                ?: error("Failed to create a Kotlin script instance for $it (script path: $scriptPath)")
-        } ?: placeholderInstanceSentinel
+        forObject?.let { createKotlinScriptInstance(this, it) } ?: placeholderInstanceSentinel
 
     // ── Remaining required virtuals (issue #42) ────────────────────────────
     // Same rationale as `KotlinScriptLanguage`: Kotlin/Native is AOT-compiled, so most of these have no
