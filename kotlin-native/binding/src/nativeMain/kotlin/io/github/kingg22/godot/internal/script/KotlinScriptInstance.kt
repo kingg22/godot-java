@@ -123,6 +123,10 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
             val name = pName?.let { StringName(it).toString() }
             val descriptor = s?.properties?.firstOrNull { it.name == name }
             if (s == null || descriptor == null) {
+                // NOT calling VariantBinding.newNilRaw(rRet) here: Godot's Object::get() (core/object/
+                // object.cpp) always declares `Variant ret;` (already validly constructed) before calling
+                // into script_instance->get(), so this slot is never actually uninitialized — confirmed by
+                // reading the engine source directly.
                 GDExtensionBool.FALSE
             } else {
                 memScoped {
@@ -145,7 +149,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
                     null
                 } else {
                     val classNameStr = internedName(s.entry.className)
-                    nativeHeap.allocArray<GDExtensionPropertyInfo>(properties.size) { index ->
+                    val result = nativeHeap.allocArray<GDExtensionPropertyInfo>(properties.size) { index ->
                         val prop = properties[index]
                         type = prop.type.toGDE()
                         name = internedName(prop.name).rawPtr
@@ -154,6 +158,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
                         hint_string = emptyHintString.rawPtr
                         usage = PropertyUsageFlags.DEFAULT.value.toUInt()
                     }
+                    result
                 }
             }
         }
@@ -162,13 +167,21 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
             if (pList != null) nativeHeap.free(pList)
         }
 
-        get_class_category_func = null
+        get_class_category_func = staticCFunction { _, _ ->
+            GDExtensionBool.FALSE
+        }
 
-        property_can_revert_func = staticCFunction { _, _ -> GDExtensionBool.FALSE }
+        property_can_revert_func = staticCFunction { _, _ ->
+            GDExtensionBool.FALSE
+        }
 
-        property_get_revert_func = staticCFunction { _, _, _ -> GDExtensionBool.FALSE }
+        property_get_revert_func = staticCFunction { _, _, _ ->
+            GDExtensionBool.FALSE
+        }
 
-        get_owner_func = staticCFunction { pInstance -> pInstance.state()?.owner?.rawPtr }
+        get_owner_func = staticCFunction { pInstance ->
+            pInstance.state()?.owner?.rawPtr
+        }
 
         get_property_state_func = staticCFunction { _, _, _ ->
             // No-op: property values aren't captured for scene duplication/undo yet, see file-level KDoc.
@@ -186,7 +199,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
                     null
                 } else {
                     val emptyStr = internedName("")
-                    nativeHeap.allocArray<GDExtensionMethodInfo>(methods.size) { index ->
+                    val result = nativeHeap.allocArray<GDExtensionMethodInfo>(methods.size) { index ->
                         val method = methods[index]
                         name = internedName(method.name).rawPtr
                         return_value.type = GDEXTENSION_VARIANT_TYPE_NIL
@@ -202,6 +215,7 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
                         default_argument_count = 0u
                         default_arguments = null
                     }
+                    result
                 }
             }
         }
@@ -218,7 +232,9 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
             descriptor?.type?.toGDE() ?: GDEXTENSION_VARIANT_TYPE_NIL
         }
 
-        validate_property_func = staticCFunction { _, _ -> GDExtensionBool.TRUE }
+        validate_property_func = staticCFunction { _, _ ->
+            GDExtensionBool.TRUE
+        }
 
         has_method_func = staticCFunction { pInstance, pName ->
             val s = pInstance.state()
@@ -239,6 +255,10 @@ public fun createKotlinScriptInstance(script: KotlinScript, forObject: GodotObje
             val name = pMethod?.let { StringName(it).toString() }
             val descriptor = s?.methods?.firstOrNull { it.name == name }
             if (s == null || descriptor == null) {
+                // NOT calling VariantBinding.newNilRaw(rReturn) here: Godot's ScriptInstanceExtension::
+                // callp() (core/object/script_language_extension.h) always declares `Variant ret;` (already
+                // validly constructed) before calling into call_func, so this slot is never actually
+                // uninitialized — confirmed by reading the engine source directly.
                 rError?.pointed?.error = GDExtensionCallErrorType.GDEXTENSION_CALL_ERROR_INVALID_METHOD
             } else {
                 descriptor.call.invoke(null, s.targetPtr, pArgs, pArgumentCount, rReturn, rError)

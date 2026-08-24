@@ -11,14 +11,17 @@ import io.github.kingg22.godot.api.builtin.VariantDictionary
 import io.github.kingg22.godot.api.builtin.toGodotString
 import io.github.kingg22.godot.api.builtin.toVariant
 import io.github.kingg22.godot.api.core.GodotObject
+import io.github.kingg22.godot.api.core.ScriptLanguage
 import io.github.kingg22.godot.api.core.ScriptLanguageExtension
 import io.github.kingg22.godot.api.core.refcounted.Script
+import io.github.kingg22.godot.api.native.ScriptLanguageExtensionProfilingInfo
 import io.github.kingg22.godot.api.singleton.ProjectSettings
 import io.github.kingg22.godot.internal.binding.InternalBinding
 import io.github.kingg22.godot.internal.binding.createInstanceFunc
 import io.github.kingg22.godot.internal.script.KotlinScriptRegistry.KOTLIN_SCRIPT_EXTENSION
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.COpaquePointer
+import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.nativeHeap
 import kotlinx.cinterop.ptr
@@ -48,6 +51,8 @@ public class KotlinScriptLanguage(nativePtr: COpaquePointer) : ScriptLanguageExt
 
     override fun _getCommentDelimiters(): PackedStringArray = packedStringArrayOf("//", "/* */")
 
+    override fun _getDocCommentDelimiters(): PackedStringArray = packedStringArrayOf("///", "/** */")
+
     override fun _getStringDelimiters(): PackedStringArray = packedStringArrayOf("\" \"", "\"\"\" \"\"\"")
 
     override fun _hasNamedClasses(): Boolean = true
@@ -73,6 +78,9 @@ public class KotlinScriptLanguage(nativePtr: COpaquePointer) : ScriptLanguageExt
     override fun _getRecognizedExtensions(): PackedStringArray = packedStringArrayOf(KOTLIN_SCRIPT_EXTENSION)
 
     override fun _createScript(): GodotObject = newEmptyKotlinScript()
+
+    // Matches Kotlin's own file-naming convention (PascalCase classes live in PascalCase-or-related files).
+    override fun _preferredFileNameCasing(): ScriptLanguage.ScriptNameCasing = ScriptLanguage.ScriptNameCasing.PASCAL_CASE
 
     // ── Remaining required virtuals (issue #42) ────────────────────────────
     // Kotlin/Native is AOT-compiled: there is no in-editor parser, debugger, profiler, or code-generation
@@ -175,6 +183,12 @@ public class KotlinScriptLanguage(nativePtr: COpaquePointer) : ScriptLanguageExt
     override fun _profilingStop() {}
 
     override fun _profilingSetSaveNativeCalls(enable: Boolean) {}
+
+    // Required (GDVIRTUAL2R_REQUIRED, unlike the rest of this block): 0 means "no profiling data
+    // available", the same answer `_profilingStart`/`_profilingStop` being no-ops already implies.
+    override fun _profilingGetAccumulatedData(infoArray: CPointer<ScriptLanguageExtensionProfilingInfo>, infoMax: Int): Int = 0
+
+    override fun _profilingGetFrameData(infoArray: CPointer<ScriptLanguageExtensionProfilingInfo>, infoMax: Int): Int = 0
 
     override fun _frame() {}
 

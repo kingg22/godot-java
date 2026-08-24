@@ -3,12 +3,16 @@
 package io.github.kingg22.godot.internal.script
 
 import io.github.kingg22.godot.api.GodotError
+import io.github.kingg22.godot.api.MethodFlags
+import io.github.kingg22.godot.api.PropertyHint
+import io.github.kingg22.godot.api.PropertyUsageFlags
 import io.github.kingg22.godot.api.builtin.GodotArray
 import io.github.kingg22.godot.api.builtin.GodotString
 import io.github.kingg22.godot.api.builtin.StringName
 import io.github.kingg22.godot.api.builtin.Variant
 import io.github.kingg22.godot.api.builtin.VariantDictionary
 import io.github.kingg22.godot.api.builtin.toStringName
+import io.github.kingg22.godot.api.builtin.toVariant
 import io.github.kingg22.godot.api.core.GodotObject
 import io.github.kingg22.godot.api.core.ScriptLanguage
 import io.github.kingg22.godot.api.core.refcounted.Script
@@ -55,6 +59,9 @@ public class KotlinScript(
 
     override fun _isTool(): Boolean = false
 
+    // A Kotlin `@Godot` class is always a concrete, instantiable ClassDB registration — never abstract.
+    override fun _isAbstract(): Boolean = false
+
     override fun _getInstanceBaseType(): StringName = targetBaseClassName.toStringName()
 
     override fun _getLanguage(): ScriptLanguage = KotlinScriptRegistration.language
@@ -69,6 +76,11 @@ public class KotlinScript(
     // the whole process, same failure mode as the #141 crash), so both fall back to the sentinel.
     override fun _instanceCreate(forObject: GodotObject?): COpaquePointer =
         forObject?.let { createKotlinScriptInstance(this, it) } ?: placeholderInstanceSentinel
+
+    // Deprecated engine-side (`#ifndef DISABLE_DEPRECATED`) and has no real C++ call site in 4.7.1 — but
+    // the dispatch table always exposes it regardless, so it must still resolve to something other than
+    // the generated `TODO()` default.
+    override fun _instanceHas(`object`: GodotObject?): Boolean = false
 
     // ── Remaining required virtuals (issue #42) ────────────────────────────
     // Same rationale as `KotlinScriptLanguage`: Kotlin/Native is AOT-compiled, so most of these have no
@@ -104,6 +116,10 @@ public class KotlinScript(
 
     override fun _getMethodInfo(method: StringName): VariantDictionary = VariantDictionary()
 
+    // A non-INT Variant makes the C++ wrapper (script_language_extension.h) fall back to
+    // `Script::get_script_method_argument_count`'s own default instead of trusting this as real data.
+    override fun _getScriptMethodArgumentCount(method: StringName): Variant = Variant()
+
     override fun _hasScriptSignal(signal: StringName): Boolean = false
 
     override fun _hasPropertyDefaultValue(property: StringName): Boolean = false
@@ -124,11 +140,54 @@ public class KotlinScript(
     // AOT/no-reflection rationale as `_getMethodInfo`/`_getConstants` above.
     override fun _getDocumentation(): GodotArray<VariantDictionary> = GodotArray()
 
+    // Optional on the C++ side (`GDVIRTUAL0RC`, not `_REQUIRED`) but kogot's dispatch table always exposes
+    // it regardless, so leaving it unwired still resolves to the generated `TODO()` default. Confirmed via
+    // real-editor testing + a self-built dev Godot binary under lldb: the editor Inspector's script-icon
+    // fetch (`EditorData::get_script_icon` → `Script::get_class_icon_path`) reaches this on every attach,
+    // and an uncaught Kotlin exception here crosses the GDExtension callback boundary as undefined
+    // behavior — this was the root cause of a real SIGSEGV inside Godot's own code, not this extension's.
+    override fun _getClassIconPathAsGdStr(): GodotString = GodotString()
+
     override fun _getScriptSignalList(): GodotArray<VariantDictionary> = GodotArray()
 
-    override fun _getScriptMethodList(): GodotArray<VariantDictionary> = GodotArray()
+    // An earlier version returned an empty list here (matching `_getMethodInfo`'s "no reflection"
+    // rationale) — but unlike that one, this list is NOT purely advisory: the editor Inspector cross-
+    // references it against `KotlinScriptInstance`'s per-instance `get_property_list_func` while building
+    // the "Script Variables" section, right after finishing the node's native properties. Real-editor
+    // testing confirmed leaving it empty here (while the instance-level list correctly reports 3
+    // properties) crashes the process (SIGSEGV) the moment the Inspector reaches that transition —
+    // before it ever gets to a script property. Must stay in sync with `ScriptInstanceState.properties`.
+    override fun _getScriptPropertyList(): GodotArray<VariantDictionary> {
+        val result = GodotArray<VariantDictionary>()
+        val entry = KotlinScriptRegistry[scriptPath] ?: return result
+        for ((name, type) in entry.properties) {
+            val dict = VariantDictionary()
+            dict["name".toVariant()] = name.toVariant()
+            dict["class_name".toVariant()] = entry.className.toVariant()
+            dict["type".toVariant()] = type.value.toVariant()
+            dict["hint".toVariant()] = PropertyHint.NONE.value.toVariant()
+            dict["hint_string".toVariant()] = "".toVariant()
+            dict["usage".toVariant()] = PropertyUsageFlags.DEFAULT.value.toVariant()
+            result.pushBack(dict.toVariant())
+        }
+        return result
+    }
 
-    override fun _getScriptPropertyList(): GodotArray<VariantDictionary> = GodotArray()
+    override fun _getScriptMethodList(): GodotArray<VariantDictionary> {
+        val result = GodotArray<VariantDictionary>()
+        val entry = KotlinScriptRegistry[scriptPath] ?: return result
+        for ((name) in entry.methods) {
+            val dict = VariantDictionary()
+            dict["name".toVariant()] = name.toVariant()
+            dict["args".toVariant()] = GodotArray<VariantDictionary>().toVariant()
+            dict["default_args".toVariant()] = GodotArray<Variant>().toVariant()
+            dict["flags".toVariant()] = MethodFlags.NORMAL.value.toVariant()
+            dict["id".toVariant()] = 0.toVariant()
+            dict["return".toVariant()] = VariantDictionary().toVariant()
+            result.pushBack(dict.toVariant())
+        }
+        return result
+    }
 
     override fun _getMembers(): GodotArray<StringName> = GodotArray()
 }
