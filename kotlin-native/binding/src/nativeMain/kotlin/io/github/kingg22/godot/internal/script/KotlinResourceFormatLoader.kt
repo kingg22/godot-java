@@ -32,15 +32,23 @@ public class KotlinResourceFormatLoader(nativePtr: COpaquePointer) : ResourceFor
         return array
     }
 
-    override fun _handlesType(type: StringName): Boolean = type.toString() == "Script"
+    // Matches ResourceFormatLoaderGDScript::handles_type (modules/gdscript/gdscript_resource_format.cpp):
+    // accepts both the generic "Script" hint and the concrete registered ClassDB type name.
+    override fun _handlesType(type: StringName): Boolean = type.toString() in HANDLED_TYPES
 
+    // Must be the concrete registered ClassDB type ("KotlinScript"), not the abstract "Script" base —
+    // GDScript's own loader returns "GDScript" here, never "Script", for the same reason: Godot's editor
+    // tooling (e.g. EditorData::get_script_icon, editor/editor_data.cpp) uses this to decide what to
+    // instantiate in some of its own internal fallback/caching paths, and "Script" is abstract (pure
+    // virtual methods) — instantiating it directly produces an object with no usable vtable. Confirmed
+    // via a self-built Godot dev binary + lldb: returning "Script" here crashed with EXC_BAD_ACCESS
+    // inside Godot's own get_class_icon_path() call, entirely outside this extension's code.
     override fun _getResourceTypeAsGdStr(path: GodotString): GodotString =
-        if (KotlinScriptRegistry.contains(globalizedPath(path.toKString()))) "Script".toGodotString() else GodotString()
+        if (KotlinScriptRegistry.contains(globalizedPath(path.toKString()))) KOTLIN_SCRIPT_CLASS_NAME.toGodotString() else GodotString()
 
     override fun _load(path: GodotString, originalPath: GodotString, useSubThreads: Boolean, cacheMode: Int): Variant {
         val normalizedPath = globalizedPath(path.toKString())
-        val entry = KotlinScriptRegistry[normalizedPath]
-            ?: return GodotError.FILE_NOT_FOUND.value.toVariant()
+        val entry = KotlinScriptRegistry[normalizedPath] ?: return GodotError.FILE_NOT_FOUND.value.toVariant()
 
         // The factory below is what `createInstanceFunc` StableRef-binds to the native pointer — every
         // virtual call (`_can_instantiate`, `_is_valid`, ...) dispatches to THIS Kotlin object via that
@@ -58,3 +66,6 @@ public class KotlinResourceFormatLoader(nativePtr: COpaquePointer) : ResourceFor
 
     private fun globalizedPath(path: String): String = ProjectSettings.instance.globalizePath(path)
 }
+
+private const val KOTLIN_SCRIPT_CLASS_NAME = "KotlinScript"
+private val HANDLED_TYPES = setOf("Script", KOTLIN_SCRIPT_CLASS_NAME)
