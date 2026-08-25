@@ -2,9 +2,9 @@ package io.github.kingg22.godot
 
 import io.github.kingg22.godot.api.builtin.toStringName
 import io.github.kingg22.godot.api.core.GodotObject
+import io.github.kingg22.godot.internal.binding.InternalBinding
+import io.github.kingg22.godot.internal.binding.materialize
 import io.github.kingg22.godot.internal.ffi.GDExtensionObjectPtr
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 
 /**
  * `ClassDBBinding.getClassTagRaw` + `ObjectBinding.castToRaw` (GDExtension's `classdb_get_class_tag` /
@@ -14,23 +14,24 @@ import kotlin.contracts.contract
  * [GDExtensionObjectPtr] is already an opaque, type-erased pointer, so "reinterpreting" it is just
  * handing the same pointer value to [factory].
  *
- * FIXME [factory] always constructs a new Kotlin wrapper instance instead of reusing one already bound
- * to that native pointer (see https://github.com/kingg22/kogot/issues/120 discussion).
+ * [factory] only ever runs for a native pointer's *first* sighting — [materialize] resolves every
+ * later cast of the same pointer to the one already-built Kotlin wrapper (see issue #114) instead of
+ * fabricating a new one, which for a stateful `@Godot` class would silently discard its live fields,
+ * and for a `RefCounted` would leak the engine reference this cast implicitly receives.
  */
 @PublishedApi
-internal inline fun <Convert : GodotObject> castToInternal(
+@OptIn(InternalBinding::class)
+internal fun <Convert : GodotObject> castToInternal(
     rawPtr: GDExtensionObjectPtr,
     godotClassName: String,
     factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
 ): Convert? {
-    contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
-
     val isRequestedClass = godotClassName.toStringName().use { className ->
         GodotObject(rawPtr).isClass(className)
     }
     if (!isRequestedClass) return null
 
-    return factory(rawPtr)
+    return materialize(rawPtr, factory)
 }
 
 // -----------------------------------------------------------------------------
@@ -38,74 +39,42 @@ internal inline fun <Convert : GodotObject> castToInternal(
 // -----------------------------------------------------------------------------
 
 public inline fun <reified Convert : GodotObject> GDExtensionObjectPtr.castTo(
-    factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
-): Convert {
-    contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
+    noinline factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
+): Convert = castTo(Convert::class.simpleName!!, factory)
 
-    return castTo(Convert::class.simpleName!!, factory)
-}
-
-public inline fun <Convert : GodotObject> GDExtensionObjectPtr.castTo(
+public fun <Convert : GodotObject> GDExtensionObjectPtr.castTo(
     godotClassName: String,
     factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
-): Convert {
-    contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
-
-    return castToInternal(this, godotClassName, factory)
-        ?: throw ClassCastException("Failed to cast pointer to $godotClassName")
-}
+): Convert = castToInternal(this, godotClassName, factory)
+    ?: throw ClassCastException("Failed to cast pointer to $godotClassName")
 
 public inline fun <reified Convert : GodotObject> GDExtensionObjectPtr.castToOrNull(
-    factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
-): Convert? {
-    contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
+    noinline factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
+): Convert? = castToInternal(this, Convert::class.simpleName!!, factory)
 
-    return castToInternal(this, Convert::class.simpleName!!, factory)
-}
-
-public inline fun <Convert : GodotObject> GDExtensionObjectPtr.castToOrNull(
+public fun <Convert : GodotObject> GDExtensionObjectPtr.castToOrNull(
     godotClassName: String,
     factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
-): Convert? {
-    contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
-
-    return castToInternal(this, godotClassName, factory)
-}
+): Convert? = castToInternal(this, godotClassName, factory)
 
 // -----------------------------------------------------------------------------
 // GodotObject overloads (Actual)
 // -----------------------------------------------------------------------------
 
 public inline fun <Actual : GodotObject, reified Convert : GodotObject> Actual.castTo(
-    factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
-): Convert {
-    contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
-
-    return rawPtr.castTo(factory)
-}
+    noinline factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
+): Convert = rawPtr.castTo(factory)
 
 public inline fun <Actual : GodotObject, reified Convert : GodotObject> Actual.castTo(
     godotClassName: String,
-    factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
-): Convert {
-    contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
-
-    return rawPtr.castTo(godotClassName, factory)
-}
+    noinline factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
+): Convert = rawPtr.castTo(godotClassName, factory)
 
 public inline fun <Actual : GodotObject, reified Convert : GodotObject> Actual.castToOrNull(
-    factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
-): Convert? {
-    contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
-
-    return rawPtr.castToOrNull(factory)
-}
+    noinline factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
+): Convert? = rawPtr.castToOrNull(factory)
 
 public inline fun <Actual : GodotObject, reified Convert : GodotObject> Actual.castToOrNull(
     godotClassName: String,
-    factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
-): Convert? {
-    contract { callsInPlace(factory, InvocationKind.AT_MOST_ONCE) }
-
-    return rawPtr.castToOrNull(godotClassName, factory)
-}
+    noinline factory: (nativePtr: GDExtensionObjectPtr) -> Convert,
+): Convert? = rawPtr.castToOrNull(godotClassName, factory)

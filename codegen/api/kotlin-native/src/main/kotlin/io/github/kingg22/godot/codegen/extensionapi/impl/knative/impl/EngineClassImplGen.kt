@@ -56,10 +56,19 @@ import io.github.kingg22.godot.codegen.types.COPAQUE_POINTER
  *
  * ## RefCounted
  *
- * `RefCounted` and its subclasses are `isRefcounted == true` in the JSON. Reference counting
- * is a Godot-side concern managed automatically when Godot constructs/destroys the object;
- * our wrapper simply holds the pointer. No special constructor logic is needed here beyond
- * what every other derived class gets.
+ * `RefCounted` and its subclasses are `isRefcounted == true` in the JSON. Reference counting is a
+ * Godot-side concern managed automatically when Godot constructs/destroys the object; our wrapper
+ * simply holds the pointer. No special constructor logic is needed here beyond what every other
+ * derived class gets.
+ *
+ * A wrapper materialized for an *existing* `RefCounted` (built via `castTo`/`GD.load`, not via our
+ * own `create_instance_func`) implicitly receives an engine reference nothing currently releases —
+ * see issue #114. Releasing it from a `kotlin.native.ref.Cleaner` was tried and reverted: Cleaners
+ * run on Kotlin/Native's dedicated finalizer thread, and Godot's engine calls are not generally safe
+ * off the main thread (reproducibly crashed with "The caller thread can't call the function
+ * `propagate_notification()`..." as soon as a shared `Resource`'s wrapper was collected while the
+ * main thread was still using the same object). Correctly releasing it needs a main-thread-deferred
+ * mechanism (e.g. `Callable.callDeferred`) — tracked as a follow-up, not solved here.
  */
 class EngineClassImplGen {
     private lateinit var implPackageRegistry: ImplementationPackageRegistry
