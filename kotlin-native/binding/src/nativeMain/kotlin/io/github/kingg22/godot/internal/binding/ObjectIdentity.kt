@@ -1,6 +1,7 @@
 package io.github.kingg22.godot.internal.binding
 
 import io.github.kingg22.godot.api.core.GodotObject
+import io.github.kingg22.godot.api.core.RefCounted
 import io.github.kingg22.godot.internal.ffi.*
 import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.StableRef
@@ -23,17 +24,16 @@ import kotlin.native.ref.WeakReference
  * from `ResourceLoader`, a `Node` from `get_node()`, ...) there is no other owner, and a weak reference
  * lets Kotlin's GC reclaim the wrapper once nothing references it, rebuilding it lazily on next access.
  *
- * This slot only fixes *identity* (never fabricate a second Kotlin instance for one native pointer).
- * It deliberately does **not** attempt to release, on the `RefCounted` wrapper's behalf, the engine
- * reference implicitly received by whoever handed us the pointer (a ptrcall return, a property read):
- * an earlier version of this fix drove that release through a `kotlin.native.ref.Cleaner`, but Cleaners
- * run on Kotlin/Native's dedicated finalizer thread, and Godot's engine calls are not generally safe
- * off the main thread — that version reproducibly crashed
+ * This slot fixes *identity* (never fabricate a second Kotlin instance for one native pointer), and
+ * [materialize] additionally attaches [attachRefCountedRelease] for a `RefCounted` wrapper, to release
+ * the engine reference implicitly received by whoever handed us the pointer (a ptrcall return, a
+ * property read) — see issue #114. An earlier version of that release drove it directly off a
+ * `kotlin.native.ref.Cleaner`, but Cleaners run on Kotlin/Native's dedicated finalizer thread, and
+ * Godot's engine calls are not generally safe off the main thread — that version reproducibly crashed
  * (`ERROR: The caller thread can't call the function 'propagate_notification()' on this node. Use
  * 'call_deferred()'...`, SIGSEGV) as soon as a shared `Resource`'s wrapper was collected while the main
- * thread was still using the same object. Doing this correctly needs a main-thread-deferred release
- * (e.g. via `Callable.callDeferred`), which is threading-safety work of its own — tracked as a
- * follow-up on issue #114, not folded into this identity fix.
+ * thread was still using the same object. [attachRefCountedRelease] fixes this by never calling the
+ * engine from the finalizer thread — it only queues the release via `Callable.callDeferred()`.
  */
 private class BindingSlot {
     var ref: WeakReference<GodotObject>? = null
@@ -108,5 +108,8 @@ public fun <T : GodotObject> materialize(
 
     val instance = factory(rawPtr)
     slot.ref = WeakReference(instance)
+    if (instance is RefCounted) {
+        attachRefCountedRelease(instance, rawPtr)
+    }
     instance
 }

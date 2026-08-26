@@ -12,6 +12,7 @@ import io.github.kingg22.godot.codegen.extensionapi.Context
 import io.github.kingg22.godot.codegen.impl.buildLazyBlock
 import io.github.kingg22.godot.codegen.models.extensionapi.domain.ResolvedEngineClass
 import io.github.kingg22.godot.codegen.types.COPAQUE_POINTER
+import io.github.kingg22.godot.codegen.types.KOTLIN_NATIVE_CLEANER
 
 /**
  * Generates the constructor binding and `nativePtr` property for Godot engine classes.
@@ -63,12 +64,15 @@ import io.github.kingg22.godot.codegen.types.COPAQUE_POINTER
  *
  * A wrapper materialized for an *existing* `RefCounted` (built via `castTo`/`GD.load`, not via our
  * own `create_instance_func`) implicitly receives an engine reference nothing currently releases —
- * see issue #114. Releasing it from a `kotlin.native.ref.Cleaner` was tried and reverted: Cleaners
- * run on Kotlin/Native's dedicated finalizer thread, and Godot's engine calls are not generally safe
- * off the main thread (reproducibly crashed with "The caller thread can't call the function
- * `propagate_notification()`..." as soon as a shared `Resource`'s wrapper was collected while the
- * main thread was still using the same object). Correctly releasing it needs a main-thread-deferred
- * mechanism (e.g. `Callable.callDeferred`) — tracked as a follow-up, not solved here.
+ * see issue #114. `RefCounted` alone (the anchor of the refcounted branch, see [configureConstructor])
+ * gets one extra property for this: `kogotReleaseCleaner: kotlin.native.ref.Cleaner?`, set by
+ * `io.github.kingg22.godot.internal.binding.materialize` right after building the wrapper. The
+ * cleaner's block never touches the engine directly from the finalizer thread — that was tried once
+ * and reproducibly crashed ("The caller thread can't call the function `propagate_notification()`...")
+ * because Godot's engine calls are not generally safe off the main thread. Instead it only builds a
+ * `Callable` around the release and calls `Callable.callDeferred()`, which pushes onto Godot's
+ * `MessageQueue` — documented and empirically confirmed thread-safe to call from any thread — and the
+ * actual `unreference()`/`object_destroy()` then runs on the main thread at the next idle frame.
  */
 class EngineClassImplGen {
     private lateinit var implPackageRegistry: ImplementationPackageRegistry
@@ -104,6 +108,19 @@ class EngineClassImplGen {
             cls.isSingleton -> configureSingleton(cls, classBuilder, className, companionBuilder)
             isRoot -> configureRoot(classBuilder)
             else -> configureDerived(classBuilder, cls)
+        }
+
+        // Anchor of the refcounted branch — every RefCounted subclass inherits this, same pattern as
+        // `nativePtrProp()` being declared once on the root. See the "RefCounted" section above.
+        if (cls.name == "RefCounted") {
+            classBuilder.addProperty(
+                PropertySpec
+                    .builder("kogotReleaseCleaner", KOTLIN_NATIVE_CLEANER.copy(nullable = true))
+                    .addAnnotation(implPackageRegistry.classNameForOrDefault("InternalBinding"))
+                    .mutable(true)
+                    .initializer("null")
+                    .build(),
+            )
         }
 
         if (!cls.isSingleton || isRoot) {
