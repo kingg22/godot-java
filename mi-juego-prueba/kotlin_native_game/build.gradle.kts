@@ -11,6 +11,8 @@ kotlin {
     dependencies {
         api(projects.kotlinNative.api)
         implementation(projects.kotlinNative.binding)
+        implementation(libs.kotlinx.coroutines.core)
+        implementation(libs.kotlinx.serialization.json)
     }
 
     applyDefaultHierarchyTemplate()

@@ -76,10 +76,13 @@ public fun <T : GodotObject> createInstanceFunc(
             ObjectBinding.setInstanceBindingRaw(
                 pO = base,
                 pToken = BindingProcAddressHolder.library,
-                pBinding = selfPtr,
+                // Mirrors `instance` for castTo/GD.load/instantiate<T>() lookups (issue #114) — the
+                // instance itself is kept alive for its whole native lifetime by `setInstanceRaw`
+                // above, so this mirror is safe to be a weak reference; see wrapForEagerBinding.
+                pBinding = wrapForEagerBinding(instance),
                 pCallbacks = cValue<GDExtensionInstanceBindingCallbacks> {
                     create_callback = null
-                    free_callback = null
+                    free_callback = identityFreeCallback
                     reference_callback = null
                 }.ptr,
             )
@@ -106,12 +109,17 @@ public fun <T : GodotObject> createInstanceFunc(
 }
 
 /**
- * Creates a free_instance function that disposes the StableRef.
+ * Creates a free_instance function that disposes the per-instance StableRef.
+ *
+ * `userData` (Godot's `p_class_userdata`) is the *per-class* [StableRef] created once in
+ * [registerClass], shared by every instance of that class — it must **not** be disposed here, only
+ * when the class itself is unregistered. Disposing it on every instance free used to double-dispose
+ * it (and leave it dangling for the class's other, still-alive instances) as soon as a second instance
+ * of the same class was ever freed; see issue #114.
  */
 @InternalBinding
-public val freeInstanceFunc: GDExtensionClassFreeInstance = staticCFunction { userData, ptr ->
-    // println("[Kogot] FreeInstance: Freeing userdata: $userData, instance: $ptr")
-    userData?.asStableRef<Any>()?.dispose()
+public val freeInstanceFunc: GDExtensionClassFreeInstance = staticCFunction { _, ptr ->
+    // println("[Kogot] FreeInstance: Freeing instance: $ptr")
     ptr?.asStableRef<Any>()?.dispose()
 }
 
